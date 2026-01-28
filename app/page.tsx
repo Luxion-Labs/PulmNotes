@@ -2,6 +2,7 @@
 
 import { Editor } from "@/editor";
 import { Sidebar } from "@/app/components/Sidebar";
+import { ReflectionSidebar } from "@/app/components/ReflectionSidebar";
 import { TopBar } from "@/app/components/TopBar";
 import { AllNotesView } from "@/app/components/AllNotesView";
 import { RecentView } from "@/app/components/RecentView";
@@ -11,12 +12,13 @@ import { BinView } from "@/app/components/BinView";
 import { SearchView } from "@/app/components/SearchView";
 import { defaultCategories } from "@/app/data/defaultCategories";
 import { defaultNotes } from "@/app/data/defaultNotes";
-import { Note, Block, Category, ViewMode } from "@/app/types";
-import { NoteStore, LocalStorageNoteStore, CategoryStore, LocalStorageCategoryStore } from "@/app/lib/persistence";
+import { Note, Block, Category, ViewMode, DailyReflection } from "@/app/types";
+import { NoteStore, LocalStorageNoteStore, CategoryStore, LocalStorageCategoryStore, ReflectionStore, LocalStorageReflectionStore } from "@/app/lib/persistence";
 import { useState, useEffect } from "react";
 
 const noteStore: NoteStore = new LocalStorageNoteStore();
 const categoryStore: CategoryStore = new LocalStorageCategoryStore();
+const reflectionStore: ReflectionStore = new LocalStorageReflectionStore();
 
 const generateId = () => Math.random().toString(36).substring(2, 11);
 
@@ -28,6 +30,7 @@ const CATEGORY_COLORS = [
 export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [reflections, setReflections] = useState<DailyReflection[]>([]);
   const [currentNoteId, setCurrentNoteId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('home');
@@ -37,6 +40,7 @@ export default function Home() {
     const loadData = async () => {
       const loadedCategories = await categoryStore.loadCategories();
       const loadedNotes = await noteStore.loadNotes();
+      const loadedReflections = await reflectionStore.loadReflections();
 
       if (loadedCategories.length > 0) {
         setCategories(loadedCategories);
@@ -52,6 +56,7 @@ export default function Home() {
         await noteStore.saveNotes(defaultNotes);
       }
 
+      setReflections(loadedReflections);
       setIsLoaded(true);
     };
 
@@ -69,6 +74,12 @@ export default function Home() {
       noteStore.saveNotes(notes);
     }
   }, [notes, isLoaded]);
+
+  useEffect(() => {
+    if (isLoaded) {
+      reflectionStore.saveReflections(reflections);
+    }
+  }, [reflections, isLoaded]);
 
   const currentNote = notes.find(n => n.id === currentNoteId);
 
@@ -171,6 +182,23 @@ export default function Home() {
     return categories.find(c => c.id === currentNote.categoryId);
   };
 
+  const handleUpdateReflection = (date: string, text: string) => {
+    const existingIndex = reflections.findIndex(r => r.date === date);
+    
+    if (existingIndex >= 0) {
+      setReflections(reflections.map((r, i) => 
+        i === existingIndex ? { ...r, text } : r
+      ));
+    } else {
+      const newReflection: DailyReflection = {
+        date,
+        text,
+        noteIds: []
+      };
+      setReflections([...reflections, newReflection]);
+    }
+  };
+
   if (!isLoaded) {
     return null;
   }
@@ -260,6 +288,14 @@ export default function Home() {
           />
         )}
       </div>
+
+      <ReflectionSidebar
+        notes={notes}
+        categories={categories}
+        reflections={reflections}
+        onSelectNote={handleSelectNote}
+        onUpdateReflection={handleUpdateReflection}
+      />
     </div>
   );
 }
