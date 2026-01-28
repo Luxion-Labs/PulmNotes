@@ -5,9 +5,9 @@ const generateId = () => Math.random().toString(36).substring(2, 11);
 export const defaultNotes: Note[] = [
   {
     id: 'note-welcome',
-    title: 'Welcome to Ditto',
+    title: 'Welcome to Pulm Notes',
     blocks: [
-      { id: generateId(), type: 'h1', content: 'Welcome to Ditto' },
+      { id: generateId(), type: 'h1', content: 'Welcome to Pulm Notes' },
       { id: generateId(), type: 'text', content: 'This is your personal note-taking space. Start by creating a new note or exploring the categories on the left.' }
     ],
     categoryId: 'cat-1',
