@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { Category, Note, ViewMode } from '@/app/types';
 import { FileText, Plus, FolderPlus, Home, Clock, Pin, Library, Settings, Trash2, Search } from 'lucide-react';
+import { NoteContextMenu } from './NoteContextMenu';
+import { CategoryContextMenu } from './CategoryContextMenu';
 
 interface SidebarProps {
   viewMode: ViewMode;
@@ -15,6 +17,8 @@ interface SidebarProps {
   onCreateCategory: (name: string) => void;
   onCreateNote: (categoryId: string) => void;
   onChangeView: (mode: ViewMode) => void;
+  onDeleteNote: (noteId: string) => void;
+  onDeleteCategory: (categoryId: string) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -27,12 +31,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectCategory,
   onCreateCategory,
   onCreateNote,
-  onChangeView
+  onChangeView,
+  onDeleteNote,
+  onDeleteCategory
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(categories.map(c => c.id)));
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isHoveringSettings, setIsHoveringSettings] = useState(false);
+  const [noteContextMenu, setNoteContextMenu] = useState<{
+    x: number;
+    y: number;
+    noteId: string;
+  } | null>(null);
+  const [categoryContextMenu, setCategoryContextMenu] = useState<{
+    x: number;
+    y: number;
+    categoryId: string;
+  } | null>(null);
 
   const toggleCategory = (categoryId: string) => {
     const newExpanded = new Set(expandedCategories);
@@ -46,6 +62,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const getNotesForCategory = (categoryId: string) => {
     return notes.filter(note => note.categoryId === categoryId && !note.isDeleted);
+  };
+
+  const handleNoteContextMenu = (e: React.MouseEvent, noteId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setNoteContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      noteId
+    });
+  };
+
+  const handleCategoryContextMenu = (e: React.MouseEvent, categoryId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCategoryContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      categoryId
+    });
+  };
+
+  const canDeleteCategory = (categoryId: string): boolean => {
+    const categoryNotes = notes.filter(n => n.categoryId === categoryId && !n.isDeleted);
+    return categoryNotes.length === 0;
   };
 
   const handleCreateCategory = () => {
@@ -161,6 +202,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         toggleCategory(category.id);
                         onSelectCategory(category.id);
                       }}
+                      onContextMenu={(e) => handleCategoryContextMenu(e, category.id)}
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div 
@@ -202,6 +244,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                               e.stopPropagation();
                               onSelectNote(note.id);
                             }}
+                            onContextMenu={(e) => handleNoteContextMenu(e, note.id)}
                           >
                             <FileText size={14} className="flex-shrink-0" />
                             <span className="text-xs truncate">{note.title}</span>
@@ -266,6 +309,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span>Settings</span>
         </button>
       </div>
+
+      {noteContextMenu && (
+        <NoteContextMenu
+          x={noteContextMenu.x}
+          y={noteContextMenu.y}
+          onOpen={() => {
+            onSelectNote(noteContextMenu.noteId);
+            setNoteContextMenu(null);
+          }}
+          onDelete={() => {
+            onDeleteNote(noteContextMenu.noteId);
+            setNoteContextMenu(null);
+          }}
+          onClose={() => setNoteContextMenu(null)}
+        />
+      )}
+
+      {categoryContextMenu && (
+        <CategoryContextMenu
+          x={categoryContextMenu.x}
+          y={categoryContextMenu.y}
+          canDelete={canDeleteCategory(categoryContextMenu.categoryId)}
+          onDelete={() => {
+            onDeleteCategory(categoryContextMenu.categoryId);
+            setCategoryContextMenu(null);
+          }}
+          onClose={() => setCategoryContextMenu(null)}
+        />
+      )}
     </div>
   );
 };
