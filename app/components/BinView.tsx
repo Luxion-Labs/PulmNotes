@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Note, Category } from '@/app/types';
 import { BinContextMenu } from './BinContextMenu';
+import { NoteCard } from './NoteCard';
 
 interface BinViewProps {
   notes: Note[];
@@ -40,39 +41,21 @@ export const BinView: React.FC<BinViewProps> = ({
 
   return (
     <div className="h-full overflow-y-auto bg-white">
-      <div className="max-w-4xl mx-auto px-8 py-12">
+      <div className="max-w-7xl mx-auto px-8 py-12">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Bin</h1>
         
-        <div className="space-y-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {deletedNotes.map((note) => {
             const category = getCategoryForNote(note);
             
             return (
-              <div
+              <NoteCard
                 key={note.id}
+                note={note}
+                category={category}
                 onContextMenu={(e) => handleContextMenu(e, note.id)}
-                className="p-4 rounded-lg border border-stone-200 hover:border-stone-300 hover:bg-stone-50 cursor-pointer transition-all"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-medium text-gray-900 truncate">
-                      {note.title}
-                    </h3>
-                    {category && (
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <div 
-                          className="w-2 h-2 rounded-full" 
-                          style={{ backgroundColor: category.color }}
-                        />
-                        <span className="text-xs text-stone-600">{category.name}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-xs text-stone-400 ml-4">
-                    {note.deletedAt?.toLocaleDateString()}
-                  </div>
-                </div>
-              </div>
+                showDeletedDate={true}
+              />
             );
           })}
         </div>
