@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Ditto Editor",
-  description: "A minimalist text editor with slash commands",
+  title: "Pulm Notes",
+  description: "A personal note taking app.",
 };
 
 export default function RootLayout({

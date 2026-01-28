@@ -232,8 +232,10 @@ export default function Home() {
               {currentNote && (
                 <Editor 
                   note={currentNote}
+                  allNotes={notes.map(n => ({ id: n.id, title: n.title, isDeleted: n.isDeleted }))}
                   onUpdateTitle={handleUpdateTitle}
                   onUpdateBlocks={handleUpdateBlocks}
+                  onOpenNote={handleSelectNote}
                 />
               )}
             </div>
