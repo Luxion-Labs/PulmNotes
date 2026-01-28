@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "ditto-editor-nextjs",
+      "name": "pulm.notes",
       "dependencies": {
         "lucide-react": "^0.563.0",
         "next": "^15.0.0",

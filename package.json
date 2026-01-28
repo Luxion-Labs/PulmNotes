@@ -1,6 +1,6 @@
 {
-  "name": "ditto-editor-nextjs",
-  "description": "A minimalist text editor featuring a slash command menu similar to Notion (Next.js)",
+  "name": "pulm.notes",
+  "description": "A personal note taking app.",
   "version": "0.0.1",
   "private": true,
   "scripts": {
