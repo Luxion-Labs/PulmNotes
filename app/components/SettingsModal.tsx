@@ -1,22 +1,32 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
+import { getStorageInfo } from '@/app/lib/storageUtils';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   notesCount: number;
   categoriesCount: number;
+  assetsCount: number;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
   notesCount,
-  categoriesCount
+  categoriesCount,
+  assetsCount
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const [storageInfo, setStorageInfo] = useState({ used: 0, available: 0, percentage: 0, usedMB: '0', availableMB: '0' });
+
+  useEffect(() => {
+    if (isOpen) {
+      setStorageInfo(getStorageInfo());
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -103,6 +113,38 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-stone-600">Categories</span>
                 <span className="text-sm font-medium text-stone-900">{categoriesCount}</span>
+              </div>
+
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-stone-600">Assets</span>
+                <span className="text-sm font-medium text-stone-900">{assetsCount}</span>
+              </div>
+              
+              <div className="flex items-center justify-between py-2 border-t border-stone-100 mt-2 pt-3">
+                <span className="text-sm text-stone-600">Storage used</span>
+                <span className="text-xs text-stone-500">{storageInfo.usedMB} MB / ~5 MB</span>
+              </div>
+
+              <div className="py-2">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-stone-500">Storage capacity</span>
+                  <span className="text-xs text-stone-500">{storageInfo.percentage.toFixed(1)}%</span>
+                </div>
+                <div className="w-full bg-stone-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full transition-all ${
+                      storageInfo.percentage > 90 ? 'bg-red-500' :
+                      storageInfo.percentage > 70 ? 'bg-amber-500' :
+                      'bg-stone-500'
+                    }`}
+                    style={{ width: `${Math.min(storageInfo.percentage, 100)}%` }}
+                  />
+                </div>
+                {storageInfo.percentage > 80 && (
+                  <p className="text-xs text-amber-600 mt-2">
+                    Storage is running low. Consider deleting unused assets.
+                  </p>
+                )}
               </div>
               
               <div className="flex items-center justify-between py-2">
