@@ -1,19 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Category, SubCategory, Note, ViewMode } from '@/app/types';
-import { FileText, Plus, FolderPlus, Home, Clock, Pin, Library, Settings, Trash2, Search, Folder, BookOpen, Briefcase, Heart, Star, Lightbulb, Coffee, Music, MessageSquare } from 'lucide-react';
+import { Category, SubCategory, Note, ViewMode, Asset } from '@/app/types';
+import { FileText, Plus, FolderPlus, Home, Clock, Pin, Library, Settings, Trash2, Search, Folder, BookOpen, Briefcase, Heart, Star, Lightbulb, Coffee, Music, MessageSquare, File, Link as LinkIcon, Image, FileCode } from 'lucide-react';
 import { NoteContextMenu } from './NoteContextMenu';
 import { CategoryContextMenu } from './CategoryContextMenu';
 import { SubCategoryContextMenu } from './SubCategoryContextMenu';
 import { CategoryModal } from './CategoryModal';
 import { SubCategoryModal } from './SubCategoryModal';
+import { AssetContextMenu } from './AssetContextMenu';
 
 interface SidebarProps {
   viewMode: ViewMode;
   categories: Category[];
   subCategories: SubCategory[];
   notes: Note[];
+  assets: Asset[];
   currentNoteId: string | null;
   selectedCategoryId: string | null;
   selectedSubCategoryId: string | null;
@@ -31,14 +33,19 @@ interface SidebarProps {
   onDeleteSubCategory: (subCategoryId: string) => void;
   onTogglePin: (noteId: string) => void;
   onMoveNote: (noteId: string, targetCategoryId: string, targetSubCategoryId?: string) => void;
+  onMoveAsset: (assetId: string, targetCategoryId: string, targetSubCategoryId?: string) => void;
   onOpenFeedback: () => void;
+  onOpenAsset: (assetId: string) => void;
+  onDeleteAsset: (assetId: string) => void;
+  onOpenAssetModal: (categoryId: string, subCategoryId?: string) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
   viewMode,
   categories,
   subCategories,
-  notes, 
+  notes,
+  assets,
   currentNoteId, 
   selectedCategoryId,
   selectedSubCategoryId,
@@ -56,7 +63,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onDeleteSubCategory,
   onTogglePin,
   onMoveNote,
-  onOpenFeedback
+  onMoveAsset,
+  onOpenFeedback,
+  onOpenAsset,
+  onDeleteAsset,
+  onOpenAssetModal
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(categories.map(c => c.id)));
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -83,6 +94,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     y: number;
     subCategoryId: string;
   } | null>(null);
+  const [assetContextMenu, setAssetContextMenu] = useState<{
+    x: number;
+    y: number;
+    assetId: string;
+  } | null>(null);
 
   const toggleCategory = (categoryId: string) => {
     const newExpanded = new Set(expandedCategories);
@@ -102,6 +118,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
+  const getAssetsForCategory = (categoryId: string, subCategoryId?: string) => {
+    return assets.filter(asset => 
+      asset.categoryId === categoryId && 
+      !asset.isDeleted &&
+      (subCategoryId ? asset.subCategoryId === subCategoryId : !asset.subCategoryId)
+    );
+  };
+
   const getSubCategoriesForCategory = (categoryId: string) => {
     return subCategories.filter(sc => sc.categoryId === categoryId);
   };
@@ -109,6 +133,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const handleNoteContextMenu = (e: React.MouseEvent, noteId: string) => {
     e.preventDefault();
     e.stopPropagation();
+    // Close other menus
+    setCategoryContextMenu(null);
+    setSubCategoryContextMenu(null);
+    setAssetContextMenu(null);
     setNoteContextMenu({
       x: e.clientX,
       y: e.clientY,
@@ -119,6 +147,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const handleCategoryContextMenu = (e: React.MouseEvent, categoryId: string) => {
     e.preventDefault();
     e.stopPropagation();
+    // Close other menus
+    setNoteContextMenu(null);
+    setSubCategoryContextMenu(null);
+    setAssetContextMenu(null);
     setCategoryContextMenu({
       x: e.clientX,
       y: e.clientY,
@@ -129,11 +161,46 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const handleSubCategoryContextMenu = (e: React.MouseEvent, subCategoryId: string) => {
     e.preventDefault();
     e.stopPropagation();
+    // Close other menus
+    setNoteContextMenu(null);
+    setCategoryContextMenu(null);
+    setAssetContextMenu(null);
     setSubCategoryContextMenu({
       x: e.clientX,
       y: e.clientY,
       subCategoryId
     });
+  };
+
+  const handleAssetContextMenu = (e: React.MouseEvent, assetId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Close other menus
+    setNoteContextMenu(null);
+    setCategoryContextMenu(null);
+    setSubCategoryContextMenu(null);
+    setAssetContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      assetId
+    });
+  };
+
+  const getAssetIcon = (type: string) => {
+    switch (type) {
+      case 'pdf':
+      case 'docx':
+        return File;
+      case 'link':
+        return LinkIcon;
+      case 'image':
+        return Image;
+      case 'markdown':
+      case 'text':
+        return FileCode;
+      default:
+        return File;
+    }
   };
 
   const canDeleteCategory = (categoryId: string): boolean => {
@@ -201,6 +268,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', noteId);
+    e.dataTransfer.setData('itemType', 'note');
+  };
+
+  const handleAssetDragStart = (e: React.DragEvent, assetId: string) => {
+    const asset = assets.find(a => a.id === assetId);
+    if (asset?.isDeleted) {
+      e.preventDefault();
+      return;
+    }
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', assetId);
+    e.dataTransfer.setData('itemType', 'asset');
   };
 
   const handleDragOver = (e: React.DragEvent, targetType: 'category' | 'subcategory', targetId: string) => {
@@ -220,29 +299,58 @@ export const Sidebar: React.FC<SidebarProps> = ({
     e.preventDefault();
     e.stopPropagation();
     
-    const noteId = e.dataTransfer.getData('text/plain');
-    const note = notes.find(n => n.id === noteId);
+    const itemId = e.dataTransfer.getData('text/plain');
+    const itemType = e.dataTransfer.getData('itemType');
     
-    if (!note || note.isDeleted) {
-      setDragOverTarget(null);
-      return;
-    }
-
-    // Check if dropping on same location
-    const isSameLocation = note.categoryId === targetCategoryId && 
-                          note.subCategoryId === targetSubCategoryId;
-    
-    if (!isSameLocation) {
-      // Validate target sub-category belongs to target category
-      if (targetSubCategoryId) {
-        const subCategory = subCategories.find(sc => sc.id === targetSubCategoryId);
-        if (!subCategory || subCategory.categoryId !== targetCategoryId) {
-          setDragOverTarget(null);
-          return;
-        }
-      }
+    if (itemType === 'asset') {
+      const asset = assets.find(a => a.id === itemId);
       
-      onMoveNote(noteId, targetCategoryId, targetSubCategoryId);
+      if (!asset || asset.isDeleted) {
+        setDragOverTarget(null);
+        return;
+      }
+
+      // Check if dropping on same location
+      const isSameLocation = asset.categoryId === targetCategoryId && 
+                            asset.subCategoryId === targetSubCategoryId;
+      
+      if (!isSameLocation) {
+        // Validate target sub-category belongs to target category
+        if (targetSubCategoryId) {
+          const subCategory = subCategories.find(sc => sc.id === targetSubCategoryId);
+          if (!subCategory || subCategory.categoryId !== targetCategoryId) {
+            setDragOverTarget(null);
+            return;
+          }
+        }
+        
+        onMoveAsset(itemId, targetCategoryId, targetSubCategoryId);
+      }
+    } else {
+      // Handle note drag (existing logic)
+      const note = notes.find(n => n.id === itemId);
+      
+      if (!note || note.isDeleted) {
+        setDragOverTarget(null);
+        return;
+      }
+
+      // Check if dropping on same location
+      const isSameLocation = note.categoryId === targetCategoryId && 
+                            note.subCategoryId === targetSubCategoryId;
+      
+      if (!isSameLocation) {
+        // Validate target sub-category belongs to target category
+        if (targetSubCategoryId) {
+          const subCategory = subCategories.find(sc => sc.id === targetSubCategoryId);
+          if (!subCategory || subCategory.categoryId !== targetCategoryId) {
+            setDragOverTarget(null);
+            return;
+          }
+        }
+        
+        onMoveNote(itemId, targetCategoryId, targetSubCategoryId);
+      }
     }
     
     setDragOverTarget(null);
@@ -386,6 +494,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         >
                           <Plus size={14} className="text-stone-600" />
                         </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenAssetModal(category.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-stone-300 rounded transition-opacity"
+                          title="Add asset"
+                        >
+                          <File size={14} className="text-stone-600" />
+                        </button>
                       </div>
                     </div>
 
@@ -415,8 +533,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           </div>
                         ))}
 
+                        {getAssetsForCategory(category.id).map((asset) => {
+                          const AssetIcon = getAssetIcon(asset.type);
+                          return (
+                            <div
+                              key={asset.id}
+                              className="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors hover:bg-stone-200 text-stone-500 group"
+                              draggable
+                              onDragStart={(e) => handleAssetDragStart(e, asset.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onOpenAsset(asset.id);
+                              }}
+                              onContextMenu={(e) => handleAssetContextMenu(e, asset.id)}
+                            >
+                              <AssetIcon size={11} className="flex-shrink-0" />
+                              <span className="text-[11px] truncate">{asset.name}</span>
+                            </div>
+                          );
+                        })}
+
                         {categorySubCategories.map((subCategory) => {
                           const subCategoryNotes = getNotesForCategory(category.id, subCategory.id);
+                          const subCategoryAssets = getAssetsForCategory(category.id, subCategory.id);
                           const isSubSelected = selectedSubCategoryId === subCategory.id;
 
                           return (
@@ -462,6 +601,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                   >
                                     <Plus size={12} className="text-stone-600" />
                                   </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onOpenAssetModal(category.id, subCategory.id);
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-stone-300 rounded transition-opacity"
+                                    title="Add asset"
+                                  >
+                                    <File size={12} className="text-stone-600" />
+                                  </button>
                                 </div>
                               </div>
 
@@ -488,6 +637,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                   )}
                                 </div>
                               ))}
+
+                              {subCategoryAssets.map((asset) => {
+                                const AssetIcon = getAssetIcon(asset.type);
+                                return (
+                                  <div
+                                    key={asset.id}
+                                    className="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer ml-4 transition-colors hover:bg-stone-200 text-stone-500"
+                                    draggable
+                                    onDragStart={(e) => handleAssetDragStart(e, asset.id)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onOpenAsset(asset.id);
+                                    }}
+                                    onContextMenu={(e) => handleAssetContextMenu(e, asset.id)}
+                                  >
+                                    <AssetIcon size={10} className="flex-shrink-0" />
+                                    <span className="text-[11px] truncate">{asset.name}</span>
+                                  </div>
+                                );
+                              })}
                             </div>
                           );
                         })}
@@ -616,6 +785,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
             setSubCategoryContextMenu(null);
           }}
           onClose={() => setSubCategoryContextMenu(null)}
+        />
+      )}
+
+      {assetContextMenu && (
+        <AssetContextMenu
+          x={assetContextMenu.x}
+          y={assetContextMenu.y}
+          onOpen={() => {
+            onOpenAsset(assetContextMenu.assetId);
+            setAssetContextMenu(null);
+          }}
+          onDelete={() => {
+            onDeleteAsset(assetContextMenu.assetId);
+            setAssetContextMenu(null);
+          }}
+          onClose={() => setAssetContextMenu(null)}
         />
       )}
 
