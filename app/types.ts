@@ -82,7 +82,7 @@ export interface Note {
   deletedAt?: Date;
 }
 
-export type AssetType = 'pdf' | 'docx' | 'markdown' | 'image' | 'text' | 'link';
+export type AssetType = 'pdf' | 'docx' | 'markdown' | 'image' | 'text' | 'link' | 'video' | 'audio';
 
 export interface Asset {
   id: string;
