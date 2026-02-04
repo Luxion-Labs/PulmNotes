@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Category, SubCategory, Note, Asset } from '@/app/types';
-import { ChevronDown, ChevronRight, FileText, Plus, Pin, File, Link as LinkIcon, Image, FileCode, Folder } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileText, Plus, Pin, File, Link as LinkIcon, Image, FileCode, Folder, BookOpen, Briefcase, Heart, Star, Lightbulb, Coffee, Music, FileVideo, FileAudio, FileArchive } from 'lucide-react';
 import { NoteContextMenu } from './NoteContextMenu';
 import { CategoryContextMenu } from './CategoryContextMenu';
 import { SubCategoryContextMenu } from './SubCategoryContextMenu';
@@ -183,17 +183,34 @@ export const SecondarySidebar: React.FC<SecondarySidebarProps> = ({
   const getAssetIcon = (type: string) => {
     switch (type) {
       case 'pdf':
+        return FileText; // PDF documents
       case 'docx':
-        return File;
+      case 'doc':
+        return FileText; // Word documents
       case 'link':
-        return LinkIcon;
+        return LinkIcon; // Links
       case 'image':
-        return Image;
+        return Image; // Images
       case 'markdown':
       case 'text':
-        return FileCode;
+        return FileCode; // Code/text files
+      case 'video':
+      case 'mp4':
+      case 'webm':
+      case 'mov':
+        return FileVideo; // Video files
+      case 'audio':
+      case 'mp3':
+      case 'wav':
+      case 'm4a':
+      case 'aac':
+        return FileAudio; // Audio files
+      case 'zip':
+      case 'rar':
+      case '7z':
+        return FileArchive; // Archive files
       default:
-        return File;
+        return File; // Generic file
     }
   };
 
@@ -306,14 +323,14 @@ export const SecondarySidebar: React.FC<SecondarySidebarProps> = ({
   const getIconComponent = (iconId?: string, withBackground: boolean = true) => {
     if (!iconId) return null;
     const iconMap: Record<string, any> = {
-      folder: File,
-      book: FileText,
-      briefcase: File,
-      heart: File,
-      star: File,
-      lightbulb: File,
-      coffee: File,
-      music: File,
+      folder: Folder,
+      book: BookOpen,
+      briefcase: Briefcase,
+      heart: Heart,
+      star: Star,
+      lightbulb: Lightbulb,
+      coffee: Coffee,
+      music: Music,
     };
     const Icon = iconMap[iconId];
     if (!Icon) return null;
