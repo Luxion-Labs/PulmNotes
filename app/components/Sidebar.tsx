@@ -507,7 +507,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 } ${!sidebarOpen && 'w-fit p-3 justify-center'}`}
                 title={sidebarOpen ? undefined : getViewModeLabel(mode)}
               >
-                <Icon size={18} className="flex-shrink-0" />
+                <Icon size={18} className={`flex-shrink-0 ${
+                  mode === 'home' ? 'text-blue-500' :
+                  mode === 'recent' ? 'text-orange-500' :
+                  mode === 'pins' ? 'text-red-500' :
+                  mode === 'library' ? 'text-green-500' :
+                  mode === 'settings' ? 'text-gray-500' :
+                  mode === 'bin' ? 'text-stone-500' :
+                  mode === 'search' ? 'text-purple-500' : ''
+                }`} />
                 {sidebarOpen && <span>{getViewModeLabel(mode)}</span>}
               </button>
               {!sidebarOpen && (
