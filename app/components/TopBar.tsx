@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Pin, FileText, CheckSquare2, MessageCircle, Eye, Edit3 } from 'lucide-react';
+import { Pin, BookOpen, ListTodo, MessageSquare, Eye, Edit3 } from 'lucide-react';
 import { ViewMode } from '@/app/types';
 
 interface TopBarProps {
@@ -81,50 +81,57 @@ export const TopBar: React.FC<TopBarProps> = ({
   }
 
   return (
-    <div className="h-12 md:h-14 border-b border-stone-200 bg-white flex items-center justify-between px-3 md:px-6 gap-2 md:gap-4 overflow-x-auto">
-      {getBreadcrumb()}
+    <div className="h-12 md:h-14 border-b border-stone-200 bg-white flex items-center px-3 md:px-6 gap-2 md:gap-4 overflow-x-auto">
+      {/* Left section - Breadcrumb */}
+      <div className="flex-shrink-0">
+        {getBreadcrumb()}
+      </div>
       
+      {/* Center section - Tabs */}
       {viewMode === 'library' && (
-        <div className="hidden sm:flex items-center gap-3 md:gap-6 flex-shrink-0">
-          <button
-            onClick={() => onTabChange?.('pages')}
-            className={`flex items-center gap-2 px-0 py-2 transition-colors text-xs md:text-sm font-medium border-b-2 whitespace-nowrap ${
-              activeTab === 'pages'
-                ? 'text-stone-900 border-stone-900'
-                : 'text-stone-500 border-transparent hover:text-stone-700'
-            }`}
-            title="Pages"
-          >
-            <FileText size={14} className="md:w-4 md:h-4" />
-            <span className="hidden md:inline">Pages</span>
-          </button>
-          <button
-            onClick={() => onTabChange?.('tasks')}
-            className={`flex items-center gap-2 px-0 py-2 transition-colors text-xs md:text-sm font-medium border-b-2 whitespace-nowrap ${
-              activeTab === 'tasks'
-                ? 'text-stone-900 border-stone-900'
-                : 'text-stone-500 border-transparent hover:text-stone-700'
-            }`}
-            title="Tasks"
-          >
-            <CheckSquare2 size={14} className="md:w-4 md:h-4" />
-            <span>Tasks</span>
-          </button>
-          <button
-            onClick={() => onTabChange?.('discussions')}
-            className={`flex items-center gap-2 px-0 py-2 transition-colors text-xs md:text-sm font-medium border-b-2 whitespace-nowrap ${
-              activeTab === 'discussions'
-                ? 'text-stone-900 border-stone-900'
-                : 'text-stone-500 border-transparent hover:text-stone-700'
-            }`}
-            title="Discussions"
-          >
-            <MessageCircle size={14} className="md:w-4 md:h-4" />
-            <span className="hidden md:inline">Discussions</span>
-          </button>
+        <div className="flex-1 flex justify-center">
+          <div className="hidden sm:flex items-center gap-3 md:gap-6">
+            <button
+              onClick={() => onTabChange?.('pages')}
+              className={`flex items-center gap-2 px-0 py-2 transition-colors text-xs md:text-sm font-medium border-b-2 whitespace-nowrap ${
+                activeTab === 'pages'
+                  ? 'text-stone-900 border-stone-900'
+                  : 'text-stone-500 border-transparent hover:text-stone-700'
+              }`}
+              title="Pages"
+            >
+              <BookOpen size={14} className="md:w-4 md:h-4 text-blue-500" />
+              <span className="hidden md:inline">Pages</span>
+            </button>
+            <button
+              onClick={() => onTabChange?.('tasks')}
+              className={`flex items-center gap-2 px-0 py-2 transition-colors text-xs md:text-sm font-medium border-b-2 whitespace-nowrap ${
+                activeTab === 'tasks'
+                  ? 'text-stone-900 border-stone-900'
+                  : 'text-stone-500 border-transparent hover:text-stone-700'
+              }`}
+              title="Tasks"
+            >
+              <ListTodo size={14} className="md:w-4 md:h-4 text-green-500" />
+              <span>Tasks</span>
+            </button>
+            <button
+              onClick={() => onTabChange?.('discussions')}
+              className={`flex items-center gap-2 px-0 py-2 transition-colors text-xs md:text-sm font-medium border-b-2 whitespace-nowrap ${
+                activeTab === 'discussions'
+                  ? 'text-stone-900 border-stone-900'
+                  : 'text-stone-500 border-transparent hover:text-stone-700'
+              }`}
+              title="Discussions"
+            >
+              <MessageSquare size={14} className="md:w-4 md:h-4 text-purple-500" />
+              <span className="hidden md:inline">Discussions</span>
+            </button>
+          </div>
         </div>
       )}
       
+      {/* Right section - Mode toggle and pin */}
       <div className="flex items-center gap-2 md:gap-3 ml-auto flex-shrink-0">
         <div className="flex items-center gap-1 bg-stone-100 rounded-full p-1">
           <button
@@ -136,7 +143,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             }`}
             title="Edit mode"
           >
-            <Edit3 size={14} />
+            <Edit3 size={14} className="text-orange-500" />
           </button>
           <button
             onClick={onToggleReadMode}
@@ -147,7 +154,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             }`}
             title="Read mode"
           >
-            <Eye size={14} />
+            <Eye size={14} className="text-emerald-500" />
           </button>
         </div>
 
