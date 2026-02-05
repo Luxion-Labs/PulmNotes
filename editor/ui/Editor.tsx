@@ -543,11 +543,11 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
     onUpdateBlocks(note.id, updatedBlocks);
     setMentionMenuOpen(false);
     
-    // Position cursor after mention is rendered
+    // Position cursor after mention is rendered (consistent with other cursor positioning)
     const cursorPosAfterMention = mentionStartPos + mentionText.length;
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       focusBlock(focusedBlockId, cursorPosAfterMention);
-    }, 0);
+    });
   };
 
   const handleMentionClick = (noteId: string) => {

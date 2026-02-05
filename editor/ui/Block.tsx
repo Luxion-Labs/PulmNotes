@@ -28,6 +28,7 @@ export const Block: React.FC<BlockProps> = ({
   const isTypingRef = useRef(false);
   const prevMentionsLengthRef = useRef(block.mentions?.length || 0);
   const lastCursorPositionRef = useRef<CursorPosition | null>(null);
+  // Capture block ID for cleanup to avoid referencing stale props in cleanup function
   const blockIdRef = useRef(block.id);
 
   // Register ref with parent
