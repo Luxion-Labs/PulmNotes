@@ -17,7 +17,7 @@ interface TopBarProps {
   onTabChange?: (tab: 'pages' | 'tasks' | 'discussions') => void;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ 
+export const TopBar: React.FC<TopBarProps> = ({
   viewMode,
   categoryName,
   subCategoryName,
@@ -57,6 +57,9 @@ export const TopBar: React.FC<TopBarProps> = ({
         if (subCategoryName) {
           parts.push({ text: subCategoryName });
         }
+        if (noteName) {
+          parts.push({ text: noteName });
+        }
         break;
       default:
         return null;
@@ -81,97 +84,43 @@ export const TopBar: React.FC<TopBarProps> = ({
   }
 
   return (
-    <div className="h-12 md:h-14 border-b border-stone-200 bg-white flex items-center px-3 md:px-6 gap-2 md:gap-4 overflow-x-auto">
+    <div className="h-12 md:h-14 bg-white flex items-center px-3 md:px-6 gap-2 md:gap-4 overflow-x-auto">
       {/* Left section - Breadcrumb */}
       <div className="flex-shrink-0">
         {getBreadcrumb()}
       </div>
-      
-      {/* Center section - Tabs */}
+
+      {/* Right section - Mode toggle and pin */}
       {viewMode === 'library' && (
-        <div className="flex-1 flex justify-center">
-          <div className="hidden sm:flex items-center gap-3 md:gap-6">
-            <button
-              onClick={() => onTabChange?.('pages')}
-              className={`flex items-center gap-2 px-0 py-2 transition-colors text-xs md:text-sm font-medium border-b-2 whitespace-nowrap ${
-                activeTab === 'pages'
-                  ? 'text-stone-900 border-stone-900'
-                  : 'text-stone-500 border-transparent hover:text-stone-700'
-              }`}
-              title="Pages"
-            >
-              <BookOpen size={14} className="md:w-4 md:h-4 text-blue-500" />
-              <span className="hidden md:inline">Pages</span>
-            </button>
-            <button
-              onClick={() => onTabChange?.('tasks')}
-              className={`flex items-center gap-2 px-0 py-2 transition-colors text-xs md:text-sm font-medium border-b-2 whitespace-nowrap ${
-                activeTab === 'tasks'
-                  ? 'text-stone-900 border-stone-900'
-                  : 'text-stone-500 border-transparent hover:text-stone-700'
-              }`}
-              title="Tasks"
-            >
-              <ListTodo size={14} className="md:w-4 md:h-4 text-green-500" />
-              <span>Tasks</span>
-            </button>
-            <button
-              onClick={() => onTabChange?.('discussions')}
-              className={`flex items-center gap-2 px-0 py-2 transition-colors text-xs md:text-sm font-medium border-b-2 whitespace-nowrap ${
-                activeTab === 'discussions'
-                  ? 'text-stone-900 border-stone-900'
-                  : 'text-stone-500 border-transparent hover:text-stone-700'
-              }`}
-              title="Discussions"
-            >
-              <MessageSquare size={14} className="md:w-4 md:h-4 text-purple-500" />
-              <span className="hidden md:inline">Discussions</span>
-            </button>
-          </div>
+        <div className="flex items-center gap-2 md:gap-3 ml-auto flex-shrink-0">
+          {onToggleReadMode && (
+            <div className="flex items-center gap-1 bg-stone-100 rounded-full p-1">
+              <button
+                onClick={onToggleReadMode}
+                className={`px-3 py-1.5 rounded-full transition-all text-xs font-medium flex items-center gap-1.5 ${!isReadMode
+                    ? 'bg-white text-stone-700 shadow-sm'
+                    : 'text-stone-500 hover:text-stone-600'
+                  }`}
+                title="Edit mode"
+              >
+                <Edit3 size={14} className={!isReadMode ? 'text-orange-500' : ''} />
+                <span className="hidden sm:inline">Write</span>
+              </button>
+              <button
+                onClick={onToggleReadMode}
+                className={`px-3 py-1.5 rounded-full transition-all text-xs font-medium flex items-center gap-1.5 ${isReadMode
+                    ? 'bg-white text-stone-700 shadow-sm'
+                    : 'text-stone-500 hover:text-stone-600'
+                  }`}
+                title="Read mode"
+              >
+                <Eye size={14} className={isReadMode ? 'text-emerald-500' : ''} />
+                <span className="hidden sm:inline">Read</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
-      
-      {/* Right section - Mode toggle and pin */}
-      <div className="flex items-center gap-2 md:gap-3 ml-auto flex-shrink-0">
-        <div className="flex items-center gap-1 bg-stone-100 rounded-full p-1">
-          <button
-            onClick={onToggleReadMode}
-            className={`px-2 py-1 rounded-full transition-all text-xs font-medium ${
-              !isReadMode
-                ? 'bg-white text-stone-700 shadow-sm'
-                : 'text-stone-500 hover:text-stone-600'
-            }`}
-            title="Edit mode"
-          >
-            <Edit3 size={14} className="text-orange-500" />
-          </button>
-          <button
-            onClick={onToggleReadMode}
-            className={`px-2 py-1 rounded-full transition-all text-xs font-medium ${
-              isReadMode
-                ? 'bg-emerald-500 text-white shadow-sm'
-                : 'text-stone-500 hover:text-stone-600'
-            }`}
-            title="Read mode"
-          >
-            <Eye size={14} className="text-emerald-500" />
-          </button>
-        </div>
-
-        {onTogglePin && (
-          <button
-            onClick={onTogglePin}
-            className={`p-1.5 rounded-lg transition-colors ${
-              isPinned 
-                ? 'text-stone-700 bg-stone-100 hover:bg-stone-200' 
-                : 'text-stone-400 hover:text-stone-600 hover:bg-stone-100'
-            }`}
-            title={isPinned ? 'Unpin note' : 'Pin note'}
-          >
-            <Pin size={16} />
-          </button>
-        )}
-      </div>
     </div>
   );
 };
