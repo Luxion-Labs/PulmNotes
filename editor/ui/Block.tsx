@@ -41,9 +41,10 @@ export const Block: React.FC<BlockProps> = ({
 
   // Cleanup ref on unmount
   useEffect(() => {
+    const capturedBlockId = blockIdRef.current;
     return () => {
       if (setBlockRef) {
-        setBlockRef(blockIdRef.current, null);
+        setBlockRef(capturedBlockId, null);
       }
     };
   }, [setBlockRef]);
@@ -145,10 +146,7 @@ export const Block: React.FC<BlockProps> = ({
         return NodeFilter.FILTER_ACCEPT;
       };
 
-      const whatToShow = typeof window !== 'undefined' && (window as any).NodeFilter
-        ? (window as any).NodeFilter.SHOW_TEXT
-        : 4; // 4 is the standard value for NodeFilter.SHOW_TEXT
-      const walker = document.createTreeWalker(element, whatToShow, { acceptNode });
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, { acceptNode });
       let currentOffset = 0;
       let node: Node | null;
       let lastNode: Node | null = null;
@@ -158,13 +156,19 @@ export const Block: React.FC<BlockProps> = ({
         lastNode = node;
         
         // Handle boundary case: if exactly at node boundary, prefer start of next node
-        if (currentOffset + nodeLength === targetOffset && walker.nextNode()) {
-          const nextNode = walker.currentNode;
-          range.setStart(nextNode, 0);
-          range.setEnd(nextNode, 0);
-          sel.removeAllRanges();
-          sel.addRange(range);
-          return;
+        if (currentOffset + nodeLength === targetOffset) {
+          // Check if there's a next node without advancing walker
+          const savedNode = walker.currentNode;
+          const nextNode = walker.nextNode();
+          if (nextNode) {
+            range.setStart(nextNode, 0);
+            range.setEnd(nextNode, 0);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            return;
+          }
+          // Reset walker if no next node found
+          walker.currentNode = savedNode;
         }
         
         if (currentOffset + nodeLength >= targetOffset) {
