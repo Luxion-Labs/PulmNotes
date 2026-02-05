@@ -367,10 +367,12 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
     if (isNaN(lineHeight)) {
       lineHeight = parseFloat(computedStyle.fontSize) * 1.5 || 24;
     }
+    // Make padding proportional to line height to handle large fonts/zoom
+    const padding = Math.max(4, lineHeight * 0.25);
 
     // Determine target Y range based on first/last line
-    const targetYMin = line === 'first' ? elementRect.top - 5 : elementRect.bottom - lineHeight - 5;
-    const targetYMax = line === 'first' ? elementRect.top + lineHeight + 5 : elementRect.bottom + 5;
+    const targetYMin = line === 'first' ? elementRect.top - padding : elementRect.bottom - lineHeight - padding;
+    const targetYMax = line === 'first' ? elementRect.top + lineHeight + padding : elementRect.bottom + padding;
 
     // Walk through all text nodes to find best position
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null);
