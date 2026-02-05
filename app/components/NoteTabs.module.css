@@ -1,0 +1,111 @@
+/* NoteTabs.module.css */
+
+.container {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    /* border-bottom removed as requested */
+    /* Slightly darker divider */
+    padding-left: 24px;
+    background-color: transparent;
+    height: 48px;
+    /* Defined height container */
+}
+
+/* Scrollable area wrapper */
+.scrollArea {
+    display: flex;
+    align-items: flex-end;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Firefox */
+    gap: -12px;
+    /* Negative gap for overlap */
+    padding-bottom: 0;
+    height: 100%;
+}
+
+.scrollArea::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+.tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    height: 36px;
+    /* The Folder Tab Shape:
+     - Top corners rounded (half height)
+     - Bottom corners square (to sit on line)
+     - BUT reference implies "pill shape" connected. 
+     - We use a large top radius.
+  */
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+
+    border: 1px solid transparent;
+    background-color: transparent;
+    color: #787774;
+
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.1s ease, color 0.1s ease;
+
+    /* Layout fix */
+    margin-right: 2px;
+    /* margin-bottom removed */
+    z-index: 1;
+}
+
+.tab:hover {
+    background-color: #efefec;
+    color: #37352f;
+}
+
+.active {
+    background-color: #ffffff;
+    /* Active is light/white */
+    color: #37352f;
+    border-color: #dcdbd8;
+    border-bottom-color: #ffffff;
+    /* Connect to content */
+    z-index: 10;
+
+    /* Subtle depression shadow or lift */
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.inactive {
+    background-color: #f1f0ed;
+    /* Beige/Gray background */
+    border: 1px solid rgba(0, 0, 0, 0.02);
+    /* Faint border */
+    border-bottom: none;
+    /* Push down slightly? No, just z-index */
+}
+
+.closeButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    color: inherit;
+    opacity: 0.6;
+    transition: all 0.1s;
+}
+
+.closeButton:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    opacity: 1;
+}
