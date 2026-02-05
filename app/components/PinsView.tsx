@@ -68,7 +68,7 @@ export const PinsView: React.FC<PinsViewProps> = ({
             <p className="text-sm md:text-base">No pinned notes. Pin a note to see it here.</p>
           </div>
         )}
-```      </div>
+      </div>
 
       {contextMenu && (
         <NoteContextMenu
