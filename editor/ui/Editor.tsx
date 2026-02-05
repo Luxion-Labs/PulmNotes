@@ -415,10 +415,7 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
       return NodeFilter.FILTER_ACCEPT;
     };
 
-    const whatToShow = typeof window !== 'undefined' && (window as any).NodeFilter
-      ? (window as any).NodeFilter.SHOW_TEXT
-      : 4; // 4 is the standard value for NodeFilter.SHOW_TEXT
-    const walker = document.createTreeWalker(element, whatToShow, { acceptNode });
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, { acceptNode });
     const range = document.createRange();
     
     let bestNode: Node | null = null;
