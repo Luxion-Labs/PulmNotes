@@ -1,7 +1,7 @@
 'use client';
 
 import { Sidebar } from "@/app/components/Sidebar";
-import { SecondarySidebar } from "@/app/components/SecondarySidebar";
+// import { SecondarySidebar } from "@/app/components/SecondarySidebar";
 // import { ReflectionSidebar } from "@/app/components/ReflectionSidebar";
 import { TopBar } from "@/app/components/TopBar";
 import { AllNotesView } from "@/app/components/AllNotesView";
@@ -20,9 +20,9 @@ import { SubCategoryModal } from "@/app/components/SubCategoryModal";
 import { defaultCategories } from "@/app/data/defaultCategories";
 import { defaultNotes } from "@/app/data/defaultNotes";
 import { Note, Block, Category, SubCategory, ViewMode, DailyReflection, Asset, AssetType } from "@/app/types";
-import { 
-  NoteStore, LocalStorageNoteStore, 
-  CategoryStore, LocalStorageCategoryStore, 
+import {
+  NoteStore, LocalStorageNoteStore,
+  CategoryStore, LocalStorageCategoryStore,
   SubCategoryStore, LocalStorageSubCategoryStore,
   ReflectionStore, LocalStorageReflectionStore,
   AssetStore, LocalStorageAssetStore
@@ -129,16 +129,16 @@ export default function Home() {
   const currentNote = notes.find(n => n.id === currentNoteId);
 
   const handleUpdateTitle = (noteId: string, title: string) => {
-    setNotes(notes.map(n => 
-      n.id === noteId 
+    setNotes(notes.map(n =>
+      n.id === noteId
         ? { ...n, title, updatedAt: new Date() }
         : n
     ));
   };
 
   const handleUpdateBlocks = (noteId: string, blocks: Block[]) => {
-    setNotes(notes.map(n => 
-      n.id === noteId 
+    setNotes(notes.map(n =>
+      n.id === noteId
         ? { ...n, blocks, updatedAt: new Date() }
         : n
     ));
@@ -157,8 +157,8 @@ export default function Home() {
   };
 
   const handleUpdateCategory = (categoryId: string, name: string, color: string, icon?: string) => {
-    setCategories(categories.map(c => 
-      c.id === categoryId 
+    setCategories(categories.map(c =>
+      c.id === categoryId
         ? { ...c, name, color, icon, updatedAt: new Date() }
         : c
     ));
@@ -204,8 +204,8 @@ export default function Home() {
 
   const handleSaveSubCategory = (name: string, icon?: string) => {
     if (subCategoryModalMode === 'edit' && editingSubCategoryId) {
-      setSubCategories(subCategories.map(sc => 
-        sc.id === editingSubCategoryId 
+      setSubCategories(subCategories.map(sc =>
+        sc.id === editingSubCategoryId
           ? { ...sc, name, icon, updatedAt: new Date() }
           : sc
       ));
@@ -216,35 +216,35 @@ export default function Home() {
   };
 
   const handleUpdateSubCategory = (subCategoryId: string, name: string, icon?: string) => {
-    setSubCategories(subCategories.map(sc => 
-      sc.id === subCategoryId 
+    setSubCategories(subCategories.map(sc =>
+      sc.id === subCategoryId
         ? { ...sc, name, icon }
         : sc
     ));
   };
 
   const handleMoveNote = (noteId: string, targetCategoryId: string, targetSubCategoryId?: string) => {
-    setNotes(notes.map(n => 
-      n.id === noteId 
-        ? { 
-            ...n, 
-            categoryId: targetCategoryId, 
-            subCategoryId: targetSubCategoryId,
-            updatedAt: new Date() 
-          }
+    setNotes(notes.map(n =>
+      n.id === noteId
+        ? {
+          ...n,
+          categoryId: targetCategoryId,
+          subCategoryId: targetSubCategoryId,
+          updatedAt: new Date()
+        }
         : n
     ));
   };
 
   const handleMoveAsset = (assetId: string, targetCategoryId: string, targetSubCategoryId?: string) => {
-    setAssets(assets.map(a => 
-      a.id === assetId 
-        ? { 
-            ...a, 
-            categoryId: targetCategoryId, 
-            subCategoryId: targetSubCategoryId,
-            updatedAt: new Date() 
-          }
+    setAssets(assets.map(a =>
+      a.id === assetId
+        ? {
+          ...a,
+          categoryId: targetCategoryId,
+          subCategoryId: targetSubCategoryId,
+          updatedAt: new Date()
+        }
         : a
     ));
   };
@@ -281,23 +281,23 @@ export default function Home() {
 
   const handleSelectNote = (noteId: string) => {
     const note = notes.find(n => n.id === noteId);
-    
+
     // Don't open deleted notes
     if (!note || note.isDeleted) {
       return;
     }
-    
+
     setCurrentNoteId(noteId);
     setIsReadMode(false); // Reset to edit mode when selecting a note
     setSelectedCategoryId(note.categoryId);
     setSelectedSubCategoryId(note.subCategoryId || null);
-    setNotes(notes.map(n => 
-      n.id === noteId 
+    setNotes(notes.map(n =>
+      n.id === noteId
         ? { ...n, lastOpenedAt: new Date() }
         : n
     ));
     setViewMode('library');
-    
+
     // Add to open tabs if not already there
     if (!openNoteIds.includes(noteId)) {
       setOpenNoteIds([...openNoteIds, noteId]);
@@ -306,22 +306,22 @@ export default function Home() {
 
   const handleOpenNote = (noteId: string) => {
     const note = notes.find(n => n.id === noteId);
-    
+
     if (!note || note.isDeleted) {
       return;
     }
-    
+
     setCurrentNoteId(noteId);
     setIsReadMode(false);
     setSelectedCategoryId(note.categoryId);
     setSelectedSubCategoryId(note.subCategoryId || null);
-    setNotes(notes.map(n => 
-      n.id === noteId 
+    setNotes(notes.map(n =>
+      n.id === noteId
         ? { ...n, lastOpenedAt: new Date() }
         : n
     ));
     setViewMode('library');
-    
+
     // Add to open tabs if not already there
     if (!openNoteIds.includes(noteId)) {
       setOpenNoteIds([...openNoteIds, noteId]);
@@ -331,7 +331,7 @@ export default function Home() {
   const handleCloseTab = (noteId: string) => {
     const newOpenNoteIds = openNoteIds.filter(id => id !== noteId);
     setOpenNoteIds(newOpenNoteIds);
-    
+
     // If closing the current note, switch to another open note or null
     if (currentNoteId === noteId) {
       if (newOpenNoteIds.length > 0) {
@@ -371,8 +371,8 @@ export default function Home() {
   };
 
   const handleDeleteNote = (noteId: string) => {
-    setNotes(notes.map(n => 
-      n.id === noteId 
+    setNotes(notes.map(n =>
+      n.id === noteId
         ? { ...n, isDeleted: true, deletedAt: new Date(), updatedAt: new Date() }
         : n
     ));
@@ -381,18 +381,18 @@ export default function Home() {
   const handleRestoreNote = (noteId: string) => {
     setNotes(notes.map(n => {
       if (n.id !== noteId) return n;
-      
+
       // Validate and repair category/sub-category references
       let validCategoryId = n.categoryId;
       let validSubCategoryId = n.subCategoryId;
-      
+
       // Check if category exists
       const categoryExists = categories.some(c => c.id === n.categoryId);
-      
+
       if (!categoryExists) {
         // Category was deleted - find or create "Uncategorized" fallback
         let uncategorizedCategory = categories.find(c => c.name === 'Uncategorized');
-        
+
         if (!uncategorizedCategory) {
           // Create fallback category
           const newCategory: Category = {
@@ -407,7 +407,7 @@ export default function Home() {
         } else {
           validCategoryId = uncategorizedCategory.id;
         }
-        
+
         // Clear sub-category since parent category is invalid
         validSubCategoryId = undefined;
       } else if (validSubCategoryId) {
@@ -415,13 +415,13 @@ export default function Home() {
         const subCategoryExists = subCategories.some(
           sc => sc.id === validSubCategoryId && sc.categoryId === validCategoryId
         );
-        
+
         if (!subCategoryExists) {
           // Sub-category was deleted - clear reference
           validSubCategoryId = undefined;
         }
       }
-      
+
       return {
         ...n,
         categoryId: validCategoryId,
@@ -437,30 +437,30 @@ export default function Home() {
     // Remove the note and clean up all mentions of it in other notes
     setNotes(notes.filter(n => n.id !== noteId).map(note => {
       // Check if this note has any blocks with mentions
-      const hasAffectedMentions = note.blocks.some(block => 
+      const hasAffectedMentions = note.blocks.some(block =>
         block.mentions?.some(mention => mention.noteId === noteId)
       );
-      
+
       if (!hasAffectedMentions) {
         return note;
       }
-      
+
       // Clean up mentions of the deleted note
       const updatedBlocks = note.blocks.map(block => {
         if (!block.mentions || block.mentions.length === 0) {
           return block;
         }
-        
+
         const filteredMentions = block.mentions.filter(mention => mention.noteId !== noteId);
-        
+
         // If mentions were removed, update the block
         if (filteredMentions.length !== block.mentions.length) {
           return { ...block, mentions: filteredMentions };
         }
-        
+
         return block;
       });
-      
+
       return { ...note, blocks: updatedBlocks, updatedAt: new Date() };
     }));
   };
@@ -500,8 +500,8 @@ export default function Home() {
   };
 
   const handleTogglePin = (noteId: string) => {
-    setNotes(notes.map(n => 
-      n.id === noteId 
+    setNotes(notes.map(n =>
+      n.id === noteId
         ? { ...n, isPinned: !n.isPinned, updatedAt: new Date() }
         : n
     ));
@@ -509,9 +509,9 @@ export default function Home() {
 
   const handleUpdateReflection = (date: string, text: string) => {
     const existingIndex = reflections.findIndex(r => r.date === date);
-    
+
     if (existingIndex >= 0) {
-      setReflections(reflections.map((r, i) => 
+      setReflections(reflections.map((r, i) =>
         i === existingIndex ? { ...r, text } : r
       ));
     } else {
@@ -553,8 +553,8 @@ export default function Home() {
   };
 
   const handleDeleteAsset = (assetId: string) => {
-    setAssets(assets.map(a => 
-      a.id === assetId 
+    setAssets(assets.map(a =>
+      a.id === assetId
         ? { ...a, isDeleted: true, deletedAt: new Date(), updatedAt: new Date() }
         : a
     ));
@@ -563,16 +563,16 @@ export default function Home() {
   const handleRestoreAsset = (assetId: string) => {
     setAssets(assets.map(a => {
       if (a.id !== assetId) return a;
-      
+
       // Validate and repair category/sub-category references
       let validCategoryId = a.categoryId;
       let validSubCategoryId = a.subCategoryId;
-      
+
       const categoryExists = categories.some(c => c.id === a.categoryId);
-      
+
       if (!categoryExists) {
         let uncategorizedCategory = categories.find(c => c.name === 'Uncategorized');
-        
+
         if (!uncategorizedCategory) {
           const newCategory: Category = {
             id: `cat-uncategorized-${generateId()}`,
@@ -586,18 +586,18 @@ export default function Home() {
         } else {
           validCategoryId = uncategorizedCategory.id;
         }
-        
+
         validSubCategoryId = undefined;
       } else if (validSubCategoryId) {
         const subCategoryExists = subCategories.some(
           sc => sc.id === validSubCategoryId && sc.categoryId === validCategoryId
         );
-        
+
         if (!subCategoryExists) {
           validSubCategoryId = undefined;
         }
       }
-      
+
       return {
         ...a,
         categoryId: validCategoryId,
@@ -611,31 +611,31 @@ export default function Home() {
 
   const handleDeleteAssetForever = (assetId: string) => {
     setAssets(assets.filter(a => a.id !== assetId));
-    
+
     // Clean up asset mentions in notes
     setNotes(notes.map(note => {
-      const hasAffectedMentions = note.blocks.some(block => 
+      const hasAffectedMentions = note.blocks.some(block =>
         block.assetMentions?.some(mention => mention.assetId === assetId)
       );
-      
+
       if (!hasAffectedMentions) {
         return note;
       }
-      
+
       const updatedBlocks = note.blocks.map(block => {
         if (!block.assetMentions || block.assetMentions.length === 0) {
           return block;
         }
-        
+
         const filteredMentions = block.assetMentions.filter(mention => mention.assetId !== assetId);
-        
+
         if (filteredMentions.length !== block.assetMentions.length) {
           return { ...block, assetMentions: filteredMentions };
         }
-        
+
         return block;
       });
-      
+
       return { ...note, blocks: updatedBlocks, updatedAt: new Date() };
     }));
   };
@@ -645,178 +645,152 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen bg-white text-gray-900 font-sans selection:bg-blue-100 flex-col lg:flex-row">
+    <div className="flex h-screen bg-[#DFEBF6] text-gray-900 font-sans selection:bg-blue-100 flex-col lg:flex-row">
       {/* Sidebar - Hidden on mobile, visible on lg+ */}
       <div className="hidden lg:block">
-        <Sidebar 
-        viewMode={viewMode}
-        categories={categories}
-        subCategories={subCategories}
-        notes={notes}
-        assets={assets}
-        currentNoteId={currentNoteId}
-        selectedCategoryId={selectedCategoryId}
-        selectedSubCategoryId={selectedSubCategoryId}
-        onSelectNote={handleSelectNote}
-        onSelectCategory={handleSelectCategory}
-        onSelectSubCategory={handleSelectSubCategory}
-        onCreateCategory={handleCreateCategory}
-        onUpdateCategory={handleUpdateCategory}
-        onCreateSubCategory={handleCreateSubCategory}
-        onUpdateSubCategory={handleUpdateSubCategory}
-        onCreateNote={handleCreateNote}
-        onChangeView={handleChangeView}
-        onDeleteNote={handleDeleteNote}
-        onDeleteCategory={handleDeleteCategory}
-        onDeleteSubCategory={handleDeleteSubCategory}
-        onTogglePin={handleTogglePin}
-        onMoveNote={handleMoveNote}
-        onMoveAsset={handleMoveAsset}
-        onOpenFeedback={() => setIsFeedbackPanelOpen(true)}
-        onOpenAsset={handleOpenAsset}
-        onDeleteAsset={handleDeleteAsset}
-        onOpenAssetModal={handleOpenAssetModal}
-        onOpenCategoryCreateModal={handleOpenCategoryCreateModal}
-      />
+        <Sidebar
+          viewMode={viewMode}
+          categories={categories}
+          subCategories={subCategories}
+          notes={notes}
+          assets={assets}
+          currentNoteId={currentNoteId}
+          selectedCategoryId={selectedCategoryId}
+          selectedSubCategoryId={selectedSubCategoryId}
+          onSelectNote={handleSelectNote}
+          onSelectCategory={handleSelectCategory}
+          onSelectSubCategory={handleSelectSubCategory}
+          onCreateCategory={handleCreateCategory}
+          onUpdateCategory={handleUpdateCategory}
+          onCreateSubCategory={handleCreateSubCategory}
+          onUpdateSubCategory={handleUpdateSubCategory}
+          onCreateNote={handleCreateNote}
+          onChangeView={handleChangeView}
+          onDeleteNote={handleDeleteNote}
+          onDeleteCategory={handleDeleteCategory}
+          onDeleteSubCategory={handleDeleteSubCategory}
+          onTogglePin={handleTogglePin}
+          onMoveNote={handleMoveNote}
+          onMoveAsset={handleMoveAsset}
+          onOpenFeedback={() => setIsFeedbackPanelOpen(true)}
+          onOpenAsset={handleOpenAsset}
+          onDeleteAsset={handleDeleteAsset}
+          onOpenAssetModal={handleOpenAssetModal}
+          onOpenCategoryCreateModal={handleOpenCategoryCreateModal}
+        />
       </div>
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {viewMode === 'library' && (
-          <TopBar 
-            viewMode={viewMode}
-            categoryName={getCurrentCategory()?.name}
-            subCategoryName={getCurrentSubCategory()?.name}
-            noteName={currentNote?.title}
-            isPinned={currentNote?.isPinned}
-            isReadMode={isReadMode}
-            onTogglePin={currentNote ? () => handleTogglePin(currentNote.id) : undefined}
-            onToggleReadMode={() => setIsReadMode(!isReadMode)}
-          />
-        )}
-        
-        <div className="flex flex-1 overflow-hidden">
-          {viewMode === 'library' && (
-            <SecondarySidebar
-              categories={categories}
-              subCategories={subCategories}
-              notes={notes}
-              assets={assets}
-              selectedCategoryId={selectedCategoryId}
-              selectedSubCategoryId={selectedSubCategoryId}
-              currentNoteId={currentNoteId}
-              onSelectNote={handleSelectNote}
-              onSelectCategory={handleSelectCategory}
-              onSelectSubCategory={handleSelectSubCategory}
-              onCreateNote={handleCreateNote}
-              onCreateSubCategory={handleCreateSubCategory}
-              onCreateCategory={handleCreateCategory}
-              onUpdateCategory={handleUpdateCategory}
-              onUpdateSubCategory={handleUpdateSubCategory}
-              onDeleteCategory={handleDeleteCategory}
-              onDeleteSubCategory={handleDeleteSubCategory}
-              onDeleteNote={handleDeleteNote}
-              onTogglePin={handleTogglePin}
-              onMoveNote={handleMoveNote}
-              onMoveAsset={handleMoveAsset}
-              onOpenFeedback={() => setIsFeedbackPanelOpen(true)}
-              onOpenAsset={handleOpenAsset}
-              onDeleteAsset={handleDeleteAsset}
-              onOpenAssetModal={handleOpenAssetModal}
-              onOpenCategoryCreateModal={handleOpenCategoryCreateModal}
-              onOpenCategoryEditModal={handleOpenCategoryEditModal}
-              onOpenSubCategoryCreateModal={handleOpenSubCategoryCreateModal}
-              onOpenSubCategoryEditModal={handleOpenSubCategoryEditModal}
-            />
-          )}
-          
-          <div className="flex-1 overflow-y-auto cursor-text flex flex-col">
-            {viewMode === 'library' && currentNote && (
-              <>
-                <NoteTabs 
-                  openNotes={openNoteIds.map(id => notes.find(n => n.id === id)).filter(Boolean) as Note[]}
-                  currentNoteId={currentNoteId}
-                  onSelectNote={handleOpenNote}
-                  onCloseTab={handleCloseTab}
-                />
-                <div className="flex-1 overflow-y-auto">
-                  <NoteView 
-                    isReadMode={isReadMode} 
-                    note={currentNote}
-                    allNotes={[
-                      ...notes.map(n => ({ id: n.id, title: n.title, isDeleted: n.isDeleted })),
-                      ...assets.filter(a => !a.isDeleted).map(a => ({ 
-                        id: a.id, 
-                        title: `📎 ${a.name}`,
-                        isDeleted: false 
-                      }))
-                    ]}
-                    assets={assets.filter(a => !a.isDeleted)}
-                    onUpdateTitle={handleUpdateTitle}
-                    onUpdateBlocks={handleUpdateBlocks}
-                    onOpenNote={(id) => {
-                      if (id.startsWith('asset-')) {
-                        handleOpenAsset(id);
-                      } else {
-                        handleOpenNote(id);
-                      }
-                    }}
+
+      <div className="flex-1 flex flex-col overflow-hidden p-2 md:p-3">
+        <div className="bg-white flex-1 flex flex-col overflow-hidden rounded-2xl md:rounded-3xl shadow-sm border border-white/50 relative">
+
+          <div className="flex flex-1 overflow-hidden">
+
+            <div className="flex-1 overflow-hidden cursor-text flex flex-col">
+              {viewMode === 'library' && currentNote && (
+                <>
+                  {/* Top Bar with breadcrumb and controls */}
+                  <TopBar
+                    viewMode={viewMode}
+                    categoryName={getCurrentCategory()?.name}
+                    subCategoryName={getCurrentSubCategory()?.name}
+                    noteName={currentNote?.title}
+                    isPinned={currentNote?.isPinned}
+                    isReadMode={isReadMode}
+                    activeTab="pages"
+                    onTogglePin={() => currentNote && handleTogglePin(currentNote.id)}
+                    onToggleReadMode={() => setIsReadMode(!isReadMode)}
                   />
-                </div>
-              </>
-            )}
-            
-            {viewMode === 'home' && (
-              <>
-                <AllNotesView 
-                  notes={notes}
-                  categories={categories}
-                  onSelectNote={handleSelectNote}
-                  onDeleteNote={handleDeleteNote}
-                  onTogglePin={handleTogglePin}
-                />
-              </>
-            )}
-            
-            {viewMode === 'recent' && (
-              <>
-                <TopBar viewMode={viewMode} />
-                <RecentView 
-                  notes={notes}
-                  categories={categories}
-                  onSelectNote={handleSelectNote}
-                  onDeleteNote={handleDeleteNote}
-                  onTogglePin={handleTogglePin}
-                />
-              </>
-            )}
-            
-            {viewMode === 'pins' && (
-              <>
-                <TopBar viewMode={viewMode} />
-                <PinsView 
-                  notes={notes}
-                  categories={categories}
-                  onSelectNote={handleSelectNote}
-                  onDeleteNote={handleDeleteNote}
-                  onTogglePin={handleTogglePin}
-                />
-              </>
-            )}
-            
-            {viewMode === 'bin' && (
-              <>
-                <TopBar viewMode={viewMode} />
-                <BinView 
-                  notes={notes}
-                  assets={assets}
-                  categories={categories}
-                  onRestore={handleRestoreNote}
-                  onDeleteForever={handleDeleteForever}
-                  onRestoreAsset={handleRestoreAsset}
-                  onDeleteAssetForever={handleDeleteAssetForever}
-                />
-              </>
-            )}
+
+                  {/* Content Divider */}
+                  <div className="border-b border-stone-200 w-full" />
+
+                  {/* Tabs Section (Divider 2) */}
+                  <NoteTabs
+                    openNotes={openNoteIds.map(id => notes.find(n => n.id === id)).filter(Boolean) as Note[]}
+                    currentNoteId={currentNoteId}
+                    onSelectNote={handleOpenNote}
+                    onCloseTab={handleCloseTab}
+                  />
+                  <div className="flex-1 overflow-y-auto">
+                    <NoteView
+                      isReadMode={isReadMode}
+                      note={currentNote}
+                      allNotes={[
+                        ...notes.map(n => ({ id: n.id, title: n.title, isDeleted: n.isDeleted })),
+                        ...assets.filter(a => !a.isDeleted).map(a => ({
+                          id: a.id,
+                          title: `📎 ${a.name}`,
+                          isDeleted: false
+                        }))
+                      ]}
+                      assets={assets.filter(a => !a.isDeleted)}
+                      onUpdateTitle={handleUpdateTitle}
+                      onUpdateBlocks={handleUpdateBlocks}
+                      onOpenNote={(id) => {
+                        if (id.startsWith('asset-')) {
+                          handleOpenAsset(id);
+                        } else {
+                          handleOpenNote(id);
+                        }
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+
+              {viewMode === 'home' && (
+                <>
+                  <AllNotesView
+                    notes={notes}
+                    categories={categories}
+                    onSelectNote={handleSelectNote}
+                    onDeleteNote={handleDeleteNote}
+                    onTogglePin={handleTogglePin}
+                  />
+                </>
+              )}
+
+              {viewMode === 'recent' && (
+                <>
+                  <TopBar viewMode={viewMode} />
+                  <RecentView
+                    notes={notes}
+                    categories={categories}
+                    onSelectNote={handleSelectNote}
+                    onDeleteNote={handleDeleteNote}
+                    onTogglePin={handleTogglePin}
+                  />
+                </>
+              )}
+
+              {viewMode === 'pins' && (
+                <>
+                  <TopBar viewMode={viewMode} />
+                  <PinsView
+                    notes={notes}
+                    categories={categories}
+                    onSelectNote={handleSelectNote}
+                    onDeleteNote={handleDeleteNote}
+                    onTogglePin={handleTogglePin}
+                  />
+                </>
+              )}
+
+              {viewMode === 'bin' && (
+                <>
+                  <TopBar viewMode={viewMode} />
+                  <BinView
+                    notes={notes}
+                    assets={assets}
+                    categories={categories}
+                    onRestore={handleRestoreNote}
+                    onDeleteForever={handleDeleteForever}
+                    onRestoreAsset={handleRestoreAsset}
+                    onDeleteAssetForever={handleDeleteAssetForever}
+                  />
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
