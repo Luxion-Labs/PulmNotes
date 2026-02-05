@@ -1,0 +1,84 @@
+/* Tabs.module.css */
+
+.container {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    border-bottom: 1px solid #d4d4d0;
+    /* Subtle warm divider */
+    padding-left: 24px;
+    /* Match indent */
+    background-color: transparent;
+    gap: -1px;
+    /* Overlap borders if needed, or 0 */
+}
+
+/* Base Tab Style */
+.tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    /* Horizontal padding looks generous in folder tabs */
+    min-width: 80px;
+    height: 36px;
+    /* Slightly taller for better touch target */
+    border-top-left-radius: 18px;
+    /* Full pill top */
+    border-top-right-radius: 18px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background-color: transparent;
+    color: #8a8885;
+    /* Muted inactive text */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.1s ease-out;
+    margin-right: 2px;
+    /* Slight gap between tabs */
+    margin-bottom: -1px;
+    /* Push down to cover divider */
+    z-index: 1;
+    user-select: none;
+}
+
+/* Hover State for Inactive */
+.tab:not(.active):hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    color: #5a5855;
+}
+
+/* Active State - PROMINENT & CONNECTED */
+.active {
+    background-color: #fbfbf9;
+    /* Matches content background - warm white */
+    color: #37352f;
+    /* Darker, sharper text */
+    border-color: #d4d4d0;
+    /* Match divider color */
+    border-bottom-color: #fbfbf9;
+    /* Hide bottom border to 'connect' */
+    z-index: 2;
+    /* Sit on top of divider */
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.01);
+    /* Very subtle depth */
+}
+
+/* Inactive State - RECESSED */
+.inactive {
+    background-color: #e8e7e3;
+    /* Darker warm beige/gray */
+    border-color: transparent;
+    /* Seamless with background usually, or define edge */
+}
+
+/* Optional: Icon spacing if icons are added later */
+.tab svg {
+    margin-right: 6px;
+    width: 14px;
+    height: 14px;
+    opacity: 0.8;
+}
