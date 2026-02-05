@@ -39,7 +39,7 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
   const updateBlock = (id: string, content: string) => {
     const currentBlock = note.blocks.find(b => b.id === id);
 
-    
+
     let cleanedMentions = currentBlock?.mentions || [];
     if (cleanedMentions.length > 0) {
       cleanedMentions = cleanedMentions.filter(mention => {
@@ -56,12 +56,12 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
     });
     onUpdateBlocks(note.id, updatedBlocks);
 
- 
+
     if (!mentionMenuOpen && focusedBlockId === id) {
       const lastAtIndex = content.lastIndexOf('@');
       if (lastAtIndex !== -1) {
         const textAfterAt = content.slice(lastAtIndex + 1);
- 
+
         if (!textAfterAt.includes(' ') && textAfterAt.length >= 0) {
           setMentionQuery(textAfterAt);
           setMentionStartPos(lastAtIndex);
@@ -82,7 +82,7 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
               }
             }
           }, 0);
-          return; 
+          return;
         }
       }
     }
@@ -114,21 +114,21 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
         e.preventDefault();
         setMentionMenuOpen(false);
       }
-      
+
       return;
     }
 
-    
+
     if (menuOpen) {
       if (e.key === 'Escape') {
         e.preventDefault();
         setMenuOpen(false);
       }
-     
+
       return;
     }
 
-    
+
     if (e.key === '/') {
       setTimeout(() => {
         const selection = window.getSelection();
@@ -149,7 +149,7 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
       return;
     }
 
-    
+
     if (e.key === 'Enter') {
       if (!e.shiftKey) {
         e.preventDefault();
@@ -172,7 +172,7 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-         
+
       if (target.closest('.mention-menu') || target.closest('.slash-menu')) {
         return;
       }
@@ -197,7 +197,7 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
     const mentionText = '@' + title;
     const newContent = beforeMention + mentionText + afterMention;
 
-   
+
     const mention = {
       noteId,
       title: mentionText,
@@ -228,14 +228,14 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-12 py-16 pb-48 relative">
+    <div className="max-w-5xl mx-auto px-16 py-12 pb-48 relative">
       <div className="mb-8 group">
         <input
           type="text"
           placeholder="Untitled"
           value={note.title}
           onChange={(e) => onUpdateTitle(note.id, e.target.value)}
-          className="w-full text-5xl font-bold text-gray-800 placeholder-gray-300 outline-none bg-transparent"
+          className="w-full text-5xl font-bold text-gray-800 placeholder-gray-300 outline-none bg-transparent text-center"
         />
       </div>
 
@@ -272,9 +272,7 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
         />
       )}
 
-      <div className="fixed bottom-4 right-4 text-gray-400 text-xs font-mono">
-        Type '/' for commands, '@' to mention notes
-      </div>
+
     </div>
   );
 };
