@@ -163,158 +163,20 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
         e.preventDefault();
         setMentionMenuOpen(false);
       }
+
       return;
     }
+
 
     if (menuOpen) {
       if (e.key === 'Escape') {
         e.preventDefault();
         setMenuOpen(false);
       }
+
       return;
     }
 
-    const currentIndex = note.blocks.findIndex(b => b.id === id);
-    const currentBlock = note.blocks[currentIndex];
-    const blockEl = blockRefs.current.get(id);
-
-    // Helper to validate selection is within the block element
-    const isSelectionInBlock = (selection: Selection | null): boolean => {
-      if (!selection || selection.rangeCount === 0 || !blockEl) return false;
-      const range = selection.getRangeAt(0);
-      return blockEl.contains(range.startContainer);
-    };
-
-    // Helper to get cursor offset from start of element
-    const getCursorOffset = (): number => {
-      const selection = window.getSelection();
-      if (!selection || !isSelectionInBlock(selection) || !blockEl) return 0;
-      const range = selection.getRangeAt(0);
-      const preCaretRange = range.cloneRange();
-      preCaretRange.selectNodeContents(blockEl);
-      preCaretRange.setEnd(range.startContainer, range.startOffset);
-      return preCaretRange.toString().length;
-    };
-
-    // Helper to check if cursor is at start
-    const isCursorAtStart = (): boolean => {
-      return getCursorOffset() === 0;
-    };
-
-    // Helper to check if cursor is at end
-    const isCursorAtEnd = (): boolean => {
-      if (!blockEl) return false;
-      return getCursorOffset() >= (blockEl.textContent?.length || 0);
-    };
-
-    // Helper to get cursor rect reliably
-    const getCursorRect = (): DOMRect | null => {
-      const selection = window.getSelection();
-      if (!selection || !isSelectionInBlock(selection)) return null;
-      const range = selection.getRangeAt(0);
-      
-      // Try getClientRects first
-      const rects = range.getClientRects();
-      if (rects.length > 0) {
-        return rects[0];
-      }
-      
-      // Fallback: insert a temporary span to get position, using a cloned range
-      const tempRange = range.cloneRange();
-      const span = document.createElement('span');
-      span.textContent = '\u200B'; // Zero-width space
-      tempRange.insertNode(span);
-      const rect = span.getBoundingClientRect();
-      span.parentNode?.removeChild(span);
-      
-      // Do not modify the actual selection; we only needed the geometry
-      if (typeof tempRange.detach === 'function') {
-        tempRange.detach();
-      }
-      
-      return rect;
-    };
-
-    // Handle arrow key navigation between blocks
-    if (e.key === 'ArrowUp' && currentIndex > 0 && blockEl) {
-      const cursorRect = getCursorRect();
-      if (cursorRect) {
-        const blockRect = blockEl.getBoundingClientRect();
-        const lineHeight = getLineHeight(blockEl);
-
-        const isEmpty = (blockEl.textContent?.length || 0) === 0;
-        const isSingleLine = blockRect.height < lineHeight * LINE_HEIGHT_MULTIPLIER;
-        const isAtFirstLine = cursorRect.top < blockRect.top + lineHeight + LINE_DETECTION_PADDING;
-
-        if (isEmpty || isSingleLine || isAtFirstLine) {
-          e.preventDefault();
-          const prevBlock = note.blocks[currentIndex - 1];
-          const prevBlockEl = blockRefs.current.get(prevBlock.id);
-
-          if (prevBlockEl) {
-            const cursorX = cursorRect.left;
-            
-            // Directly manipulate DOM without triggering React cursor positioning
-            prevBlockEl.focus();
-            setFocusedBlockId(prevBlock.id);
-            setCursorPosition(null); // null means "don't position cursor via React"
-            
-            // Position cursor immediately after focus
-            positionCursorAtX(prevBlockEl, cursorX, 'last');
-          }
-        }
-      }
-      return;
-    }
-
-    if (e.key === 'ArrowDown' && currentIndex < note.blocks.length - 1 && blockEl) {
-      const cursorRect = getCursorRect();
-      if (cursorRect) {
-        const blockRect = blockEl.getBoundingClientRect();
-        const lineHeight = getLineHeight(blockEl);
-
-        const isEmpty = (blockEl.textContent?.length || 0) === 0;
-        const isSingleLine = blockRect.height < lineHeight * LINE_HEIGHT_MULTIPLIER;
-        const isAtLastLine = cursorRect.bottom > blockRect.bottom - lineHeight - LINE_DETECTION_PADDING;
-
-        if (isEmpty || isSingleLine || isAtLastLine) {
-          e.preventDefault();
-          const nextBlock = note.blocks[currentIndex + 1];
-          const nextBlockEl = blockRefs.current.get(nextBlock.id);
-
-          if (nextBlockEl) {
-            const cursorX = cursorRect.left;
-            
-            // Directly manipulate DOM without triggering React cursor positioning
-            nextBlockEl.focus();
-            setFocusedBlockId(nextBlock.id);
-            setCursorPosition(null); // null means "don't position cursor via React"
-            
-            // Position cursor immediately after focus
-            positionCursorAtX(nextBlockEl, cursorX, 'first');
-          }
-        }
-      }
-      return;
-    }
-
-    if (e.key === 'ArrowLeft' && currentIndex > 0 && blockEl) {
-      if (isCursorAtStart()) {
-        e.preventDefault();
-        const prevBlock = note.blocks[currentIndex - 1];
-        focusBlock(prevBlock.id, 'end');
-      }
-      return;
-    }
-
-    if (e.key === 'ArrowRight' && currentIndex < note.blocks.length - 1 && blockEl) {
-      if (isCursorAtEnd()) {
-        e.preventDefault();
-        const nextBlock = note.blocks[currentIndex + 1];
-        focusBlock(nextBlock.id, 'start');
-      }
-      return;
-    }
 
     if (e.key === '/') {
       setTimeout(() => {
