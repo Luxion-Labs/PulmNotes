@@ -21,8 +21,6 @@ interface EditorProps {
   onOpenNote?: (noteId: string) => void;
 }
 
-type CursorPosition = 'start' | 'end' | number;
-
 export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTitle, onUpdateBlocks, onOpenNote }) => {
   const [focusedBlockId, setFocusedBlockId] = useState<string | null>(null);
   const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(null);
@@ -122,7 +120,7 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
             if (selection && selection.rangeCount > 0) {
               const range = selection.getRangeAt(0);
               const rect = range.getBoundingClientRect();
-              const editorRect = document.querySelector('.max-w-3xl')?.getBoundingClientRect();
+              const editorRect = document.querySelector('.max-w-5xl')?.getBoundingClientRect();
 
               if (editorRect) {
                 setMentionMenuPosition({
@@ -157,6 +155,116 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
       addBlock(focusedBlockId);
     }
   };
+
+  function positionCursorAtX(element: HTMLDivElement, targetX: number, line: 'first' | 'last') {
+    const sel = window.getSelection();
+    if (!sel) return;
+
+    const textContent = element.textContent || '';
+    
+    // Handle empty elements
+    if (textContent.length === 0) {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      return;
+    }
+
+    // Get element metrics
+    const elementRect = element.getBoundingClientRect();
+    const lineHeight = getLineHeight(element);
+    // Make padding proportional to line height to handle large fonts/zoom
+    const padding = Math.max(MIN_LINE_HEIGHT_PADDING, lineHeight * MIN_LINE_HEIGHT_PADDING_RATIO);
+
+    // Determine target Y range based on first/last line
+    const targetYMin = line === 'first' ? elementRect.top - padding : elementRect.bottom - lineHeight - padding;
+    const targetYMax = line === 'first' ? elementRect.top + lineHeight + padding : elementRect.bottom + padding;
+
+    // Walk through all text nodes to find best position
+    // Skip text nodes inside contentEditable='false' elements (like mention spans)
+    const acceptNode = (node: Node): number => {
+      let parent = node.parentElement;
+      while (parent && parent !== element) {
+        if (parent.contentEditable === 'false') {
+          return NodeFilter.FILTER_REJECT;
+        }
+        parent = parent.parentElement;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    };
+
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, { acceptNode });
+    const range = document.createRange();
+    
+    let bestNode: Node | null = null;
+    let bestOffset = 0;
+    let bestDistance = Infinity;
+    let fallbackNode: Node | null = null;
+    let fallbackOffset = 0;
+
+    let node: Node | null;
+    while ((node = walker.nextNode())) {
+      const text = node.textContent || '';
+      
+      // Store first/last node for fallback
+      if (line === 'first' && !fallbackNode) {
+        fallbackNode = node;
+        fallbackOffset = 0;
+      }
+      if (line === 'last') {
+        fallbackNode = node;
+        fallbackOffset = text.length;
+      }
+
+      // First, check if any position in this node is on the target line
+      range.setStart(node, 0);
+      range.setEnd(node, 0);
+      const startRect = range.getBoundingClientRect();
+      const isStartOnTargetLine = startRect.top >= targetYMin && startRect.bottom <= targetYMax;
+      
+      if (isStartOnTargetLine || text.length < 50) {
+        // For short text or if we know we're on target line, check all positions
+        for (let i = 0; i <= text.length; i++) {
+          range.setStart(node, i);
+          range.setEnd(node, i);
+          const rect = range.getBoundingClientRect();
+
+          // Check if on target line
+          const isOnTargetLine = rect.top >= targetYMin && rect.bottom <= targetYMax;
+          if (isOnTargetLine) {
+            const distance = Math.abs(rect.left - targetX);
+            if (distance < bestDistance) {
+              bestDistance = distance;
+              bestNode = node;
+              bestOffset = i;
+            }
+          }
+        }
+      } else {
+        // For longer text not on target line, skip detailed checking
+        continue;
+      }
+    }
+
+    // Use best match or fallback
+    const finalNode = bestNode || fallbackNode;
+    const finalOffset = bestNode ? bestOffset : fallbackOffset;
+
+    if (finalNode) {
+      range.setStart(finalNode, finalOffset);
+      range.setEnd(finalNode, finalOffset);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      // Ultimate fallback
+      range.selectNodeContents(element);
+      range.collapse(line === 'first');
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent, id: string) => {
     // Handle mention menu separately
@@ -319,7 +427,7 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0);
           const rect = range.getBoundingClientRect();
-          const editorRect = document.querySelector('.max-w-3xl')?.getBoundingClientRect();
+          const editorRect = document.querySelector('.max-w-5xl')?.getBoundingClientRect();
 
           if (editorRect) {
             setMenuPosition({
@@ -372,134 +480,6 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
       }
     }
 
-    // Use best match or fallback
-    const finalNode = bestNode || fallbackNode;
-    const finalOffset = bestNode ? bestOffset : fallbackOffset;
-
-    if (finalNode) {
-      range.setStart(finalNode, finalOffset);
-      range.setEnd(finalNode, finalOffset);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    } else {
-      // Ultimate fallback
-      range.selectNodeContents(element);
-      range.collapse(line === 'first');
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-  };
-
-
-  const positionCursorAtX = (element: HTMLDivElement, targetX: number, line: 'first' | 'last') => {
-    const sel = window.getSelection();
-    if (!sel) return;
-
-    const textContent = element.textContent || '';
-    
-    // Handle empty elements
-    if (textContent.length === 0) {
-      const range = document.createRange();
-      range.selectNodeContents(element);
-      range.collapse(true);
-      sel.removeAllRanges();
-      sel.addRange(range);
-      return;
-    }
-
-    // Get element metrics
-    const elementRect = element.getBoundingClientRect();
-    const lineHeight = getLineHeight(element);
-    // Make padding proportional to line height to handle large fonts/zoom
-    const padding = Math.max(MIN_LINE_HEIGHT_PADDING, lineHeight * MIN_LINE_HEIGHT_PADDING_RATIO);
-
-    // Determine target Y range based on first/last line
-    const targetYMin = line === 'first' ? elementRect.top - padding : elementRect.bottom - lineHeight - padding;
-    const targetYMax = line === 'first' ? elementRect.top + lineHeight + padding : elementRect.bottom + padding;
-
-    // Walk through all text nodes to find best position
-    // Skip text nodes inside contentEditable='false' elements (like mention spans)
-    const acceptNode = (node: Node): number => {
-      let parent = node.parentElement;
-      while (parent && parent !== element) {
-        if (parent.contentEditable === 'false') {
-          return NodeFilter.FILTER_REJECT;
-        }
-        parent = parent.parentElement;
-      }
-      return NodeFilter.FILTER_ACCEPT;
-    };
-
-    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, { acceptNode });
-    const range = document.createRange();
-    
-    let bestNode: Node | null = null;
-    let bestOffset = 0;
-    let bestDistance = Infinity;
-    let fallbackNode: Node | null = null;
-    let fallbackOffset = 0;
-
-    let node: Node | null;
-    while ((node = walker.nextNode())) {
-      const text = node.textContent || '';
-      
-      // Store first/last node for fallback
-      if (line === 'first' && !fallbackNode) {
-        fallbackNode = node;
-        fallbackOffset = 0;
-      }
-      if (line === 'last') {
-        fallbackNode = node;
-        fallbackOffset = text.length;
-      }
-
-      // First, check if any position in this node is on the target line
-      range.setStart(node, 0);
-      range.setEnd(node, 0);
-      const startRect = range.getBoundingClientRect();
-      const isStartOnTargetLine = startRect.top >= targetYMin && startRect.bottom <= targetYMax;
-      
-      if (isStartOnTargetLine || text.length < 50) {
-        // For short text or if we know we're on target line, check all positions
-        for (let i = 0; i <= text.length; i++) {
-          range.setStart(node, i);
-          range.setEnd(node, i);
-          const rect = range.getBoundingClientRect();
-
-          // Check if on target line
-          const isOnTargetLine = rect.top >= targetYMin && rect.bottom <= targetYMax;
-
-          if (isOnTargetLine) {
-            const distance = Math.abs(rect.left - targetX);
-            if (distance < bestDistance) {
-              bestDistance = distance;
-              bestNode = node;
-              bestOffset = i;
-            }
-          }
-        }
-      } else {
-        // For longer text not on target line, skip detailed checking
-        continue;
-      }
-    }
-
-    // Use best match or fallback
-    const finalNode = bestNode || fallbackNode;
-    const finalOffset = bestNode ? bestOffset : fallbackOffset;
-
-    if (finalNode) {
-      range.setStart(finalNode, finalOffset);
-      range.setEnd(finalNode, finalOffset);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    } else {
-      // Ultimate fallback
-      range.selectNodeContents(element);
-      range.collapse(line === 'first');
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
   };
 
   useEffect(() => {
