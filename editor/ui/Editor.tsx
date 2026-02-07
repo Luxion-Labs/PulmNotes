@@ -76,13 +76,17 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
 
   const availableNotes = allNotes.filter(n => n.id !== note.id && !n.isDeleted);
 
-  const addBlock = (currentId: string) => {
+  const addBlock = (currentId: string, blocksToUse?: Block[]) => {
     const newBlock: Block = { id: generateId(), type: 'text', content: '' };
-    const currentIndex = note.blocks.findIndex(b => b.id === currentId);
-    const newBlocks = [...note.blocks];
+    // Use provided blocks or fall back to note.blocks
+    const blocksArray = blocksToUse || note.blocks;
+    const currentIndex = blocksArray.findIndex(b => b.id === currentId);
+    const newBlocks = [...blocksArray];
     newBlocks.splice(currentIndex + 1, 0, newBlock);
     onUpdateBlocks(note.id, newBlocks);
-    focusBlock(newBlock.id, 'start');
+    requestAnimationFrame(() => {
+      focusBlock(newBlock.id, 'start');
+    });
   };
 
   const updateBlock = (id: string, content: string) => {
@@ -142,8 +146,10 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
 
     const updatedBlocks = note.blocks.map(b => {
       if (b.id === focusedBlockId) {
-        const cleanContent = b.content.endsWith('/') ? b.content.slice(0, -1) : b.content;
-        return { ...b, type, content: cleanContent };
+        // Content no longer has slash (removed when "/" was typed)
+        // For divider, content should be empty since it's not editable
+        const finalContent = type === 'divider' ? '' : b.content;
+        return { ...b, type, content: finalContent };
       }
       return b;
     });
@@ -152,7 +158,12 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
     setMenuOpen(false);
 
     if (type === 'divider') {
-      addBlock(focusedBlockId);
+      addBlock(focusedBlockId, updatedBlocks);
+    } else {
+      // For non-divider blocks, focus the current block with cursor at end
+      requestAnimationFrame(() => {
+        focusBlock(focusedBlockId, 'end');
+      });
     }
   };
 
@@ -422,6 +433,16 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
     }
 
     if (e.key === '/') {
+      const currentBlock = note.blocks.find(b => b.id === id);
+      if (currentBlock) {
+        // Remove the "/" from content immediately
+        const contentWithoutSlash = currentBlock.content.slice(0, -1); // Remove last character (/)
+        const updatedBlocks = note.blocks.map(b => 
+          b.id === id ? { ...b, content: contentWithoutSlash } : b
+        );
+        onUpdateBlocks(note.id, updatedBlocks);
+      }
+
       setTimeout(() => {
         const selection = window.getSelection();
         if (selection && selection.rangeCount > 0) {
@@ -444,7 +465,32 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
     if (e.key === 'Enter') {
       if (!e.shiftKey) {
         e.preventDefault();
-        addBlock(id);
+        e.stopPropagation();
+        
+        // For list types: if empty, convert to text; if has content, continue list
+        if (currentBlock && (currentBlock.type === 'bullet-list' || currentBlock.type === 'numbered-list' || currentBlock.type === 'todo')) {
+          if (currentBlock.content.trim() === '') {
+            // Empty list item - convert to regular text and stop listing
+            const updatedBlocks = note.blocks.map(b => 
+              b.id === id ? { ...b, type: 'text' as BlockType, content: '' } : b
+            );
+            onUpdateBlocks(note.id, updatedBlocks);
+          } else {
+            // Has content - create new list item
+            const newBlock: Block = { 
+              id: generateId(), 
+              type: currentBlock.type, 
+              content: '' 
+            };
+            const currentIndex = note.blocks.findIndex(b => b.id === id);
+            const newBlocks = [...note.blocks];
+            newBlocks.splice(currentIndex + 1, 0, newBlock);
+            onUpdateBlocks(note.id, newBlocks);
+            focusBlock(newBlock.id, 'start');
+          }
+        } else {
+          addBlock(id);
+        }
       }
     } else if (e.key === 'Backspace') {
       if (currentBlock && currentBlock.content === '' && note.blocks.length > 1) {
@@ -545,7 +591,13 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-16 py-12 pb-48 relative">
+    <div 
+      className="max-w-5xl mx-auto px-16 py-12 pb-48 relative"
+      onKeyDown={(e) => {
+        // Prevent all keyboard events from bubbling to sidebar
+        e.stopPropagation();
+      }}
+    >
       <div className="mb-8 group">
         <input
           type="text"
