@@ -12,7 +12,23 @@ export type BlockType =
   | 'quote' 
   | 'code' 
   | 'divider' 
-  | 'table';
+  | 'table'
+  | 'image'
+  | 'video'
+  | 'audio'
+  | 'math';
+
+export interface MediaContent {
+  type: 'image' | 'video' | 'audio';
+  src: string;
+  alt?: string;
+  caption?: string;
+}
+
+export interface MathContent {
+  expression: string;
+  format: 'latex' | 'inline';
+}
 
 export interface NoteMention {
   noteId: string;
@@ -36,6 +52,8 @@ export interface Block {
   isOpen?: boolean;
   mentions?: NoteMention[];
   assetMentions?: AssetMention[];
+  media?: MediaContent;
+  math?: MathContent;
 }
 
 export interface MenuItem {
