@@ -1,9 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Block, BlockType, Coordinates, Note } from '../schema/types';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Block, BlockType, Coordinates, Note, CursorPosition } from '../schema/types';
 import { generateId } from '../core/utils';
 import { Block as BlockComponent } from './Block';
 import { SlashMenu } from './SlashMenu';
 import { MentionMenu } from './MentionMenu';
+
+// Constants for cursor positioning
+const LINE_HEIGHT_MULTIPLIER = 1.8;
+const LINE_DETECTION_PADDING = 5;
+const DEFAULT_FONT_SIZE = 24;
+const DEFAULT_LINE_HEIGHT_RATIO = 1.5;
+const MIN_LINE_HEIGHT_PADDING_RATIO = 0.25;
+const MIN_LINE_HEIGHT_PADDING = 4;
 
 interface EditorProps {
   note: Note;
@@ -15,6 +23,47 @@ interface EditorProps {
 
 export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTitle, onUpdateBlocks, onOpenNote }) => {
   const [focusedBlockId, setFocusedBlockId] = useState<string | null>(null);
+  const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(null);
+  const blockRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  const setBlockRef = useCallback((id: string, el: HTMLDivElement | null) => {
+    if (el) {
+      blockRefs.current.set(id, el);
+    } else {
+      blockRefs.current.delete(id);
+    }
+  }, []);
+
+  // Helper to get line height from element
+  const getLineHeight = (element: HTMLElement): number => {
+    const computedStyle = window.getComputedStyle(element);
+    let lineHeight = parseFloat(computedStyle.lineHeight);
+    if (isNaN(lineHeight)) {
+      const fontSize = parseFloat(computedStyle.fontSize);
+      lineHeight = (!isNaN(fontSize) ? fontSize : DEFAULT_FONT_SIZE) * DEFAULT_LINE_HEIGHT_RATIO;
+    }
+    return lineHeight;
+  };
+
+  const focusBlock = useCallback((blockId: string, position?: CursorPosition) => {
+    setFocusedBlockId(blockId);
+    // Update cursor position when explicitly provided (including null to clear)
+    if (position !== undefined) {
+      setCursorPosition(position);
+    }
+  }, []);
+
+  // Ensure blockRefs only contains refs for blocks that currently exist in note.blocks
+  useEffect(() => {
+    const validIds = new Set(note.blocks.map((block) => block.id));
+    const refs = blockRefs.current;
+
+    for (const id of refs.keys()) {
+      if (!validIds.has(id)) {
+        refs.delete(id);
+      }
+    }
+  }, [note.blocks]);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<Coordinates>({ x: 0, y: 0 });
@@ -27,13 +76,17 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
 
   const availableNotes = allNotes.filter(n => n.id !== note.id && !n.isDeleted);
 
-  const addBlock = (currentId: string) => {
+  const addBlock = (currentId: string, blocksToUse?: Block[]) => {
     const newBlock: Block = { id: generateId(), type: 'text', content: '' };
-    const currentIndex = note.blocks.findIndex(b => b.id === currentId);
-    const newBlocks = [...note.blocks];
+    // Use provided blocks or fall back to note.blocks
+    const blocksArray = blocksToUse || note.blocks;
+    const currentIndex = blocksArray.findIndex(b => b.id === currentId);
+    const newBlocks = [...blocksArray];
     newBlocks.splice(currentIndex + 1, 0, newBlock);
     onUpdateBlocks(note.id, newBlocks);
-    setFocusedBlockId(newBlock.id);
+    requestAnimationFrame(() => {
+      focusBlock(newBlock.id, 'start');
+    });
   };
 
   const updateBlock = (id: string, content: string) => {
@@ -71,7 +124,7 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
             if (selection && selection.rangeCount > 0) {
               const range = selection.getRangeAt(0);
               const rect = range.getBoundingClientRect();
-              const editorRect = document.querySelector('.max-w-3xl')?.getBoundingClientRect();
+              const editorRect = document.querySelector('.max-w-5xl')?.getBoundingClientRect();
 
               if (editorRect) {
                 setMentionMenuPosition({
@@ -93,8 +146,10 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
 
     const updatedBlocks = note.blocks.map(b => {
       if (b.id === focusedBlockId) {
-        const cleanContent = b.content.endsWith('/') ? b.content.slice(0, -1) : b.content;
-        return { ...b, type, content: cleanContent };
+        // Content no longer has slash (removed when "/" was typed)
+        // For divider, content should be empty since it's not editable
+        const finalContent = type === 'divider' ? '' : b.content;
+        return { ...b, type, content: finalContent };
       }
       return b;
     });
@@ -103,9 +158,124 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
     setMenuOpen(false);
 
     if (type === 'divider') {
-      addBlock(focusedBlockId);
+      addBlock(focusedBlockId, updatedBlocks);
+    } else {
+      // For non-divider blocks, focus the current block with cursor at end
+      requestAnimationFrame(() => {
+        focusBlock(focusedBlockId, 'end');
+      });
     }
   };
+
+  function positionCursorAtX(element: HTMLDivElement, targetX: number, line: 'first' | 'last') {
+    const sel = window.getSelection();
+    if (!sel) return;
+
+    const textContent = element.textContent || '';
+    
+    // Handle empty elements
+    if (textContent.length === 0) {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      return;
+    }
+
+    // Get element metrics
+    const elementRect = element.getBoundingClientRect();
+    const lineHeight = getLineHeight(element);
+    // Make padding proportional to line height to handle large fonts/zoom
+    const padding = Math.max(MIN_LINE_HEIGHT_PADDING, lineHeight * MIN_LINE_HEIGHT_PADDING_RATIO);
+
+    // Determine target Y range based on first/last line
+    const targetYMin = line === 'first' ? elementRect.top - padding : elementRect.bottom - lineHeight - padding;
+    const targetYMax = line === 'first' ? elementRect.top + lineHeight + padding : elementRect.bottom + padding;
+
+    // Walk through all text nodes to find best position
+    // Skip text nodes inside contentEditable='false' elements (like mention spans)
+    const acceptNode = (node: Node): number => {
+      let parent = node.parentElement;
+      while (parent && parent !== element) {
+        if (parent.contentEditable === 'false') {
+          return NodeFilter.FILTER_REJECT;
+        }
+        parent = parent.parentElement;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    };
+
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, { acceptNode });
+    const range = document.createRange();
+    
+    let bestNode: Node | null = null;
+    let bestOffset = 0;
+    let bestDistance = Infinity;
+    let fallbackNode: Node | null = null;
+    let fallbackOffset = 0;
+
+    let node: Node | null;
+    while ((node = walker.nextNode())) {
+      const text = node.textContent || '';
+      
+      // Store first/last node for fallback
+      if (line === 'first' && !fallbackNode) {
+        fallbackNode = node;
+        fallbackOffset = 0;
+      }
+      if (line === 'last') {
+        fallbackNode = node;
+        fallbackOffset = text.length;
+      }
+
+      // First, check if any position in this node is on the target line
+      range.setStart(node, 0);
+      range.setEnd(node, 0);
+      const startRect = range.getBoundingClientRect();
+      const isStartOnTargetLine = startRect.top >= targetYMin && startRect.bottom <= targetYMax;
+      
+      if (isStartOnTargetLine || text.length < 50) {
+        // For short text or if we know we're on target line, check all positions
+        for (let i = 0; i <= text.length; i++) {
+          range.setStart(node, i);
+          range.setEnd(node, i);
+          const rect = range.getBoundingClientRect();
+
+          // Check if on target line
+          const isOnTargetLine = rect.top >= targetYMin && rect.bottom <= targetYMax;
+          if (isOnTargetLine) {
+            const distance = Math.abs(rect.left - targetX);
+            if (distance < bestDistance) {
+              bestDistance = distance;
+              bestNode = node;
+              bestOffset = i;
+            }
+          }
+        }
+      } else {
+        // For longer text not on target line, skip detailed checking
+        continue;
+      }
+    }
+
+    // Use best match or fallback
+    const finalNode = bestNode || fallbackNode;
+    const finalOffset = bestNode ? bestOffset : fallbackOffset;
+
+    if (finalNode) {
+      range.setStart(finalNode, finalOffset);
+      range.setEnd(finalNode, finalOffset);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      // Ultimate fallback
+      range.selectNodeContents(element);
+      range.collapse(line === 'first');
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent, id: string) => {
     // Handle mention menu separately
@@ -114,28 +284,171 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
         e.preventDefault();
         setMentionMenuOpen(false);
       }
-
       return;
     }
-
 
     if (menuOpen) {
       if (e.key === 'Escape') {
         e.preventDefault();
         setMenuOpen(false);
       }
-
       return;
     }
 
+    const currentIndex = note.blocks.findIndex(b => b.id === id);
+    const currentBlock = note.blocks[currentIndex];
+    const blockEl = blockRefs.current.get(id);
+
+    // Helper to get cursor offset from start of element
+    const getCursorOffset = (): number => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || !blockEl) return 0;
+      const range = selection.getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(blockEl);
+      preCaretRange.setEnd(range.startContainer, range.startOffset);
+      return preCaretRange.toString().length;
+    };
+
+    // Helper to check if cursor is at start
+    const isCursorAtStart = (): boolean => {
+      return getCursorOffset() === 0;
+    };
+
+    // Helper to check if cursor is at end
+    const isCursorAtEnd = (): boolean => {
+      if (!blockEl) return false;
+      return getCursorOffset() >= (blockEl.textContent?.length || 0);
+    };
+
+    // Helper to get cursor rect reliably
+    const getCursorRect = (): DOMRect | null => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return null;
+      const range = selection.getRangeAt(0);
+      
+      // Try getClientRects first
+      const rects = range.getClientRects();
+      if (rects.length > 0) {
+        return rects[0];
+      }
+      
+      // Fallback: insert a temporary span to get position
+      const span = document.createElement('span');
+      span.textContent = '\u200B'; // Zero-width space
+      range.insertNode(span);
+      const rect = span.getBoundingClientRect();
+      span.parentNode?.removeChild(span);
+      
+      // Normalize the range after removing span
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      return rect;
+    };
+
+    // Handle arrow key navigation between blocks
+    if (e.key === 'ArrowUp' && currentIndex > 0 && blockEl) {
+      const cursorRect = getCursorRect();
+      if (!cursorRect) return;
+
+      const blockRect = blockEl.getBoundingClientRect();
+      const computedStyle = window.getComputedStyle(blockEl);
+      let lineHeight = parseFloat(computedStyle.lineHeight);
+      if (isNaN(lineHeight)) lineHeight = parseFloat(computedStyle.fontSize) * 1.5 || 24;
+
+      const isEmpty = (blockEl.textContent?.length || 0) === 0;
+      const isSingleLine = blockRect.height < lineHeight * 1.8;
+      const isAtFirstLine = cursorRect.top < blockRect.top + lineHeight + 5;
+
+      if (isEmpty || isSingleLine || isAtFirstLine) {
+        e.preventDefault();
+        const prevBlock = note.blocks[currentIndex - 1];
+        const prevBlockEl = blockRefs.current.get(prevBlock.id);
+
+        if (prevBlockEl) {
+          const cursorX = cursorRect.left;
+          
+          // Directly manipulate DOM without triggering React cursor positioning
+          prevBlockEl.focus();
+          setFocusedBlockId(prevBlock.id);
+          setCursorPosition(null); // null means "don't position cursor via React"
+          
+          // Position cursor immediately after focus
+          positionCursorAtX(prevBlockEl, cursorX, 'last');
+        }
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowDown' && currentIndex < note.blocks.length - 1 && blockEl) {
+      const cursorRect = getCursorRect();
+      if (!cursorRect) return;
+
+      const blockRect = blockEl.getBoundingClientRect();
+      const computedStyle = window.getComputedStyle(blockEl);
+      let lineHeight = parseFloat(computedStyle.lineHeight);
+      if (isNaN(lineHeight)) lineHeight = parseFloat(computedStyle.fontSize) * 1.5 || 24;
+
+      const isEmpty = (blockEl.textContent?.length || 0) === 0;
+      const isSingleLine = blockRect.height < lineHeight * 1.8;
+      const isAtLastLine = cursorRect.bottom > blockRect.bottom - lineHeight - 5;
+
+      if (isEmpty || isSingleLine || isAtLastLine) {
+        e.preventDefault();
+        const nextBlock = note.blocks[currentIndex + 1];
+        const nextBlockEl = blockRefs.current.get(nextBlock.id);
+
+        if (nextBlockEl) {
+          const cursorX = cursorRect.left;
+          
+          // Directly manipulate DOM without triggering React cursor positioning
+          nextBlockEl.focus();
+          setFocusedBlockId(nextBlock.id);
+          setCursorPosition(null); // null means "don't position cursor via React"
+          
+          // Position cursor immediately after focus
+          positionCursorAtX(nextBlockEl, cursorX, 'first');
+        }
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowLeft' && currentIndex > 0 && blockEl) {
+      if (isCursorAtStart()) {
+        e.preventDefault();
+        const prevBlock = note.blocks[currentIndex - 1];
+        focusBlock(prevBlock.id, 'end');
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowRight' && currentIndex < note.blocks.length - 1 && blockEl) {
+      if (isCursorAtEnd()) {
+        e.preventDefault();
+        const nextBlock = note.blocks[currentIndex + 1];
+        focusBlock(nextBlock.id, 'start');
+      }
+      return;
+    }
 
     if (e.key === '/') {
+      const currentBlock = note.blocks.find(b => b.id === id);
+      if (currentBlock) {
+        // Remove the "/" from content immediately
+        const contentWithoutSlash = currentBlock.content.slice(0, -1); // Remove last character (/)
+        const updatedBlocks = note.blocks.map(b => 
+          b.id === id ? { ...b, content: contentWithoutSlash } : b
+        );
+        onUpdateBlocks(note.id, updatedBlocks);
+      }
+
       setTimeout(() => {
         const selection = window.getSelection();
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0);
           const rect = range.getBoundingClientRect();
-          const editorRect = document.querySelector('.max-w-3xl')?.getBoundingClientRect();
+          const editorRect = document.querySelector('.max-w-5xl')?.getBoundingClientRect();
 
           if (editorRect) {
             setMenuPosition({
@@ -149,24 +462,70 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
       return;
     }
 
-
     if (e.key === 'Enter') {
       if (!e.shiftKey) {
         e.preventDefault();
-        addBlock(id);
-      }
-    } else if (e.key === 'Backspace') {
-      const currentBlock = note.blocks.find(b => b.id === id);
-      if (currentBlock && currentBlock.content === '' && note.blocks.length > 1) {
-        e.preventDefault();
-        const index = note.blocks.findIndex(b => b.id === id);
-        if (index > 0) {
-          const prevBlock = note.blocks[index - 1];
-          setFocusedBlockId(prevBlock.id);
-          onUpdateBlocks(note.id, note.blocks.filter(b => b.id !== id));
+        e.stopPropagation();
+        
+        // For list types: if empty, convert to text; if has content, continue list
+        if (currentBlock && (currentBlock.type === 'bullet-list' || currentBlock.type === 'numbered-list' || currentBlock.type === 'todo')) {
+          if (currentBlock.content.trim() === '') {
+            // Empty list item - convert to regular text and stop listing
+            const updatedBlocks = note.blocks.map(b => 
+              b.id === id ? { ...b, type: 'text' as BlockType, content: '' } : b
+            );
+            onUpdateBlocks(note.id, updatedBlocks);
+          } else {
+            // Has content - create new list item
+            const newBlock: Block = { 
+              id: generateId(), 
+              type: currentBlock.type, 
+              content: '' 
+            };
+            const currentIndex = note.blocks.findIndex(b => b.id === id);
+            const newBlocks = [...note.blocks];
+            newBlocks.splice(currentIndex + 1, 0, newBlock);
+            onUpdateBlocks(note.id, newBlocks);
+            focusBlock(newBlock.id, 'start');
+          }
+        } else {
+          addBlock(id);
         }
       }
+    } else if (e.key === 'Backspace') {
+      if (currentBlock && currentBlock.content === '' && note.blocks.length > 1) {
+        e.preventDefault();
+        if (currentIndex > 0) {
+          const prevBlock = note.blocks[currentIndex - 1];
+          const newBlocks = note.blocks.filter(b => b.id !== id);
+          onUpdateBlocks(note.id, newBlocks);
+          focusBlock(prevBlock.id, 'end');
+        } else if (currentIndex === 0 && note.blocks.length > 1) {
+          // If deleting first block, focus the next one
+          const nextBlock = note.blocks[1];
+          const newBlocks = note.blocks.filter(b => b.id !== id);
+          onUpdateBlocks(note.id, newBlocks);
+          focusBlock(nextBlock.id, 'start');
+        }
+      } else if (currentBlock && currentIndex > 0 && isCursorAtStart()) {
+        // Cursor at start - merge with previous block
+        e.preventDefault();
+        const prevBlock = note.blocks[currentIndex - 1];
+        
+        // Merge content (ensure both values are strings)
+        const prevContent = prevBlock.content || '';
+        const currentContent = currentBlock.content || '';
+        const mergedContent = prevContent + currentContent;
+        const newBlocks = note.blocks
+          .map(b => b.id === prevBlock.id ? { ...b, content: mergedContent } : b)
+          .filter(b => b.id !== id);
+        
+        onUpdateBlocks(note.id, newBlocks);
+        // Place cursor at the end of the merged previous block to avoid relying on string length
+        focusBlock(prevBlock.id, 'end');
+      }
     }
+
   };
 
   useEffect(() => {
@@ -191,12 +550,10 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
     const currentBlock = note.blocks.find(b => b.id === focusedBlockId);
     if (!currentBlock) return;
 
-
     const beforeMention = currentBlock.content.slice(0, mentionStartPos);
     const afterMention = currentBlock.content.slice(mentionStartPos + 1 + mentionQuery.length);
     const mentionText = '@' + title;
     const newContent = beforeMention + mentionText + afterMention;
-
 
     const mention = {
       noteId,
@@ -219,6 +576,12 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
 
     onUpdateBlocks(note.id, updatedBlocks);
     setMentionMenuOpen(false);
+    
+    // Position cursor after mention is rendered (consistent with other cursor positioning)
+    const cursorPosAfterMention = mentionStartPos + mentionText.length;
+    requestAnimationFrame(() => {
+      focusBlock(focusedBlockId, cursorPosAfterMention);
+    });
   };
 
   const handleMentionClick = (noteId: string) => {
@@ -228,7 +591,13 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-16 py-12 pb-48 relative">
+    <div 
+      className="max-w-5xl mx-auto px-16 py-12 pb-48 relative"
+      onKeyDown={(e) => {
+        // Prevent all keyboard events from bubbling to sidebar
+        e.stopPropagation();
+      }}
+    >
       <div className="mb-8 group">
         <input
           type="text"
@@ -245,11 +614,13 @@ export const Editor: React.FC<EditorProps> = ({ note, allNotes = [], onUpdateTit
             key={block.id}
             block={block}
             isFocused={focusedBlockId === block.id}
+            cursorPosition={focusedBlockId === block.id ? cursorPosition : null}
             updateBlock={updateBlock}
             onKeyDown={handleKeyDown}
-            onFocus={setFocusedBlockId}
-            onClick={setFocusedBlockId}
+            onFocus={focusBlock}
+            onClick={focusBlock}
             onMentionClick={handleMentionClick}
+            setBlockRef={setBlockRef}
           />
         ))}
       </div>

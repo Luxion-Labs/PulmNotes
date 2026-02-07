@@ -51,7 +51,7 @@ export const NoteTabs: React.FC<NoteTabsProps> = ({
                 {note.title || 'Untitled'}
               </span>
 
-              <button
+              <span
                 onClick={(e) => {
                   e.stopPropagation();
                   onCloseTab(note.id);
@@ -60,6 +60,7 @@ export const NoteTabs: React.FC<NoteTabsProps> = ({
                   flex items-center justify-center
                   w-4 h-4 rounded-full
                   transition-all duration-200
+                  cursor-pointer
                   ${isActive 
                     ? 'opacity-60 hover:opacity-100 hover:bg-blue-100' 
                     : 'opacity-40 hover:opacity-100 hover:bg-stone-300'}
@@ -67,7 +68,7 @@ export const NoteTabs: React.FC<NoteTabsProps> = ({
                 title="Close tab"
               >
                 <X size={12} strokeWidth={2.5} />
-              </button>
+              </span>
 
               {/* Flare Effects for Active Tab */}
               {isActive && (

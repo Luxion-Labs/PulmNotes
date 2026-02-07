@@ -1,29 +1,54 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import { Block as BlockType } from '../schema/types';
+import { Block as BlockType, CursorPosition } from '../schema/types';
 import { ChevronRight, GripVertical } from 'lucide-react';
-
 interface BlockProps {
   block: BlockType;
   isFocused: boolean;
+  cursorPosition?: CursorPosition | null;
   updateBlock: (id: string, content: string) => void;
   onKeyDown: (e: React.KeyboardEvent, id: string) => void;
-  onFocus: (id: string) => void;
-  onClick: (id: string) => void;
+  onFocus: (id: string, position?: CursorPosition) => void;
+  onClick: (id: string, position?: CursorPosition) => void;
   onMentionClick?: (noteId: string) => void;
+  setBlockRef?: (id: string, el: HTMLDivElement | null) => void;
 }
 
 export const Block: React.FC<BlockProps> = ({
   block,
   isFocused,
+  cursorPosition,
   updateBlock,
   onKeyDown,
   onFocus,
   onClick,
-  onMentionClick
+  onMentionClick,
+  setBlockRef
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const isTypingRef = useRef(false);
   const prevMentionsLengthRef = useRef(block.mentions?.length || 0);
+  const lastCursorPositionRef = useRef<CursorPosition | null>(null);
+  // Capture block ID for cleanup to avoid referencing stale props in cleanup function
+  const blockIdRef = useRef(block.id);
+
+  // Register ref with parent
+  useEffect(() => {
+    blockIdRef.current = block.id;
+
+    if (setBlockRef && contentRef.current) {
+      setBlockRef(block.id, contentRef.current);
+    }
+  }, [block.id, setBlockRef]);
+
+  // Cleanup ref on unmount
+  useEffect(() => {
+    const capturedBlockId = blockIdRef.current;
+    return () => {
+      if (setBlockRef) {
+        setBlockRef(capturedBlockId, null);
+      }
+    };
+  }, [setBlockRef]);
 
   // Set initial content on mount
   useEffect(() => {
@@ -32,11 +57,152 @@ export const Block: React.FC<BlockProps> = ({
     }
   }, []); // Only run on mount
 
+  // Track if we've already focused to avoid re-positioning cursor
+  const hasPositionedCursorRef = useRef(false);
+  const prevFocusedRef = useRef(isFocused);
+
+  // Reset cursor positioning flag when losing focus
   useEffect(() => {
-    if (isFocused && contentRef.current) {
-      contentRef.current.focus();
+    if (!isFocused) {
+      hasPositionedCursorRef.current = false;
     }
   }, [isFocused]);
+
+  // Reset cursor positioning state when cursorPosition is cleared
+  useEffect(() => {
+    if (cursorPosition === null || cursorPosition === undefined) {
+      hasPositionedCursorRef.current = false;
+    }
+  }, [cursorPosition]);
+
+  // Handle focus and cursor positioning
+  useEffect(() => {
+    if (isFocused && contentRef.current) {
+      // Only focus and position cursor when focus changes from false to true
+      // OR when cursorPosition explicitly changes to a non-null value
+      const justGotFocus = !prevFocusedRef.current && isFocused;
+      
+      if (justGotFocus) {
+        contentRef.current.focus();
+        hasPositionedCursorRef.current = false;
+      }
+      
+      // Only set cursor position if:
+      // 1. cursorPosition is explicitly set (not null)
+      // 2. AND we haven't already positioned for this focus session
+      if (cursorPosition !== null && cursorPosition !== undefined && !hasPositionedCursorRef.current) {
+        // Small delay to ensure focus is complete
+        setTimeout(() => {
+          // Set cursor position without checking if element has focus
+          // This ensures cursor is positioned even for newly created blocks
+          if (isFocused && contentRef.current) {
+            setCursorPosition(cursorPosition);
+            hasPositionedCursorRef.current = true;
+            lastCursorPositionRef.current = cursorPosition;
+          }
+        }, 0);
+      }
+    }
+    
+    prevFocusedRef.current = isFocused;
+  }, [isFocused, cursorPosition]);
+
+  const setCursorPosition = (position: CursorPosition) => {
+    if (!contentRef.current) return;
+
+    const element = contentRef.current;
+    const sel = window.getSelection();
+    if (!sel) return;
+
+    const range = document.createRange();
+    const totalLength = element.textContent?.length || 0;
+
+    if (position === 'start' || totalLength === 0) {
+      range.selectNodeContents(element);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      return;
+    }
+    
+    if (position === 'end') {
+      range.selectNodeContents(element);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      return;
+    }
+    
+    if (typeof position === 'number') {
+      const targetOffset = Math.min(Math.max(0, position), totalLength);
+      
+      // Use TreeWalker to find the position in text nodes
+      // Skip text nodes inside contentEditable='false' elements (like mention spans)
+      const acceptNode = (node: Node): number => {
+        let parent = node.parentElement;
+        while (parent && parent !== element) {
+          if (parent.contentEditable === 'false') {
+            return NodeFilter.FILTER_REJECT;
+          }
+          parent = parent.parentElement;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      };
+
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, { acceptNode });
+      let currentOffset = 0;
+      // Collect all text nodes first to avoid walker state issues
+      const textNodes: Node[] = [];
+      let node: Node | null;
+      while ((node = walker.nextNode())) {
+        textNodes.push(node);
+      }
+      
+      // Track the last valid text node seen for fallback positioning
+      const lastNode = textNodes[textNodes.length - 1] || null;
+      
+      for (let i = 0; i < textNodes.length; i++) {
+        const currentNode = textNodes[i];
+        const nodeLength = currentNode.textContent?.length || 0;
+        const hasNextNode = i < textNodes.length - 1;
+        
+        // Handle boundary case: if exactly at node boundary, prefer start of next node
+        // This ensures cursor placement between nodes is consistent and predictable
+        if (currentOffset + nodeLength === targetOffset && hasNextNode) {
+          const nextNode = textNodes[i + 1];
+          range.setStart(nextNode, 0);
+          range.setEnd(nextNode, 0);
+          sel.removeAllRanges();
+          sel.addRange(range);
+          return;
+        }
+        
+        if (currentOffset + nodeLength >= targetOffset) {
+          const offsetInNode = targetOffset - currentOffset;
+          range.setStart(currentNode, offsetInNode);
+          range.setEnd(currentNode, offsetInNode);
+          sel.removeAllRanges();
+          sel.addRange(range);
+          return;
+        }
+        currentOffset += nodeLength;
+      }
+      
+      // Fallback: place at end of last valid text node or end of element
+      if (lastNode) {
+        const nodeLength = lastNode.textContent?.length || 0;
+        range.setStart(lastNode, nodeLength);
+        range.setEnd(lastNode, nodeLength);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } else {
+        range.selectNodeContents(element);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
+  };
 
   // Render mentions when they change OR when unfocused
   useEffect(() => {
@@ -53,12 +219,9 @@ export const Block: React.FC<BlockProps> = ({
     } else if (currentMentionsLength > prevMentionsLength) {
       // A new mention was added - render it and place cursor at end
       renderContentWithMentions();
-      const range = document.createRange();
-      const sel = window.getSelection();
-      range.selectNodeContents(contentRef.current);
-      range.collapse(false);
-      sel?.removeAllRanges();
-      sel?.addRange(range);
+      requestAnimationFrame(() => {
+        setCursorPosition('end');
+      });
     }
 
     prevMentionsLengthRef.current = currentMentionsLength;
@@ -67,7 +230,9 @@ export const Block: React.FC<BlockProps> = ({
   const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>) => {
     isTypingRef.current = true;
     const text = e.currentTarget.innerText;
+    
     updateBlock(block.id, text);
+    
     // Reset typing flag after state update
     requestAnimationFrame(() => {
       isTypingRef.current = false;
@@ -156,7 +321,7 @@ export const Block: React.FC<BlockProps> = ({
   };
 
   return (
-    <div className="group relative flex items-start -ml-8 pl-8 py-0.5" onClick={() => onClick(block.id)}>
+    <div className="group relative flex items-start -ml-8 pl-8 py-0.5">
 
       <div className="absolute left-0 top-1.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-gray-300">
         <GripVertical size={18} />
@@ -183,7 +348,29 @@ export const Block: React.FC<BlockProps> = ({
       )}
 
       {block.type === 'divider' ? (
-        <hr className="w-full my-4 border-t border-gray-200" />
+        <hr className="w-full my-4 border-t border-gray-300" />
+      ) : block.type === 'table' ? (
+        <div className="w-full overflow-x-auto my-4">
+          <table className="w-full border-collapse border border-gray-300">
+            <tbody>
+              <tr>
+                <td className="border border-gray-300 p-2 bg-gray-50 font-semibold"><input type="text" className="w-full outline-none bg-transparent" defaultValue="Column 1" /></td>
+                <td className="border border-gray-300 p-2 bg-gray-50 font-semibold"><input type="text" className="w-full outline-none bg-transparent" defaultValue="Column 2" /></td>
+                <td className="border border-gray-300 p-2 bg-gray-50 font-semibold"><input type="text" className="w-full outline-none bg-transparent" defaultValue="Column 3" /></td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 p-2"><input type="text" className="w-full outline-none" /></td>
+                <td className="border border-gray-300 p-2"><input type="text" className="w-full outline-none" /></td>
+                <td className="border border-gray-300 p-2"><input type="text" className="w-full outline-none" /></td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 p-2"><input type="text" className="w-full outline-none" /></td>
+                <td className="border border-gray-300 p-2"><input type="text" className="w-full outline-none" /></td>
+                <td className="border border-gray-300 p-2"><input type="text" className="w-full outline-none" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       ) : (
         <div
           ref={contentRef}
@@ -191,10 +378,27 @@ export const Block: React.FC<BlockProps> = ({
           suppressContentEditableWarning
           onInput={handleInput}
           onKeyDown={(e) => onKeyDown(e, block.id)}
-          onFocus={() => onFocus(block.id)}
+          onFocus={() => {
+            console.log('Block focused:', block.id);
+            onFocus(block.id);
+          }}
+          onMouseDown={(e) => {
+            console.log('MouseDown on block:', block.id, 'isFocused:', isFocused);
+            onClick(block.id);
+          }}
+          onMouseUp={() => {
+            console.log('MouseUp on block:', block.id, 'activeElement:', document.activeElement?.tagName);
+            if (contentRef.current && !contentRef.current.contains(document.activeElement)) {
+              console.log('Refocusing contentRef');
+              contentRef.current.focus();
+            }
+          }}
+          onClick={(e) => {
+            console.log('Click on block:', block.id, 'target:', e.target);
+          }}
           data-placeholder={getPlaceholder()}
           className={`
-            w-full outline-none empty-node break-words
+            w-full outline-none empty-node break-words cursor-text
             ${getStyles()}
             ${block.type === 'todo' ? 'line-through-peer-checked' : ''}
           `}
