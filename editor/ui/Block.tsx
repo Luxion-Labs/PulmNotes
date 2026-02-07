@@ -91,15 +91,16 @@ export const Block: React.FC<BlockProps> = ({
       // 1. cursorPosition is explicitly set (not null)
       // 2. AND we haven't already positioned for this focus session
       if (cursorPosition !== null && cursorPosition !== undefined && !hasPositionedCursorRef.current) {
-        // Small delay to ensure focus is complete and check if still focused
-        requestAnimationFrame(() => {
-          // Check if contentRef or any of its children still has focus and we're still the focused block
-          if (isFocused && contentRef.current && contentRef.current.contains(document.activeElement)) {
+        // Small delay to ensure focus is complete
+        setTimeout(() => {
+          // Set cursor position without checking if element has focus
+          // This ensures cursor is positioned even for newly created blocks
+          if (isFocused && contentRef.current) {
             setCursorPosition(cursorPosition);
             hasPositionedCursorRef.current = true;
             lastCursorPositionRef.current = cursorPosition;
           }
-        });
+        }, 0);
       }
     }
     
@@ -320,7 +321,7 @@ export const Block: React.FC<BlockProps> = ({
   };
 
   return (
-    <div className="group relative flex items-start -ml-8 pl-8 py-0.5" onClick={() => onClick(block.id)}>
+    <div className="group relative flex items-start -ml-8 pl-8 py-0.5">
 
       <div className="absolute left-0 top-1.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-gray-300">
         <GripVertical size={18} />
@@ -347,7 +348,29 @@ export const Block: React.FC<BlockProps> = ({
       )}
 
       {block.type === 'divider' ? (
-        <hr className="w-full my-4 border-t border-gray-200" />
+        <hr className="w-full my-4 border-t border-gray-300" />
+      ) : block.type === 'table' ? (
+        <div className="w-full overflow-x-auto my-4">
+          <table className="w-full border-collapse border border-gray-300">
+            <tbody>
+              <tr>
+                <td className="border border-gray-300 p-2 bg-gray-50 font-semibold"><input type="text" className="w-full outline-none bg-transparent" defaultValue="Column 1" /></td>
+                <td className="border border-gray-300 p-2 bg-gray-50 font-semibold"><input type="text" className="w-full outline-none bg-transparent" defaultValue="Column 2" /></td>
+                <td className="border border-gray-300 p-2 bg-gray-50 font-semibold"><input type="text" className="w-full outline-none bg-transparent" defaultValue="Column 3" /></td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 p-2"><input type="text" className="w-full outline-none" /></td>
+                <td className="border border-gray-300 p-2"><input type="text" className="w-full outline-none" /></td>
+                <td className="border border-gray-300 p-2"><input type="text" className="w-full outline-none" /></td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 p-2"><input type="text" className="w-full outline-none" /></td>
+                <td className="border border-gray-300 p-2"><input type="text" className="w-full outline-none" /></td>
+                <td className="border border-gray-300 p-2"><input type="text" className="w-full outline-none" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       ) : (
         <div
           ref={contentRef}
@@ -355,10 +378,27 @@ export const Block: React.FC<BlockProps> = ({
           suppressContentEditableWarning
           onInput={handleInput}
           onKeyDown={(e) => onKeyDown(e, block.id)}
-          onFocus={() => onFocus(block.id)}
+          onFocus={() => {
+            console.log('Block focused:', block.id);
+            onFocus(block.id);
+          }}
+          onMouseDown={(e) => {
+            console.log('MouseDown on block:', block.id, 'isFocused:', isFocused);
+            onClick(block.id);
+          }}
+          onMouseUp={() => {
+            console.log('MouseUp on block:', block.id, 'activeElement:', document.activeElement?.tagName);
+            if (contentRef.current && !contentRef.current.contains(document.activeElement)) {
+              console.log('Refocusing contentRef');
+              contentRef.current.focus();
+            }
+          }}
+          onClick={(e) => {
+            console.log('Click on block:', block.id, 'target:', e.target);
+          }}
           data-placeholder={getPlaceholder()}
           className={`
-            w-full outline-none empty-node break-words
+            w-full outline-none empty-node break-words cursor-text
             ${getStyles()}
             ${block.type === 'todo' ? 'line-through-peer-checked' : ''}
           `}
