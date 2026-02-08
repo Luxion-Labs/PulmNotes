@@ -13,6 +13,7 @@ interface MentionMenuProps {
   query: string;
   onSelect: (noteId: string, title: string) => void;
   onClose: () => void;
+  noTransform?: boolean; // when true, menu will be positioned by parent container and won't apply its translate transform
 }
 
 export const MentionMenu: React.FC<MentionMenuProps> = ({
@@ -20,7 +21,8 @@ export const MentionMenu: React.FC<MentionMenuProps> = ({
   notes,
   query,
   onSelect,
-  onClose
+  onClose,
+  noTransform,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -78,14 +80,14 @@ export const MentionMenu: React.FC<MentionMenuProps> = ({
   }, [selectedIndex]);
 
   if (filteredNotes.length === 0) {
+    const style = noTransform
+      ? { top: position.y, left: position.x, transform: 'none' }
+      : { top: position.y, left: position.x, transform: 'translateY(-100%) translateY(-10px)' }
+
     return (
       <div
         className="mention-menu absolute z-50 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
-        style={{
-          top: position.y,
-          left: position.x,
-          transform: 'translateY(-100%) translateY(-10px)'
-        }}
+        style={style}
       >
         <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider bg-white">
           Link to Note
@@ -97,15 +99,15 @@ export const MentionMenu: React.FC<MentionMenuProps> = ({
     );
   }
 
+  const style = noTransform
+    ? { top: position.y, left: position.x, transform: 'none' }
+    : { top: position.y, left: position.x, transform: 'translateY(-100%) translateY(-10px)' }
+
   return (
     <div
       ref={menuRef}
       className="mention-menu absolute z-50 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex flex-col max-h-[380px] overflow-y-auto"
-      style={{
-        top: position.y,
-        left: position.x,
-        transform: 'translateY(-100%) translateY(-10px)'
-      }}
+      style={style}
     >
       <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider bg-white sticky top-0 z-10">
         Link to Note
