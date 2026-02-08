@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "./globals.scss";
 
 export const metadata: Metadata = {
   title: "Pulm Notes",
@@ -42,7 +42,7 @@ export default function RootLayout({
           }
         `}</style>
       </head>
-      <body className="min-h-screen bg-white text-gray-900 cursor-text font-sans selection:bg-blue-100">
+      <body className="min-h-screen bg-white text-gray-900 cursor-text font-sans selection:bg-blue-100 scrollbar-none">
         {children}
       </body>
     </html>

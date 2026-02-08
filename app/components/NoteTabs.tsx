@@ -23,7 +23,7 @@ export const NoteTabs: React.FC<NoteTabsProps> = ({
 
   return (
     <div className="flex items-end w-full">
-      <div className="flex items-end gap-0 relative overflow-x-auto scrollbar-none">
+      <div className="flex items-end gap-0 relative overflow-x-auto overflow-y-hidden">
         {openNotes.map((note) => {
           const isActive = note.id === currentNoteId;
 

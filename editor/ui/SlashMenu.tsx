@@ -11,34 +11,55 @@ import {
   Table as TableIcon,
   Quote,
   Code,
-  Minus
+  Minus,
+  FileText,
+  AtSign,
+  Smile
 } from 'lucide-react';
 import { MenuItem, BlockType, Coordinates } from '../schema/types';
 
-const MENU_ITEMS: MenuItem[] = [
-  { id: 'text', label: 'Plain Text', icon: Type },
-  { id: 'h1', label: 'Heading 1', icon: Heading1, shortcut: '#' },
-  { id: 'h2', label: 'Heading 2', icon: Heading2, shortcut: '##' },
-  { id: 'h3', label: 'Heading 3', icon: Heading3, shortcut: '###' },
-  { id: 'bullet-list', label: 'Bulleted List', icon: List, shortcut: '-' },
-  { id: 'numbered-list', label: 'Numbered List', icon: ListOrdered, shortcut: '1.' },
-  { id: 'todo', label: 'To-Do List', icon: CheckSquare, shortcut: '[]' },
-  { id: 'toggle', label: 'Toggle List', icon: ChevronRight, shortcut: '>' },
-  { id: 'table', label: 'Table', icon: TableIcon },
-  { id: 'quote', label: 'Blockquote', icon: Quote, shortcut: '|' },
-  { id: 'code', label: 'Code Block', icon: Code, shortcut: '```' },
-  { id: 'divider', label: 'Divider', icon: Minus, shortcut: '---' },
+export const MENU_ITEMS: MenuItem[] = [
+  { id: 'text', label: 'Text', icon: Type, group: 'Style' },
+  { id: 'h1', label: 'Heading 1', icon: Heading1, group: 'Style' },
+  { id: 'h2', label: 'Heading 2', icon: Heading2, group: 'Style' },
+  { id: 'h3', label: 'Heading 3', icon: Heading3, group: 'Style' },
+  { id: 'bullet-list', label: 'Bullet List', icon: List, group: 'Style' },
+  { id: 'numbered-list', label: 'Numbered List', icon: ListOrdered, group: 'Style' },
+  { id: 'todo', label: 'To-do List', icon: CheckSquare, group: 'Style' },
+  { id: 'quote', label: 'Blockquote', icon: Quote, group: 'Style' },
+  { id: 'code', label: 'Code Block', icon: Code, group: 'Style' },
+  { id: 'divider', label: 'Divider', icon: Minus, group: 'Insert' },
+  { id: 'table', label: 'Table', icon: TableIcon, group: 'Insert' },
+  { id: 'emoji', label: 'Emoji', icon: Smile, group: 'Insert' },
+  { id: 'mention', label: 'Mention', icon: AtSign, group: 'Insert' },
+  { id: 'image', label: 'Image', icon: FileText, group: 'Upload' },
 ];
 
 interface SlashMenuProps {
   position: Coordinates;
   onSelect: (type: BlockType) => void;
   onClose: () => void;
+  // Optional controlled props used by TipTap Suggestion renderer
+  items?: MenuItem[];
+  query?: string | null;
 }
 
-export const SlashMenu: React.FC<SlashMenuProps> = ({ position, onSelect, onClose }) => {
+export const SlashMenu: React.FC<SlashMenuProps> = ({ position, onSelect, onClose, items, query: controlledQuery }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [internalQuery, setInternalQuery] = useState('')
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Determine items and query (controlled by Suggestion or local state)
+  const q = (controlledQuery !== undefined && controlledQuery !== null) ? controlledQuery : internalQuery
+  const sourceItems = items ?? MENU_ITEMS
+  const filteredItems = sourceItems.filter((it) => it.label.toLowerCase().includes((q || '').toLowerCase()))
+
+  const grouped: Record<string, MenuItem[]> = {};
+  for (const item of filteredItems) {
+    const g = item.group ?? 'Other'
+    if (!grouped[g]) grouped[g] = []
+    grouped[g].push(item)
+  }
 
   // Auto-focus menu when it appears to intercept keyboard events
   useEffect(() => {
@@ -51,37 +72,57 @@ export const SlashMenu: React.FC<SlashMenuProps> = ({ position, onSelect, onClos
     const handleKeyDown = (e: KeyboardEvent) => {
       // Prevent any keyboard events from bubbling when menu is open
       e.stopPropagation();
-      
-      switch (e.key) {
-        case 'ArrowDown':
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev + 1) % filteredItems.length);
+        return
+      }
+
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev - 1 + filteredItems.length) % filteredItems.length);
+        return
+      }
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (filteredItems[selectedIndex]) onSelect(filteredItems[selectedIndex].id);
+        return
+      }
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return
+      }
+
+      // handle printable characters and Backspace for filtering in uncontrolled mode
+      if (!items) {
+        if (e.key === 'Backspace') {
           e.preventDefault();
-          setSelectedIndex((prev) => (prev + 1) % MENU_ITEMS.length);
-          break;
-        case 'ArrowUp':
+          setInternalQuery((q) => q.slice(0, -1));
+          setSelectedIndex(0);
+          return
+        }
+
+        if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
           e.preventDefault();
-          setSelectedIndex((prev) => (prev - 1 + MENU_ITEMS.length) % MENU_ITEMS.length);
-          break;
-        case 'Enter':
-          e.preventDefault();
-          onSelect(MENU_ITEMS[selectedIndex].id);
-          break;
-        case 'Escape':
-          e.preventDefault();
-          onClose();
-          break;
-        default:
-          e.preventDefault();
+          setInternalQuery((q) => (q + e.key).slice(0, 64));
+          setSelectedIndex(0);
+          return
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIndex, onSelect, onClose]);
+  }, [selectedIndex, onSelect, onClose, items, filteredItems.length]);
 
   useEffect(() => {
     const menu = menuRef.current;
     if (menu) {
-      const selectedElement = menu.children[selectedIndex + 1] as HTMLElement;
+      const selectedElement = menu.querySelector('[data-selected="true"]') as HTMLElement | null;
       if (selectedElement) {
         if (selectedElement.offsetTop < menu.scrollTop) {
           menu.scrollTop = selectedElement.offsetTop;
@@ -90,13 +131,13 @@ export const SlashMenu: React.FC<SlashMenuProps> = ({ position, onSelect, onClos
         }
       }
     }
-  }, [selectedIndex]);
+  }, [selectedIndex, controlledQuery, internalQuery]);
 
   return (
     <div
       ref={menuRef}
       tabIndex={-1}
-      className="slash-menu absolute z-50 w-80 bg-white rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[380px]"
+      className="slash-menu absolute z-50 w-44 bg-white rounded-md shadow-md overflow-hidden flex flex-col max-h-[320px]"
       style={{
         top: position.y,
         left: position.x
@@ -106,42 +147,45 @@ export const SlashMenu: React.FC<SlashMenuProps> = ({ position, onSelect, onClos
         e.stopPropagation();
       }}
     >
-      <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider bg-white sticky top-0 z-10">
-        Commands
+      {/* header placeholder removed to keep UI compact */}
+      
+
+      <div className="flex flex-col divide-y divide-gray-100 overflow-y-auto">
+        {Object.keys(grouped).map((section) => (
+          <div key={section} className="py-1 px-0">
+            <div className="px-3 py-1 text-xs font-semibold text-gray-400 uppercase">{section}</div>
+            <div className="flex flex-col py-0">
+              {grouped[section].map((item, idx) => {
+                const baseIndex = Object.values(grouped).slice(0, Object.keys(grouped).indexOf(section)).reduce((acc, arr) => acc + arr.length, 0)
+                const isSelected = (baseIndex + idx) === selectedIndex
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onSelect(item.id)}
+                    onMouseEnter={() => setSelectedIndex(baseIndex + idx)}
+                    data-selected={isSelected}
+                    className={`flex items-center gap-2 px-2 py-1 mx-1 rounded text-sm transition-colors duration-150 ${isSelected
+                        ? 'bg-sky-600 text-white'
+                        : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                  >
+                    <div className={`p-0.5 rounded ${isSelected ? 'bg-white/20' : 'bg-transparent'}`}>
+                      <item.icon size={14} className={isSelected ? 'text-white' : 'text-gray-500'} />
+                    </div>
+
+                    <div className="flex flex-col items-start text-left">
+                      <span className="font-medium truncate">{item.label}</span>
+                      {item.description && <span className="text-xs text-gray-400 truncate">{item.description}</span>}
+                    </div>
+
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="flex flex-col py-1">
-        {MENU_ITEMS.map((item, index) => {
-          const isSelected = index === selectedIndex;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onSelect(item.id)}
-              onMouseEnter={() => setSelectedIndex(index)}
-              className={`flex items-center gap-2 px-2 py-1 mx-0.5 rounded text-xs transition-colors duration-150 ${isSelected
-                  ? 'bg-blue-500 text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
-                }`}
-            >
-              <div className={`p-0.5 rounded ${isSelected ? 'bg-white/20' : 'bg-transparent'
-                }`}>
-                <item.icon size={14} className={isSelected ? 'text-white' : 'text-gray-600'} />
-              </div>
-
-              <span className="font-medium truncate">{item.label}</span>
-
-              {item.shortcut && (
-                <div className={`text-[9px] px-1 rounded ml-auto whitespace-nowrap ${isSelected
-                    ? 'text-blue-100'
-                    : 'text-gray-400'
-                  }`}>
-                  {item.shortcut}
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
     </div>
   );
 };

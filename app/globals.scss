@@ -1,0 +1,18 @@
+@import '../editor/styles/_variables.scss';
+@import '../editor/styles/_keyframe-animations.scss';
+
+/* Global styles for Next.js */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}

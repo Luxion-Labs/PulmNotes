@@ -35,3 +35,8 @@ node_modules
 /src-tauri/target/
 /src-tauri/WixTools/
 /src-tauri/Cargo.lock
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

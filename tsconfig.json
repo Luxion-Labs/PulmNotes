@@ -21,8 +21,15 @@
     "paths": {
       "@/*": [
         "./*"
-      ]
-    },
+      ],
+      "@/components/*": [
+        "./editor/components/*",
+        "./components/*"
+      ],
+      "@/hooks/*": [
+        "./hooks/*",
+        "./editor/hooks/*"
+      ],    },
     "incremental": true,
     "plugins": [
       {
@@ -34,9 +41,11 @@
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "editor/types/**/*.d.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "e2e"
   ]
 }
