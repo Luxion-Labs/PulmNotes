@@ -147,14 +147,11 @@ export const SlashMenu: React.FC<SlashMenuProps> = ({ position, onSelect, onClos
         e.stopPropagation();
       }}
     >
-      {/* header placeholder removed to keep UI compact */}
-      
-
       <div className="flex flex-col divide-y divide-gray-100 overflow-y-auto">
         {Object.keys(grouped).map((section) => (
-          <div key={section} className="py-1 px-0">
+          <div key={section} className="px-0">
             <div className="px-3 py-1 text-xs font-semibold text-gray-400 uppercase">{section}</div>
-            <div className="flex flex-col py-0">
+            <div className="flex flex-col">
               {grouped[section].map((item, idx) => {
                 const baseIndex = Object.values(grouped).slice(0, Object.keys(grouped).indexOf(section)).reduce((acc, arr) => acc + arr.length, 0)
                 const isSelected = (baseIndex + idx) === selectedIndex
