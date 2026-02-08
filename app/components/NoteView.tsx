@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Note, Block, Asset } from '@/app/types';
-import { Editor } from '@/editor';
+import { TipTapNoteEditor } from '@/editor';
 import { RichContentRenderer } from './RichContentRenderer';
 
 interface NoteViewProps {
@@ -43,12 +43,18 @@ export const NoteView: React.FC<NoteViewProps> = ({
     if (itemType === 'asset' && assetId.startsWith('asset-')) {
       const asset = assets.find(a => a.id === assetId);
       if (asset && ['image', 'video', 'audio'].includes(asset.type)) {
-        // Insert asset reference at the end of the note
-        const assetReference = `{{asset:${assetId}}}`;
+        // Create an asset block (will be converted to TipTap asset node automatically)
         const newBlock = {
           id: Math.random().toString(36).substring(2, 11),
-          type: 'text' as const,
-          content: assetReference
+          type: 'asset' as const,
+          content: `{{asset:${assetId}}}`,
+          media: {
+            type: asset.type as 'image' | 'video' | 'audio',
+            src: `/assets/${assetId}`,
+            alt: asset.name || '',
+            caption: asset.name || '',
+            assetId,
+          }
         };
         onUpdateBlocks(note.id, [...note.blocks, newBlock]);
       }
@@ -68,7 +74,7 @@ export const NoteView: React.FC<NoteViewProps> = ({
   };
 
   if (!isReadMode) {
-    // Edit mode - use existing editor
+    // Edit mode - use TipTap editor with title input
     return (
       <div
         onDrop={handleDrop}
@@ -76,13 +82,26 @@ export const NoteView: React.FC<NoteViewProps> = ({
         onDragLeave={handleDragLeave}
         className={`relative w-full ${isDragOver ? 'ring-2 ring-stone-400 ring-inset' : ''}`}
       >
-        <Editor
+        {/* Title Input */}
+        <div className="mb-8 group px-4 sm:px-6 md:px-8 lg:px-12 py-4 md:py-6">
+          <input
+            type="text"
+            placeholder="Untitled"
+            value={note.title}
+            onChange={(e) => onUpdateTitle(note.id, e.target.value)}
+            className="w-full text-5xl font-bold text-gray-800 placeholder-gray-300 outline-none bg-transparent text-center"
+          />
+        </div>
+
+        {/* TipTap Editor for Blocks */}
+        <TipTapNoteEditor
           note={note}
           allNotes={allNotes}
           onUpdateTitle={onUpdateTitle}
           onUpdateBlocks={onUpdateBlocks}
           onOpenNote={onOpenNote}
         />
+
         {isDragOver && (
           <div className="fixed inset-0 bg-stone-900/5 pointer-events-none flex items-center justify-center z-40">
             <div className="bg-white px-4 sm:px-6 py-3 rounded-lg shadow-lg border-2 border-stone-400 border-dashed">

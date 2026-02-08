@@ -16,13 +16,17 @@ export type BlockType =
   | 'image'
   | 'video'
   | 'audio'
-  | 'math';
+  | 'asset'
+  | 'math'
+  | 'mention'
+  | 'emoji';
 
 export interface MediaContent {
   type: 'image' | 'video' | 'audio';
   src: string;
   alt?: string;
   caption?: string;
+  assetId?: string;
 }
 
 export interface MathContent {
