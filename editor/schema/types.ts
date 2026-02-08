@@ -16,13 +16,17 @@ export type BlockType =
   | 'image'
   | 'video'
   | 'audio'
-  | 'math';
+  | 'asset'
+  | 'math'
+  | 'mention'
+  | 'emoji';
 
 export interface MediaContent {
   type: 'image' | 'video' | 'audio';
   src: string;
   alt?: string;
   caption?: string;
+  assetId?: string;
 }
 
 export interface MathContent {
@@ -48,12 +52,15 @@ export interface Block {
   math?: MathContent;
 }
 
+export type MenuGroup = 'Style' | 'Insert' | 'Upload' | 'Other'
+
 export interface MenuItem {
   id: BlockType;
   label: string;
   icon: LucideIcon;
   shortcut?: string;
   description?: string;
+  group?: MenuGroup;
 }
 
 export interface Coordinates {
