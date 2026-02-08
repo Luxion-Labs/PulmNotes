@@ -25,6 +25,11 @@ import { createMentionSuggestion } from "@/editor/extensions/mention-suggestion"
 import { AssetNode } from "@/editor/extensions/asset-node"
 import { TodoNode } from "@/editor/extensions/todo-node"
 
+// --- Enhanced Table Components ---
+import { TableKit } from "@/editor/components/tiptap-node/table-node/extensions/table-node-extension"
+import { TableHandleExtension } from "@/editor/components/tiptap-node/table-node/extensions/table-handle"
+import { TableHandle } from "@/editor/components/tiptap-node/table-node/ui/table-handle"
+
 // --- Converters ---
 import { convertBlocksToTipTap } from "@/editor/lib/convertBlocksToTipTap"
 import { convertTipTapToBlocks } from "@/editor/lib/convertTipTapToBlocks"
@@ -41,7 +46,9 @@ import "@/components/tiptap-node/list-node/list-node.scss"
 import "@/components/tiptap-node/image-node/image-node.scss"
 import "@/components/tiptap-node/heading-node/heading-node.scss"
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss"
-import "@/components/tiptap-node/table-node/table-node.scss"
+import "@/editor/components/tiptap-node/table-node/styles/table-node.scss"
+import "@/editor/components/tiptap-node/table-node/styles/prosemirror-table.scss"
+import "@/editor/components/tiptap-node/table-node/ui/table-handle-menu/table-handle-menu.scss"
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 
 // --- UI Components ---
@@ -128,7 +135,16 @@ export function TipTapNoteEditor({ note, allNotes = [], onUpdateTitle, onUpdateB
         placeholder: "Write or type '/' for commands...",
       }),
       ImageExtension,           // ✅ Image extension with resize
-      ...TableExtension,        // ✅ Table extension (spreads array of [Table, TableRow, TableCell, TableHeader])
+      TableKit.configure({     // ✅ Enhanced table extension with drag handles and context menu
+        table: {
+          resizable: true,
+          handleWidth: 5,
+          cellMinWidth: 50,
+          lastColumnResizable: true,
+          allowTableNodeSelection: true,
+        },
+      }),
+      TableHandleExtension,    // ✅ Table handle extension for row/column manipulation
       AssetNode,                // ✅ Custom asset node with NodeView
       TodoNode,                 // ✅ Custom todo node with checkbox NodeView
       Typography,
@@ -187,6 +203,7 @@ export function TipTapNoteEditor({ note, allNotes = [], onUpdateTitle, onUpdateB
       <EditorContent editor={editor} role="presentation" className="simple-editor-content" />
       <FloatingToolbar editor={editor} />
       <EmojiDropdownMenu editor={editor} />
+      {editor && <TableHandle editor={editor} />}
     </div>
   )
 }
