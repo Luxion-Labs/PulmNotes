@@ -11,8 +11,11 @@ import { Typography } from "@tiptap/extension-typography"
 import { Highlight } from "@tiptap/extension-highlight"
 import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
+import { Underline } from "@tiptap/extension-underline"
+import { Color, TextStyle } from "@tiptap/extension-text-style"
 import { Selection } from "@tiptap/extensions"
 import { Placeholder } from "@tiptap/extension-placeholder"
+import { Emoji, gitHubEmojis } from "@tiptap/extension-emoji"
 
 // --- Custom Extensions ---
 import ImageExtension from "@/editor/extensions/image-extension"
@@ -40,6 +43,10 @@ import "@/components/tiptap-node/heading-node/heading-node.scss"
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss"
 import "@/components/tiptap-node/table-node/table-node.scss"
 import "@/components/tiptap-templates/simple/simple-editor.scss"
+
+// --- UI Components ---
+import { FloatingToolbar } from "@/editor/ui/FloatingToolbar"
+import { EmojiDropdownMenu } from "@/editor/components/tiptap-ui/emoji-dropdown-menu"
 
 // --- Types ---
 import { Note, Block } from "@/editor/schema/types"
@@ -127,7 +134,16 @@ export function TipTapNoteEditor({ note, allNotes = [], onUpdateTitle, onUpdateB
       Typography,
       Superscript,
       Subscript,
+      Underline,
+      TextStyle,
+      Color,
       Selection,
+      Emoji.configure({
+        emojis: gitHubEmojis.filter(
+          (emoji) => !emoji.name.includes("regional")
+        ),
+        forceFallbackImages: true,
+      }),
       ImageUploadNode.configure({
         accept: "image/*",
         maxSize: MAX_FILE_SIZE,
@@ -169,6 +185,8 @@ export function TipTapNoteEditor({ note, allNotes = [], onUpdateTitle, onUpdateB
   return (
     <div className="tiptap-note-editor-wrapper">
       <EditorContent editor={editor} role="presentation" className="simple-editor-content" />
+      <FloatingToolbar editor={editor} />
+      <EmojiDropdownMenu editor={editor} />
     </div>
   )
 }

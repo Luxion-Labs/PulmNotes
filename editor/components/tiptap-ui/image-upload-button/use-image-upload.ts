@@ -12,7 +12,7 @@ import { useIsBreakpoint } from "@/hooks/use-is-breakpoint"
 import { isExtensionAvailable } from "@/editor/lib/tiptap-utils"
 
 // --- Icons ---
-import { ImagePlusIcon } from "@/components/tiptap-icons/image-plus-icon"
+import { ImagePlusIcon } from "@/editor/components/tiptap-icons/image-plus-icon"
 
 export const IMAGE_UPLOAD_SHORTCUT_KEY = "mod+shift+i"
 

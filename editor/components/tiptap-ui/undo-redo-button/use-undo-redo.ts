@@ -10,8 +10,8 @@ import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 import { isNodeTypeSelected } from "@/editor/lib/tiptap-utils"
 
 // --- Icons ---
-import { Redo2Icon } from "@/components/tiptap-icons/redo2-icon"
-import { Undo2Icon } from "@/components/tiptap-icons/undo2-icon"
+import { Redo2Icon } from "@/editor/components/tiptap-icons/redo2-icon"
+import { Undo2Icon } from "@/editor/components/tiptap-icons/undo2-icon"
 
 export type UndoRedoAction = "undo" | "redo"
 

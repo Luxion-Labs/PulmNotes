@@ -143,7 +143,19 @@ export const SlashSuggestion = Extension.create({
 
                     break
                   case 'emoji':
-                    editor.chain().focus().insertContent('😀 ').run()
+                    // Trigger emoji picker by inserting : character
+                    editor.chain().focus().insertContent(':').run()
+                    // Force trigger the emoji suggestion
+                    setTimeout(() => {
+                      try {
+                        if (editor && editor.view) {
+                          editor.view.dispatch(editor.state.tr)
+                          editor.view.focus()
+                        }
+                      } catch (err) {
+                        console.error('[Slash] trigger emoji suggestion error', err)
+                      }
+                    }, 0)
                     break
                   case 'image':
                     try {
