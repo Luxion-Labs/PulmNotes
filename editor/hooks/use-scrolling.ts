@@ -41,7 +41,7 @@ export function useScrolling(
       el: EventTargetWithScroll,
       event: string,
       handler: EventListener
-    ) => el.removeEventListener(event, handler)
+    ) => el.removeEventListener(event, handler, true)
 
     let timeout: ReturnType<typeof setTimeout>
     const supportsScrollEnd = element === window && "onscrollend" in window
