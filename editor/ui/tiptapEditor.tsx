@@ -15,8 +15,8 @@ import { Selection } from "@tiptap/extensions"
 import { Placeholder } from "@tiptap/extension-placeholder"
 
 // --- Custom Extensions ---
-import  ImageExtension from "@/editor/extensions/image-extension"
-import  TableExtension  from "@/editor/extensions/table-extension"
+import ImageExtension from "@/editor/extensions/image-extension"
+import TableExtension from "@/editor/extensions/table-extension"
 import SlashSuggestion from "@/editor/extensions/slash-suggestion"
 import { createMentionSuggestion } from "@/editor/extensions/mention-suggestion"
 import { AssetNode } from "@/editor/extensions/asset-node"
@@ -67,6 +67,18 @@ interface TipTapNoteEditorProps {
 export function TipTapNoteEditor({ note, allNotes = [], onUpdateTitle, onUpdateBlocks, onOpenNote }: TipTapNoteEditorProps) {
   const editorRef = useRef<any>(null)
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Keep a ref to allNotes so the extension can access the latest list without re-initialization
+  const allNotesRef = useRef(allNotes)
+  useEffect(() => {
+    allNotesRef.current = allNotes
+  }, [allNotes])
+
+  // Ref for current note ID to filter out self
+  const noteIdRef = useRef(note.id)
+  useEffect(() => {
+    noteIdRef.current = note.id
+  }, [note.id])
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -124,7 +136,10 @@ export function TipTapNoteEditor({ note, allNotes = [], onUpdateTitle, onUpdateB
         onError: (error) => console.error("Upload failed:", error),
       }),
       SlashSuggestion,               // ✅ Slash suggestions (/)
-      createMentionSuggestion(allNotes),  // ✅ Mention suggestions (@)
+      createMentionSuggestion(() => {
+        // Dynamic getter: returns all notes excluding the current one
+        return (allNotesRef.current || []).filter(n => n.id !== noteIdRef.current)
+      }),  // ✅ Mention suggestions (@)
     ],
     // Initialize with converted blocks
     content: convertBlocksToTipTap(note.blocks),
