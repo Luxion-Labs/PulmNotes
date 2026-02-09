@@ -1,0 +1,265 @@
+.toc-sidebar {
+  --tt-toc-sidebar-line-bg: var(--tt-gray-light-200);
+  --tt-toc-sidebar-line-bg-active: var(--tt-gray-light-900);
+  --tt-toc-sidebar-bg: var(--white);
+  --tt-toc-sidebar-border-color: var(--tt-gray-light-a-100);
+  --tt-toc-sidebar-text-color: var(--tt-gray-light-a-600);
+  --tt-toc-sidebar-text-hover-color: var(--tt-gray-light-a-800);
+  --tt-toc-sidebar-bg-hover-color: var(--tt-gray-light-a-100);
+  --tt-toc-sidebar-text-active-color: var(--tt-brand-color-500);
+
+  /* TOC spacing configuration */
+  --toc-indent: 0.75rem; // Base spacing per level (12px)
+  --toc-depth-factor: 1; // Global multiplier
+  --toc-progress-indent: 0.25rem; // Base indent for progress lines (4px)
+  --toc-progress-width-base: 1rem; // Base width for progress lines (16px)
+  --toc-progress-width-min: 0.25rem; // Minimum width for progress lines (4px)
+
+  .dark & {
+    --tt-toc-sidebar-line-bg: var(--tt-gray-dark-200);
+    --tt-toc-sidebar-line-bg-active: var(--tt-gray-dark-900);
+    --tt-toc-sidebar-bg: var(--tt-gray-dark-200);
+    --tt-toc-sidebar-border-color: var(--tt-gray-dark-a-100);
+    --tt-toc-sidebar-text-color: var(--tt-gray-dark-a-600);
+    --tt-toc-sidebar-text-hover-color: var(--tt-gray-dark-a-800);
+    --tt-toc-sidebar-bg-hover-color: var(--tt-gray-dark-a-100);
+    --tt-toc-sidebar-text-active-color: var(--tt-brand-color-400);
+  }
+
+  /* =========================
+     Sidebar layout & grid
+     ========================= */
+  width: 100%;
+  grid-row: 1 / -1;
+  grid-column: content-end / full-end;
+  padding-inline-start: 0;
+  position: relative;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+
+  /* Sticky wrapper */
+  &-wrapper {
+    display: flex;
+    flex-direction: row;
+    position: sticky;
+    top: 130px;
+    margin-left: auto;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 200ms ease;
+  }
+
+  /* Inner layout */
+  &-inner {
+    position: relative;
+    z-index: 10;
+    margin-right: 0.625rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-right: 0.5rem;
+    padding-bottom: 0.75rem;
+  }
+
+  /* =========================
+     Progress bar column
+     ========================= */
+  &-progress {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    padding-left: 1.25rem;
+
+    &-line {
+      height: 0.125rem;
+      border-radius: 0.25rem;
+      background-color: var(--tt-toc-sidebar-line-bg);
+      transition: background-color 0.3s ease;
+
+      // Dynamic margin based on depth
+      margin-left: calc(
+        var(--toc-progress-indent) * (var(--toc-depth, 1) - 1) *
+          var(--toc-depth-factor)
+      );
+
+      // Dynamic width based on depth (narrower at deeper levels)
+      width: max(
+        var(--toc-progress-width-min),
+        calc(
+          var(--toc-progress-width-base) -
+            (var(--toc-progress-indent) * (var(--toc-depth, 1) - 1))
+        )
+      );
+
+      &--active {
+        background-color: var(--tt-toc-sidebar-line-bg-active);
+      }
+
+      // Fallback mappings in case inline style is missing
+      &[data-depth="1"] {
+        --toc-depth: 1;
+      }
+      &[data-depth="2"] {
+        --toc-depth: 2;
+      }
+      &[data-depth="3"] {
+        --toc-depth: 3;
+      }
+      &[data-depth="4"] {
+        --toc-depth: 4;
+      }
+      &[data-depth="5"] {
+        --toc-depth: 5;
+      }
+      &[data-depth="6"] {
+        --toc-depth: 6;
+      }
+    }
+  }
+
+  /* =========================
+     TOC nav trigger / popover
+     ========================= */
+  &-nav {
+    position: absolute;
+    top: -0.625rem;
+    right: 0;
+    padding-inline: 0.625rem;
+    pointer-events: none;
+    transform: translateX(10px);
+    opacity: 0;
+    display: flex;
+    transition:
+      transform 0.3s ease,
+      opacity 0.3s ease;
+
+    &--hidden {
+      display: none;
+    }
+  }
+
+  /* Popover container */
+  &-popover {
+    --padding: 0.75rem;
+    --border-width: 1px;
+
+    background-color: var(--tt-toc-sidebar-bg);
+    border-radius: calc(var(--padding) + var(--tt-radius-md));
+    border: 1px solid var(--tt-toc-sidebar-border-color);
+    box-shadow: var(--tt-shadow-elevated-md);
+    margin-right: -0.625rem;
+    max-height: 24rem;
+    width: 100%;
+    overflow: auto;
+    padding: var(--padding);
+    scroll-margin: 0.25rem;
+    flex-grow: 1;
+  }
+
+  /* =========================
+     TOC links
+     ========================= */
+  &-item {
+    display: flex;
+    align-items: center;
+    min-height: 1.5rem;
+    padding-block: 0.25rem;
+    padding-inline: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--tt-toc-sidebar-text-color);
+    text-decoration: none;
+    border-radius: var(--tt-radius-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    // Central calculation: Base * (Depth - 1) * Factor
+    margin-inline-start: calc(
+      var(--toc-indent) * (var(--toc-depth, 1) - 1) * var(--toc-depth-factor)
+    );
+
+    &:hover {
+      background-color: var(--tt-toc-sidebar-bg-hover-color);
+    }
+
+    &:hover:not(&--active) {
+      color: var(--tt-toc-sidebar-text-hover-color);
+    }
+
+    &--active {
+      color: var(--tt-toc-sidebar-text-active-color);
+      font-weight: 500;
+    }
+
+    // Fallback mappings
+    &[data-depth="1"] {
+      --toc-depth: 1;
+    }
+    &[data-depth="2"] {
+      --toc-depth: 2;
+    }
+    &[data-depth="3"] {
+      --toc-depth: 3;
+    }
+    &[data-depth="4"] {
+      --toc-depth: 4;
+    }
+    &[data-depth="5"] {
+      --toc-depth: 5;
+    }
+    &[data-depth="6"] {
+      --toc-depth: 6;
+    }
+  }
+
+  /* =========================
+     Context-specific variants
+     ========================= */
+  &.toc-sidebar--dense {
+    --toc-depth-factor: 0.75;
+  }
+
+  &.toc-sidebar--loose {
+    --toc-depth-factor: 1.25;
+  }
+
+  /* =========================
+     Interactions / media
+     ========================= */
+
+  /* Pointer-hover devices */
+  @media (hover: hover) {
+    &-wrapper:hover &-nav {
+      pointer-events: auto;
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Touch devices */
+  @media (hover: none) {
+    &-nav {
+      pointer-events: auto;
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Mobile */
+  @media screen and (max-width: 768px) {
+    & {
+      display: none;
+    }
+  }
+}

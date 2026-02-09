@@ -1,0 +1,105 @@
+.tiptap.ProseMirror {
+  .node-tocNode.ProseMirror-selectednode {
+    border-radius: var(--tt-radius-md);
+    background-color: var(--tt-selection-color);
+  }
+
+  a.tiptap-table-of-contents-item {
+    color: var(--tt-toc-node-text-color);
+    text-decoration: underline var(--tt-toc-node-underline-color);
+    text-underline-offset: 4px;
+  }
+}
+
+.tiptap-table-of-contents-node {
+  margin: 1.5rem 0;
+
+  // TOC spacing configuration
+  --toc-indent: 1.5rem; // Base spacing per level (24px)
+  --toc-depth-factor: 1; // Global multiplier
+
+  --tt-toc-node-text-color: var(--tt-gray-light-a-600);
+  --tt-toc-node-text-hover-color: var(--tt-gray-light-a-800);
+  --tt-toc-node-bg-hover-color: var(--tt-gray-light-a-100);
+  --tt-toc-node-underline-color: var(--tt-gray-light-a-300);
+  --tt-toc-node-underline-hover-color: var(--tt-gray-light-a-400);
+
+  .dark & {
+    --tt-toc-node-text-color: var(--tt-gray-dark-a-600);
+    --tt-toc-node-text-hover-color: var(--tt-gray-dark-a-800);
+    --tt-toc-node-bg-hover-color: var(--tt-gray-dark-a-100);
+    --tt-toc-node-underline-color: var(--tt-gray-dark-a-300);
+    --tt-toc-node-underline-hover-color: var(--tt-gray-dark-a-400);
+  }
+
+  .tiptap-table-of-contents-empty {
+    padding: 1rem;
+    text-align: center;
+    color: var(--tt-toc-node-text-color);
+    font-size: 0.875rem;
+  }
+
+  .tiptap-table-of-contents-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--tt-toc-node-text-hover-color);
+    margin-bottom: 0.5rem;
+  }
+
+  .tiptap-table-of-contents-list {
+    margin: 0;
+    padding: 0;
+  }
+
+  .tiptap-table-of-contents-item {
+    display: flex;
+    align-items: center;
+    height: 1.875rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    border-radius: var(--tt-radius-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+    cursor: pointer;
+
+    // Central calculation: Base * (Depth - 1) * Factor
+    padding-inline-start: calc(
+      var(--toc-indent) * (var(--toc-depth, 1) - 1) * var(--toc-depth-factor)
+    );
+
+    &:hover {
+      background-color: var(--tt-toc-node-bg-hover-color);
+    }
+
+    // Fallback mappings in case inline style is missing
+    &[data-depth="1"] {
+      --toc-depth: 1;
+    }
+    &[data-depth="2"] {
+      --toc-depth: 2;
+    }
+    &[data-depth="3"] {
+      --toc-depth: 3;
+    }
+    &[data-depth="4"] {
+      --toc-depth: 4;
+    }
+    &[data-depth="5"] {
+      --toc-depth: 5;
+    }
+    &[data-depth="6"] {
+      --toc-depth: 6;
+    }
+  }
+
+  // Context-specific variants (optional)
+  &.toc--dense {
+    --toc-depth-factor: 0.75;
+  }
+
+  &.toc--loose {
+    --toc-depth-factor: 1.25;
+  }
+}
