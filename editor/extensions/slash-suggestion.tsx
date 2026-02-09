@@ -179,6 +179,19 @@ export const SlashSuggestion = Extension.create({
                       editor.chain().focus().insertContent('![]()').run()
                     }
                     break
+                  case 'video':
+                    try {
+                      // Insert videoUploadNode which shows dialog automatically
+                      editor.chain().focus().insertContent({
+                        type: 'videoUploadNode',
+                        attrs: {
+                          src: null,
+                        },
+                      }).run()
+                    } catch (err) {
+                      console.error('[Slash] insert video upload node error', err)
+                    }
+                    break
                   default:
                     break
                 }
