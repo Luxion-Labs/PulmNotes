@@ -23,6 +23,8 @@ import { Mathematics } from "@tiptap/extension-mathematics"
 import { Ai } from "@tiptap-pro/extension-ai"
 import { UniqueID } from "@tiptap/extension-unique-id"
 import { Emoji, gitHubEmojis } from "@tiptap/extension-emoji"
+import { getVideoExtension, VideoNode } from "@/editor/components/tiptap-node/video-node"
+import { VideoUploadNodeExtension } from "@/components/tiptap-node/video-upload-node"
 import {
   getHierarchicalIndexes,
   TableOfContents,
@@ -311,6 +313,9 @@ export function EditorProvider(props: EditorProviderProps) {
           context.editor.commands.aiGenerationHasMessage(hasMessage)
         },
       })] : []),
+      VideoNode,
+      getVideoExtension(),
+      VideoUploadNodeExtension,
     ],
   })
 

@@ -18,6 +18,8 @@ import { Color, TextStyle } from "@tiptap/extension-text-style"
 import { Selection } from "@tiptap/extensions"
 import { Placeholder } from "@tiptap/extension-placeholder"
 import { Emoji, gitHubEmojis } from "@tiptap/extension-emoji"
+import { getVideoExtension, VideoNode } from "@/editor/components/tiptap-node/video-node"
+import { VideoUploadNodeExtension } from "@/components/tiptap-node/video-upload-node"
 
 
 // --- UI Primitives ---
@@ -265,6 +267,9 @@ export function SimpleEditor() {
       MentionSuggestion,
 
       SlashSuggestion,
+      VideoNode,
+      getVideoExtension(),
+      VideoUploadNodeExtension,
     ],
     content,
   })
