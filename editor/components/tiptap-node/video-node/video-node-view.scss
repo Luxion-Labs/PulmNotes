@@ -1,0 +1,60 @@
+.video-node-wrapper {
+  margin: 1rem 0;
+
+  .video-node-container {
+    position: relative;
+    background: #1e1e1e;
+    border-radius: 8px;
+    overflow: hidden;
+    display: inline-block;
+    max-width: 100%;
+
+    &.selected {
+      outline: 2px solid #4a9eff;
+    }
+
+    .video-node-element {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      background: #000;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    .video-node-toolbar {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 8px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+
+      .delete-button {
+        background: #ff4444;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+        transition: background 0.2s ease;
+
+        &:hover {
+          background: #ff2222;
+        }
+      }
+    }
+
+    &:hover .video-node-toolbar {
+      opacity: 1;
+    }
+  }
+}
