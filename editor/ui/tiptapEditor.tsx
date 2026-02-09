@@ -19,7 +19,6 @@ import { Emoji, gitHubEmojis } from "@tiptap/extension-emoji"
 
 // --- Custom Extensions ---
 import ImageExtension from "@/editor/extensions/image-extension"
-import TableExtension from "@/editor/extensions/table-extension"
 import SlashSuggestion from "@/editor/extensions/slash-suggestion"
 import { createMentionSuggestion } from "@/editor/extensions/mention-suggestion"
 import { AssetNode } from "@/editor/extensions/asset-node"
@@ -46,6 +45,7 @@ import "@/components/tiptap-node/list-node/list-node.scss"
 import "@/components/tiptap-node/image-node/image-node.scss"
 import "@/components/tiptap-node/heading-node/heading-node.scss"
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss"
+import "@/editor/components/tiptap-node/table-node/styles/table-node.scss"
 
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 
