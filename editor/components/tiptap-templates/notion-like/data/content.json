@@ -1,0 +1,1658 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "8e84d1f3-8d16-4370-94e7-46252c8428d8",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null,
+        "data-toc-id": "8e84d1f3-8d16-4370-94e7-46252c8428d8",
+        "level": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Welcome to Notion-like template "
+        },
+        {
+          "type": "emoji",
+          "attrs": {
+            "name": "sparkles"
+          }
+        }
+      ]
+    },
+    {
+      "type": "blockquote",
+      "attrs": {
+        "id": "efb65cf1-6283-4386-ba70-292a2e0f448a",
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "id": "888ea526-525b-4911-bf2e-e6d9bc500185",
+            "textAlign": null,
+            "backgroundColor": null,
+            "nodeTextAlign": null,
+            "nodeVerticalAlign": null
+          },
+          "content": [
+            {
+              "type": "emoji",
+              "attrs": {
+                "name": "love_letter"
+              }
+            },
+            {
+              "type": "text",
+              "marks": [
+                {
+                  "type": "bold"
+                }
+              ],
+              "text": " Invite your colleagues to make this fun! "
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "Just copy the URL from your browser and share it – everyone with the link can join in and collaborate in real time."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "id": "70447a3a-b34b-4b71-975d-d70ba7376c13",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Start writing your thoughts here … "
+        },
+        {
+          "type": "emoji",
+          "attrs": {
+            "name": "pencil"
+          }
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "hardBreak"
+        },
+        {
+          "type": "text",
+          "text": "Try some "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "bold"
+            }
+          ],
+          "text": "Markdown:"
+        }
+      ]
+    },
+    {
+      "type": "codeBlock",
+      "attrs": {
+        "id": "81b9bf40-8e99-47d4-a5a8-5697f388c5a4",
+        "language": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "# Headings\n- Lists\n> Quotes\n`Inline code`"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "id": "02b24e83-889d-46a1-a617-b6274eeacb25",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Or type "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "code"
+            }
+          ],
+          "text": "/"
+        },
+        {
+          "type": "text",
+          "text": " to open the command menu and discover blocks, formatting, and hidden features."
+        }
+      ]
+    },
+    {
+      "type": "horizontalRule"
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "9a020862-49f3-43e0-a697-202b41566a0c",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null,
+        "data-toc-id": "9a020862-49f3-43e0-a697-202b41566a0c",
+        "level": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Make it yours"
+        }
+      ]
+    },
+    {
+      "type": "bulletList",
+      "attrs": {
+        "id": "a13c0ca7-0402-40b1-ab87-f87a649a1edf",
+        "backgroundColor": null
+      },
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "de2491d7-c6a1-4283-94b1-cd2a8c0d81f1",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "Select text"
+                },
+                {
+                  "type": "text",
+                  "text": " to reveal a floating toolbar: "
+                },
+                {
+                  "type": "hardBreak"
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "italic"
+                    }
+                  ],
+                  "text": "Quickly italicize, "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "textStyle",
+                      "attrs": {
+                        "color": "var(--tt-color-text-blue)"
+                      }
+                    },
+                    {
+                      "type": "italic"
+                    }
+                  ],
+                  "text": "color"
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "italic"
+                    }
+                  ],
+                  "text": ", add "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "link",
+                      "attrs": {
+                        "href": "https://tiptap.dev/docs/ui-components/getting-started/overview",
+                        "target": "_blank",
+                        "rel": "noopener noreferrer nofollow",
+                        "class": null
+                      }
+                    },
+                    {
+                      "type": "italic"
+                    }
+                  ],
+                  "text": "links"
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "italic"
+                    }
+                  ],
+                  "text": ", or "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "italic"
+                    },
+                    {
+                      "type": "highlight",
+                      "attrs": {
+                        "color": "var(--tt-color-highlight-green)"
+                      }
+                    }
+                  ],
+                  "text": "highlight text"
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "italic"
+                    }
+                  ],
+                  "text": " just as you're used to.."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "10d47502-caac-4074-99e5-717d56b6c056",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ],
+                  "text": "Hover near any block"
+                },
+                {
+                  "type": "text",
+                  "text": " to reveal the context handle "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "code"
+                    }
+                  ],
+                  "text": "⠿"
+                },
+                {
+                  "type": "hardBreak"
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "italic"
+                    }
+                  ],
+                  "text": "Click to open the context menu (duplicate, delete, reset formatting, and more) or simply drag to move your content anywhere you like!"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "c69fb59a-c96f-4a98-96e5-9d8fc1fbbc20",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Mention teammates with "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "code"
+                    }
+                  ],
+                  "text": "@"
+                },
+                {
+                  "type": "text",
+                  "text": " and add some fun with emoji "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "code"
+                    }
+                  ],
+                  "text": ":"
+                },
+                {
+                  "type": "text",
+                  "text": "  "
+                },
+                {
+                  "type": "emoji",
+                  "attrs": {
+                    "name": "hooray"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "ddd83b89-a2e4-481a-ab94-20583b471eee",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Switch between "
+                },
+                {
+                  "type": "emoji",
+                  "attrs": {
+                    "name": "sun"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": " light and "
+                },
+                {
+                  "type": "emoji",
+                  "attrs": {
+                    "name": "new_moon"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": " dark mode – whatever fits your mood."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "attrs": {
+        "src": "/images/tiptap-ui-placeholder-image.jpg",
+        "alt": "Screenshot 2025-02-23 at 19.22.27",
+        "title": "Screenshot 2025-02-23 at 19.22.27",
+        "width": null,
+        "height": null,
+        "data-align": null,
+        "showCaption": false
+      }
+    },
+    {
+      "type": "blockquote",
+      "attrs": {
+        "id": "72652f50-837d-4ec8-9697-3ac7ec9c4877",
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "id": "59129237-cbf5-4305-955c-017821f2ac29",
+            "textAlign": null,
+            "backgroundColor": null,
+            "nodeTextAlign": null,
+            "nodeVerticalAlign": null
+          },
+          "content": [
+            {
+              "type": "text",
+              "marks": [
+                {
+                  "type": "bold"
+                }
+              ],
+              "text": "Need a spark? "
+            },
+            {
+              "type": "emoji",
+              "attrs": {
+                "name": "sparkles"
+              }
+            },
+            {
+              "type": "text",
+              "marks": [
+                {
+                  "type": "bold"
+                }
+              ],
+              "text": " "
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "Summon the AI Assistant with "
+            },
+            {
+              "type": "text",
+              "marks": [
+                {
+                  "type": "code"
+                }
+              ],
+              "text": "/ask ai"
+            },
+            {
+              "type": "text",
+              "text": " from the context menu, or by selecting text and choosing "
+            },
+            {
+              "type": "text",
+              "marks": [
+                {
+                  "type": "code"
+                }
+              ],
+              "text": "Improve"
+            },
+            {
+              "type": "text",
+              "text": "."
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "Polish your writing, or try a ready-made prompt—the AI menu appears with helpful suggestions."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "c76b9241-350c-4c58-a37f-0d5784ea4f50",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null,
+        "data-toc-id": "c76b9241-350c-4c58-a37f-0d5784ea4f50",
+        "level": 3
+      },
+      "content": [
+        {
+          "type": "emoji",
+          "attrs": {
+            "name": "white_check_mark"
+          }
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "bold"
+            }
+          ],
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": "Interactive Tables Included"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "id": "6f673f04-0c65-4e60-8ff6-ec4e1f32f72d",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "This template comes with the full-featured table component. Click row or column handles for sorting and formatting, use the extend buttons (+ icons) to add rows or columns, drag and drop to reorder rows, and select cells to format or merge content."
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "attrs": {
+        "id": "df3debd5-fd7c-4df4-a258-9e13a6eb0d8c"
+      },
+      "content": [
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableHeader",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [154]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "3d4d8056-5093-48cc-b6f7-4ef0802601f3",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Name"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableHeader",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [185]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "c9f91f47-c58d-4f2a-9c0a-18f58b92e397",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Role"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableHeader",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [154]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "508903f8-3bac-4eb1-a41e-bf83794a15e1",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Department"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableHeader",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [156]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "52d46d31-1885-41d9-922e-18deec2c3c58",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Location"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [154]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "de6a13d1-3cfc-4922-877b-3c00f690e5c5",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Alice Johnson"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [185]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "0140a353-f1ac-4e85-a009-bc1b1bd21c98",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Senior Developer"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [154]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "c57d93f0-7ba7-4622-b126-b6bc982040a8",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Engineering"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [156]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "c0a808ab-084a-4bfb-96e1-22ecb66fbd85",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "San Francisco"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [154]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "7ee5a5fb-5345-4c1c-9ba0-45f70a8a886c",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Bob Smith"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [185]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "dcfdb462-a1d1-4bca-b15f-ccc0c841e296",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Product Manager"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [154]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "c592e682-9f1f-46f5-98fb-9b2993c5dfa4",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Product"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [156]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "9b009b8c-f5da-4bee-8f3d-a191e2bc8ed3",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "New York"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [154]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "36f7ae5a-47c3-4979-a716-7d20184ce9b5",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Carol White"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [185]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "a11f34c5-35b6-4d47-acce-0121e810bf65",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "UX Designer"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [154]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "c2a2961c-1dbc-4347-ba07-ec082d90b641",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Design"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [156]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "2e5cb030-71d8-43c4-a40d-4f74b6ed908f",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "London"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [154]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "fe210fe3-ed90-4a7f-9999-71da605093e9",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "David Chen"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [185]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "90dfe1be-dc5b-464e-b897-8687f7199e4e",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Data Analyst"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [154]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "3320699c-85cb-4108-abe7-fe5a4a04308a",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Analytics"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null,
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": [156]
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "id": "4bd0e141-0e0b-4499-be6f-343c6350c2e7",
+                    "textAlign": null,
+                    "backgroundColor": null,
+                    "nodeTextAlign": null,
+                    "nodeVerticalAlign": null
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Remote"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "6a90ecef-245d-4f75-9846-4fb16bb606ba",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null,
+        "data-toc-id": "6a90ecef-245d-4f75-9846-4fb16bb606ba",
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Table of Content"
+        }
+      ]
+    },
+    {
+      "type": "tocNode",
+      "attrs": {
+        "id": "6efde07c-6858-45ac-8120-a01a77734907",
+        "backgroundColor": null,
+        "topOffset": null,
+        "maxShowCount": null,
+        "showTitle": true
+      }
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "bf962ab5-f0a0-43f7-8473-de72f4a2b8ae",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null,
+        "data-toc-id": "bf962ab5-f0a0-43f7-8473-de72f4a2b8ae",
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Checklist"
+        }
+      ]
+    },
+    {
+      "type": "taskList",
+      "attrs": {
+        "id": "6e80de5f-0bc2-4b2e-81db-8a1c0b4d7dbd",
+        "backgroundColor": null
+      },
+      "content": [
+        {
+          "type": "taskItem",
+          "attrs": {
+            "checked": true
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "9aa558bd-c8d2-4f38-a574-13505e158fe5",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Read up to this point"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "taskItem",
+          "attrs": {
+            "checked": false
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "d9b7734a-4b28-4903-9f44-262450bb142d",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Try a slash command"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "taskItem",
+          "attrs": {
+            "checked": false
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "5cceb712-6cb7-4e26-a768-8fb28637b098",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Mention someone"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "taskItem",
+          "attrs": {
+            "checked": false
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "0e2cb9e4-0de9-47d0-8cba-084f8b0d7123",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Use the floating toolbar"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "taskItem",
+          "attrs": {
+            "checked": false
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "d27c6c12-83db-41f6-bd1b-fa2e1a9bdc28",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Add a color highlight"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "taskItem",
+          "attrs": {
+            "checked": false
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "e15353be-84c3-4922-9165-a74caf7daef1",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Explore the context menu & drag blocks"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "taskItem",
+          "attrs": {
+            "checked": false
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "e93482bb-0082-45e3-ba16-5e07fec3344f",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Ask the AI for help"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "horizontalRule"
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "e2ba59b4-1014-4875-9992-552bdc74521c",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null,
+        "data-toc-id": "e2ba59b4-1014-4875-9992-552bdc74521c",
+        "level": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Developer quickstart"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "id": "7f98f6f5-07df-48a6-8759-2c6ea62d7c67",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Ready to build your own editor? Just run:"
+        }
+      ]
+    },
+    {
+      "type": "codeBlock",
+      "attrs": {
+        "id": "3600cd2b-86a5-4b3a-8d39-560f6871744e",
+        "language": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "npx @tiptap/cli init"
+        }
+      ]
+    },
+    {
+      "type": "blockquote",
+      "attrs": {
+        "id": "0c7127a4-32e4-42e3-96d6-5c804ab2bc1a",
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "id": "f40f4db9-3733-4772-91a9-9ac126d536f8",
+            "textAlign": null,
+            "backgroundColor": null,
+            "nodeTextAlign": null,
+            "nodeVerticalAlign": null
+          },
+          "content": [
+            {
+              "type": "text",
+              "marks": [
+                {
+                  "type": "bold"
+                }
+              ],
+              "text": "Did you know? "
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "Many features here are powered by open-source Tiptap UI Components. Some advanced tools – like the AI Assistant, advanced color palettes, or context menus – are exclusive to paid users. "
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "Unlock even more possibilities by "
+            },
+            {
+              "type": "text",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://tiptap.dev/pricing",
+                    "target": "_blank",
+                    "rel": "noopener noreferrer nofollow",
+                    "class": null
+                  }
+                }
+              ],
+              "text": "upgrading your plan"
+            },
+            {
+              "type": "text",
+              "text": "!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "1741b659-1e29-4da3-9fb0-269418e78f79",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null,
+        "data-toc-id": "1741b659-1e29-4da3-9fb0-269418e78f79",
+        "level": 3
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Short description"
+        }
+      ]
+    },
+    {
+      "type": "bulletList",
+      "attrs": {
+        "id": "30afe9a9-a336-40ae-8b0c-8cdaa040db81",
+        "backgroundColor": null
+      },
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "b8c80273-447a-4e0e-ab9f-78d0150d0a3b",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Content blocks = Node Components"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "id": "49974099-ca00-48f1-bd3d-ffd877fa45f1",
+                "textAlign": null,
+                "backgroundColor": null,
+                "nodeTextAlign": null,
+                "nodeVerticalAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Toolbars, menus, and buttons = UI Components"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "horizontalRule"
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "id": "ac284b90-febc-4403-bf34-5d287956ed25",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null,
+        "data-toc-id": "ac284b90-febc-4403-bf34-5d287956ed25",
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "P.S."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "id": "182c7969-aac2-4482-a21d-0362d3844698",
+        "textAlign": null,
+        "backgroundColor": null,
+        "nodeTextAlign": null,
+        "nodeVerticalAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "You’re using the Notion-like template, available for paid users."
+        }
+      ]
+    }
+  ]
+}
