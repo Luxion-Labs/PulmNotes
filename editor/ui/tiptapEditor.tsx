@@ -26,6 +26,10 @@ import { TodoNode } from "@/editor/extensions/todo-node"
 // --- Enhanced Image Node ---
 import { Image } from "@/components/tiptap-node/image-node/image-node-extension"
 
+// --- Video Node ---
+import { getVideoExtension, VideoNode } from "@/editor/components/tiptap-node/video-node"
+import { VideoUploadNodeExtension } from "@/components/tiptap-node/video-upload-node"
+
 // --- Enhanced Table Components ---
 import { TableKit } from "@/editor/components/tiptap-node/table-node/extensions/table-node-extension"
 import { TableHandleExtension } from "@/editor/components/tiptap-node/table-node/extensions/table-handle"
@@ -184,6 +188,9 @@ export function TipTapNoteEditor({ note, allNotes = [], onUpdateTitle, onUpdateB
         // Dynamic getter: returns all notes excluding the current one and deleted notes
         return (allNotesRef.current || []).filter(n => n.id !== noteIdRef.current && !n.isDeleted)
       }),  // ✅ Mention suggestions (@)
+      VideoNode,                     // ✅ Custom video node
+      getVideoExtension(),            // ✅ YouTube embed
+      VideoUploadNodeExtension,       // ✅ Video upload node
     ],
     // Initialize with converted blocks
     content: convertBlocksToTipTap(note.blocks),
