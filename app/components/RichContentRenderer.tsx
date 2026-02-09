@@ -74,7 +74,7 @@ const TokenRenderer: React.FC<TokenRendererProps> = ({ token, onAssetClick }) =>
             e.preventDefault();
             onAssetClick(token.url);
           }}
-          className="text-stone-700 underline underline-offset-2 hover:text-stone-900 transition-colors inline-flex items-center gap-1"
+          className="cursor-pointer text-stone-700 underline underline-offset-2 hover:text-stone-900 transition-colors inline-flex items-center gap-1"
         >
           {token.text}
         </a>
@@ -87,7 +87,7 @@ const TokenRenderer: React.FC<TokenRendererProps> = ({ token, onAssetClick }) =>
         href={token.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-stone-700 underline underline-offset-2 hover:text-stone-900 transition-colors inline-flex items-center gap-1"
+        className="cursor-pointer text-stone-700 underline underline-offset-2 hover:text-stone-900 transition-colors inline-flex items-center gap-1"
       >
         {token.text}
         <ExternalLink size={12} className="opacity-60" />
@@ -103,7 +103,7 @@ const TokenRenderer: React.FC<TokenRendererProps> = ({ token, onAssetClick }) =>
           href={token.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-stone-700 underline underline-offset-2 hover:text-stone-900 transition-colors inline-flex items-center gap-1"
+          className="cursor-pointer text-stone-700 underline underline-offset-2 hover:text-stone-900 transition-colors inline-flex items-center gap-1"
         >
           {token.url}
           <ExternalLink size={12} className="opacity-60" />

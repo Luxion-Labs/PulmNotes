@@ -144,6 +144,58 @@ interface ReadModeBlockProps {
   onOpenNote?: (noteId: string) => void;
 }
 
+/**
+ * TableRenderer - Renders table data in read mode
+ */
+interface TableData {
+  rows: Array<{ cells: string[] }>;
+  headerRowIndex?: number;
+}
+
+const TableRenderer: React.FC<{ tableData: TableData }> = ({ tableData }) => {
+  if (!tableData.rows || tableData.rows.length === 0) {
+    return null;
+  }
+
+  const headerRowIndex = tableData.headerRowIndex ?? 0;
+
+  return (
+    <div className="my-4 overflow-x-auto">
+      <table className="w-full border-collapse border border-gray-300">
+        <tbody>
+          {tableData.rows.map((row, rowIdx) => (
+            <tr key={rowIdx} className={rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+              {row.cells.map((cellContent, cellIdx) => {
+                const isHeader = rowIdx === headerRowIndex;
+                const CellTag = isHeader ? 'th' : 'td';
+
+                return (
+                  <CellTag
+                    key={cellIdx}
+                    className={`border border-gray-300 px-4 py-2 text-sm ${
+                      isHeader
+                        ? 'bg-gray-100 font-semibold text-gray-900'
+                        : 'text-gray-700'
+                    }`}
+                  >
+                    {cellContent}
+                  </CellTag>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+interface ReadModeBlockProps {
+  block: Block;
+  assets?: Asset[];
+  onOpenNote?: (noteId: string) => void;
+}
+
 const ReadModeBlock: React.FC<ReadModeBlockProps> = ({ block, assets = [], onOpenNote }) => {
   const getStyles = () => {
     switch (block.type) {
@@ -155,12 +207,29 @@ const ReadModeBlock: React.FC<ReadModeBlockProps> = ({ block, assets = [], onOpe
       case 'todo': return 'flex items-start gap-2';
       case 'bullet-list': return 'flex items-start gap-2';
       case 'numbered-list': return 'flex items-start gap-2';
+      case 'table': return 'my-4 w-full overflow-x-auto';
       default: return 'text-base my-1 text-gray-700 leading-relaxed';
     }
   };
 
   if (block.type === 'divider') {
     return <hr className="w-full my-4 border-t border-gray-200" />;
+  }
+
+  // Handle table blocks
+  if (block.type === 'table') {
+    try {
+      const tableData = JSON.parse(block.content);
+      return <TableRenderer tableData={tableData} />;
+    } catch (err) {
+      console.error('[ReadMode] Failed to parse table data', err);
+      // Fallback for corrupted table data
+      return (
+        <div className="my-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800">
+          ⚠️ Unable to display table
+        </div>
+      );
+    }
   }
 
   // Render content with mentions
