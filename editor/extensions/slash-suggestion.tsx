@@ -24,7 +24,7 @@ export const SlashSuggestion = Extension.create({
         editor: this.editor,
         command: ({ editor, range, props }: any) => {
           // handled by render() selection; leave noop here
-        }, 
+        },
         items: ({ query }: any) => {
           const q = (query || '').toLowerCase()
           return MENU_ITEMS.filter((it) => it.label.toLowerCase().includes(q)) as MenuItem[]
@@ -56,8 +56,22 @@ export const SlashSuggestion = Extension.create({
               }
             }
             if (!rect) return
-            const left = rect.left + window.scrollX
-            const top = (rect.bottom || rect.top) + window.scrollY
+            if (!rect) return
+
+            const menuHeight = 320; // Approx max height
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+
+            const left = rect.left + window.scrollX + 50; // Offset right by 50px
+
+            let top;
+            // Place above if restricted space below, but only if there is space above
+            if (spaceBelow < menuHeight && spaceAbove > menuHeight) {
+              top = (rect.top + window.scrollY) - menuHeight - 10;
+            } else {
+              top = (rect.bottom + window.scrollY) + 10;
+            }
+
             container.style.left = `${left}px`
             container.style.top = `${top}px`
           }
@@ -139,7 +153,19 @@ export const SlashSuggestion = Extension.create({
 
                     break
                   case 'emoji':
-                    editor.chain().focus().insertContent('😀 ').run()
+                    // Trigger emoji picker by inserting : character
+                    editor.chain().focus().insertContent(':').run()
+                    // Force trigger the emoji suggestion
+                    setTimeout(() => {
+                      try {
+                        if (editor && editor.view) {
+                          editor.view.dispatch(editor.state.tr)
+                          editor.view.focus()
+                        }
+                      } catch (err) {
+                        console.error('[Slash] trigger emoji suggestion error', err)
+                      }
+                    }, 0)
                     break
                   case 'image':
                     try {

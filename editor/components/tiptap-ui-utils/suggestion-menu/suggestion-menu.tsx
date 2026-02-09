@@ -5,9 +5,9 @@ import { flip, offset, shift, size } from "@floating-ui/react"
 import { PluginKey } from "@tiptap/pm/state"
 
 // --- Hooks ---
-import { useFloatingElement } from "@/hooks/use-floating-element"
-import { useMenuNavigation } from "@/hooks/use-menu-navigation"
-import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
+import { useFloatingElement } from "@/editor/hooks/use-floating-element"
+import { useMenuNavigation } from "@/editor/hooks/use-menu-navigation"
+import { useTiptapEditor } from "@/editor/hooks/use-tiptap-editor"
 
 // --- Tiptap Editor ---
 import type { Range } from "@tiptap/react"
@@ -22,11 +22,11 @@ import {
   type SuggestionProps,
 } from "@tiptap/suggestion"
 
-import { calculateStartPosition } from "@/components/tiptap-ui-utils/suggestion-menu/suggestion-menu-utils"
+import { calculateStartPosition } from "@/editor/components/tiptap-ui-utils/suggestion-menu/suggestion-menu-utils"
 import type {
   SuggestionItem,
   SuggestionMenuProps,
-} from "@/components/tiptap-ui-utils/suggestion-menu/suggestion-menu-types"
+} from "@/editor/components/tiptap-ui-utils/suggestion-menu/suggestion-menu-types"
 
 /**
  * A component that renders a suggestion menu for Tiptap editors.

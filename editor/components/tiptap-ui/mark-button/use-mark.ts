@@ -10,13 +10,13 @@ import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 import { isMarkInSchema, isNodeTypeSelected } from "@/editor/lib/tiptap-utils"
 
 // --- Icons ---
-import { BoldIcon } from "@/components/tiptap-icons/bold-icon"
-import { Code2Icon } from "@/components/tiptap-icons/code2-icon"
-import { ItalicIcon } from "@/components/tiptap-icons/italic-icon"
-import { StrikeIcon } from "@/components/tiptap-icons/strike-icon"
-import { SubscriptIcon } from "@/components/tiptap-icons/subscript-icon"
-import { SuperscriptIcon } from "@/components/tiptap-icons/superscript-icon"
-import { UnderlineIcon } from "@/components/tiptap-icons/underline-icon"
+import { BoldIcon } from "@/editor/components/tiptap-icons/bold-icon"
+import { Code2Icon } from "@/editor/components/tiptap-icons/code2-icon"
+import { ItalicIcon } from "@/editor/components/tiptap-icons/italic-icon"
+import { StrikeIcon } from "@/editor/components/tiptap-icons/strike-icon"
+import { SubscriptIcon } from "@/editor/components/tiptap-icons/subscript-icon"
+import { SuperscriptIcon } from "@/editor/components/tiptap-icons/superscript-icon"
+import { UnderlineIcon } from "@/editor/components/tiptap-icons/underline-icon"
 
 export type Mark =
   | "bold"
