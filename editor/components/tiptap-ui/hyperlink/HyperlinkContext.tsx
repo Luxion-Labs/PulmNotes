@@ -13,6 +13,8 @@ interface HyperlinkContextType {
 
 const HyperlinkContext = createContext<HyperlinkContextType | null>(null)
 
+export { HyperlinkContext }
+
 export function HyperlinkProvider({ children }: { children: ReactNode }) {
   const hyperlinkState = useHyperlinkHover()
 

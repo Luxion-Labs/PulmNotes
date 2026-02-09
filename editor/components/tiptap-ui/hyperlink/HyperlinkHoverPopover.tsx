@@ -1,13 +1,18 @@
 "use client"
 
-import { useHyperlinkContext } from "./HyperlinkContext"
+import { useContext } from "react"
+import { HyperlinkContext } from "./HyperlinkContext"
 
 export interface HyperlinkHoverPopoverProps {
   onEdit: () => void
 }
 
 export function HyperlinkHoverPopover({ onEdit }: HyperlinkHoverPopoverProps) {
-  const { hoveredLink, handlePopoverMouseEnter, handlePopoverMouseLeave } = useHyperlinkContext()
+  const context = useContext(HyperlinkContext)
+
+  if (!context) return null
+
+  const { hoveredLink, handlePopoverMouseEnter, handlePopoverMouseLeave } = context
 
   if (!hoveredLink) return null
 

@@ -1,16 +1,20 @@
 "use client"
 
-import { useEffect } from "react"
-import { useHyperlinkContext } from "./HyperlinkContext"
+import { useEffect, useContext } from "react"
+import { HyperlinkContext } from "./HyperlinkContext"
 
 /**
  * Global event listener component that handles hyperlink hover events
  * This component attaches event listeners to the document to detect link hovers
  */
 export function HyperlinkEventHandler() {
-  const { handleLinkMouseOver, handleLinkMouseOut } = useHyperlinkContext()
+  const context = useContext(HyperlinkContext)
 
   useEffect(() => {
+    if (!context) return // Context not available yet
+
+    const { handleLinkMouseOver, handleLinkMouseOut } = context
+
     const handleMouseOver = (event: MouseEvent) => {
       handleLinkMouseOver(event)
     }
@@ -40,7 +44,7 @@ export function HyperlinkEventHandler() {
       document.removeEventListener("mouseout", handleMouseOut)
       document.removeEventListener("click", handleClick, true)
     }
-  }, [handleLinkMouseOver, handleLinkMouseOut])
+  }, [context])
 
   return null // This component doesn't render anything
 }
