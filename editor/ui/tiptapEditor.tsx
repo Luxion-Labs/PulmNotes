@@ -11,16 +11,24 @@ import { Typography } from "@tiptap/extension-typography"
 import { Highlight } from "@tiptap/extension-highlight"
 import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
+import { Underline } from "@tiptap/extension-underline"
+import { Color, TextStyle } from "@tiptap/extension-text-style"
 import { Selection } from "@tiptap/extensions"
 import { Placeholder } from "@tiptap/extension-placeholder"
+import { Emoji, gitHubEmojis } from "@tiptap/extension-emoji"
 
 // --- Custom Extensions ---
-import  ImageExtension from "@/editor/extensions/image-extension"
-import  TableExtension  from "@/editor/extensions/table-extension"
+import ImageExtension from "@/editor/extensions/image-extension"
+import TableExtension from "@/editor/extensions/table-extension"
 import SlashSuggestion from "@/editor/extensions/slash-suggestion"
 import { createMentionSuggestion } from "@/editor/extensions/mention-suggestion"
 import { AssetNode } from "@/editor/extensions/asset-node"
 import { TodoNode } from "@/editor/extensions/todo-node"
+
+// --- Enhanced Table Components ---
+import { TableKit } from "@/editor/components/tiptap-node/table-node/extensions/table-node-extension"
+import { TableHandleExtension } from "@/editor/components/tiptap-node/table-node/extensions/table-handle"
+import { TableHandle } from "@/editor/components/tiptap-node/table-node/ui/table-handle"
 
 // --- Converters ---
 import { convertBlocksToTipTap } from "@/editor/lib/convertBlocksToTipTap"
@@ -38,8 +46,14 @@ import "@/components/tiptap-node/list-node/list-node.scss"
 import "@/components/tiptap-node/image-node/image-node.scss"
 import "@/components/tiptap-node/heading-node/heading-node.scss"
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss"
-import "@/components/tiptap-node/table-node/table-node.scss"
+import "@/editor/components/tiptap-node/table-node/styles/table-node.scss"
+import "@/editor/components/tiptap-node/table-node/styles/prosemirror-table.scss"
+import "@/editor/components/tiptap-node/table-node/ui/table-handle-menu/table-handle-menu.scss"
 import "@/components/tiptap-templates/simple/simple-editor.scss"
+
+// --- UI Components ---
+import { FloatingToolbar } from "@/editor/ui/FloatingToolbar"
+import { EmojiDropdownMenu } from "@/editor/components/tiptap-ui/emoji-dropdown-menu"
 
 // --- Types ---
 import { Note, Block } from "@/editor/schema/types"
@@ -67,6 +81,18 @@ interface TipTapNoteEditorProps {
 export function TipTapNoteEditor({ note, allNotes = [], onUpdateTitle, onUpdateBlocks, onOpenNote }: TipTapNoteEditorProps) {
   const editorRef = useRef<any>(null)
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Keep a ref to allNotes so the extension can access the latest list without re-initialization
+  const allNotesRef = useRef(allNotes)
+  useEffect(() => {
+    allNotesRef.current = allNotes
+  }, [allNotes])
+
+  // Ref for current note ID to filter out self
+  const noteIdRef = useRef(note.id)
+  useEffect(() => {
+    noteIdRef.current = note.id
+  }, [note.id])
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -109,13 +135,31 @@ export function TipTapNoteEditor({ note, allNotes = [], onUpdateTitle, onUpdateB
         placeholder: "Write or type '/' for commands...",
       }),
       ImageExtension,           // ✅ Image extension with resize
-      ...TableExtension,        // ✅ Table extension (spreads array of [Table, TableRow, TableCell, TableHeader])
+      TableKit.configure({     // ✅ Enhanced table extension with drag handles and context menu
+        table: {
+          resizable: true,
+          handleWidth: 5,
+          cellMinWidth: 50,
+          lastColumnResizable: true,
+          allowTableNodeSelection: true,
+        },
+      }),
+      TableHandleExtension,    // ✅ Table handle extension for row/column manipulation
       AssetNode,                // ✅ Custom asset node with NodeView
       TodoNode,                 // ✅ Custom todo node with checkbox NodeView
       Typography,
       Superscript,
       Subscript,
+      Underline,
+      TextStyle,
+      Color,
       Selection,
+      Emoji.configure({
+        emojis: gitHubEmojis.filter(
+          (emoji) => !emoji.name.includes("regional")
+        ),
+        forceFallbackImages: true,
+      }),
       ImageUploadNode.configure({
         accept: "image/*",
         maxSize: MAX_FILE_SIZE,
@@ -124,7 +168,10 @@ export function TipTapNoteEditor({ note, allNotes = [], onUpdateTitle, onUpdateB
         onError: (error) => console.error("Upload failed:", error),
       }),
       SlashSuggestion,               // ✅ Slash suggestions (/)
-      createMentionSuggestion(allNotes),  // ✅ Mention suggestions (@)
+      createMentionSuggestion(() => {
+        // Dynamic getter: returns all notes excluding the current one
+        return (allNotesRef.current || []).filter(n => n.id !== noteIdRef.current)
+      }),  // ✅ Mention suggestions (@)
     ],
     // Initialize with converted blocks
     content: convertBlocksToTipTap(note.blocks),
@@ -154,6 +201,9 @@ export function TipTapNoteEditor({ note, allNotes = [], onUpdateTitle, onUpdateB
   return (
     <div className="tiptap-note-editor-wrapper">
       <EditorContent editor={editor} role="presentation" className="simple-editor-content" />
+      <FloatingToolbar editor={editor} />
+      <EmojiDropdownMenu editor={editor} />
+      {editor && <TableHandle editor={editor} />}
     </div>
   )
 }

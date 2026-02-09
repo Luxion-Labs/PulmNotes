@@ -16,7 +16,7 @@ import {
 } from "@/editor/lib/tiptap-utils"
 
 // --- Icons ---
-import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
+import { HighlighterIcon } from "@/editor/components/tiptap-icons/highlighter-icon"
 
 export const COLOR_HIGHLIGHT_SHORTCUT_KEY = "mod+shift+h"
 export const HIGHLIGHT_COLORS = [

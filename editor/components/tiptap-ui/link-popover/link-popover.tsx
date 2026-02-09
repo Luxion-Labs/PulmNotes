@@ -8,10 +8,10 @@ import { useIsBreakpoint } from "@/hooks/use-is-breakpoint"
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 
 // --- Icons ---
-import { CornerDownLeftIcon } from "@/components/tiptap-icons/corner-down-left-icon"
-import { ExternalLinkIcon } from "@/components/tiptap-icons/external-link-icon"
-import { LinkIcon } from "@/components/tiptap-icons/link-icon"
-import { TrashIcon } from "@/components/tiptap-icons/trash-icon"
+import { CornerDownLeftIcon } from "@/editor/components/tiptap-icons/corner-down-left-icon"
+import { ExternalLinkIcon } from "@/editor/components/tiptap-icons/external-link-icon"
+import { LinkIcon } from "@/editor/components/tiptap-icons/link-icon"
+import { TrashIcon } from "@/editor/components/tiptap-icons/trash-icon"
 
 // --- Tiptap UI ---
 import type { UseLinkPopoverConfig } from "@/components/tiptap-ui/link-popover"

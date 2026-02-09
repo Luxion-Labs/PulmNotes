@@ -3,7 +3,7 @@
 import { forwardRef, useCallback, useState } from "react"
 
 // --- Icons ---
-import { ChevronDownIcon } from "@/components/tiptap-icons/chevron-down-icon"
+import { ChevronDownIcon } from "@/editor/components/tiptap-icons/chevron-down-icon"
 
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor"

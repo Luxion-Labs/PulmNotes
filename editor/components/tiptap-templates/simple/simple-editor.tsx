@@ -13,8 +13,11 @@ import { Typography } from "@tiptap/extension-typography"
 import { Highlight } from "@tiptap/extension-highlight"
 import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
+import { Underline } from "@tiptap/extension-underline"
+import { Color, TextStyle } from "@tiptap/extension-text-style"
 import { Selection } from "@tiptap/extensions"
 import { Placeholder } from "@tiptap/extension-placeholder"
+import { Emoji, gitHubEmojis } from "@tiptap/extension-emoji"
 
 
 // --- UI Primitives ---
@@ -59,9 +62,9 @@ import { TextAlignButton } from "@/components/tiptap-ui/text-align-button"
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button"
 
 // --- Icons ---
-import { ArrowLeftIcon } from "@/components/tiptap-icons/arrow-left-icon"
-import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
-import { LinkIcon } from "@/components/tiptap-icons/link-icon"
+import { ArrowLeftIcon } from "@/editor/components/tiptap-icons/arrow-left-icon"
+import { HighlighterIcon } from "@/editor/components/tiptap-icons/highlighter-icon"
+import { LinkIcon } from "@/editor/components/tiptap-icons/link-icon"
 
 // --- Hooks ---
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint"
@@ -70,6 +73,8 @@ import { useCursorVisibility } from "@/hooks/use-cursor-visibility"
 
 // --- Components ---
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
+import { FloatingToolbar } from "@/editor/ui/FloatingToolbar"
+import { EmojiDropdownMenu } from "@/editor/components/tiptap-ui/emoji-dropdown-menu"
 import SlashSuggestion from "@/editor/extensions/slash-suggestion"
 import MentionSuggestion from "@/editor/extensions/mention-suggestion"
 
@@ -232,7 +237,16 @@ export function SimpleEditor() {
       Typography,
       Superscript,
       Subscript,
+      Underline,
+      TextStyle,
+      Color,
       Selection,
+      Emoji.configure({
+        emojis: gitHubEmojis.filter(
+          (emoji) => !emoji.name.includes("regional")
+        ),
+        forceFallbackImages: true,
+      }),
       ImageUploadNode.configure({
         accept: "image/*",
         maxSize: MAX_FILE_SIZE,
@@ -336,7 +350,10 @@ export function SimpleEditor() {
           editor={editor}
           role="presentation"
           className="simple-editor-content"
-        />
+        >
+          <FloatingToolbar />
+          <EmojiDropdownMenu />
+        </EditorContent>
 
       </EditorContext.Provider>
     </div>

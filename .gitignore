@@ -41,6 +41,6 @@ node_modules
 /blob-report/
 /playwright/.cache/
 
-
 # Authentication tokens
 .npmrc
+/new-editor-tiptap/
