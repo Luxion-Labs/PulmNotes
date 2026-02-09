@@ -181,8 +181,8 @@ export function TipTapNoteEditor({ note, allNotes = [], onUpdateTitle, onUpdateB
       UiState,
       SlashSuggestion,               // ✅ Slash suggestions (/)
       createMentionSuggestion(() => {
-        // Dynamic getter: returns all notes excluding the current one
-        return (allNotesRef.current || []).filter(n => n.id !== noteIdRef.current)
+        // Dynamic getter: returns all notes excluding the current one and deleted notes
+        return (allNotesRef.current || []).filter(n => n.id !== noteIdRef.current && !n.isDeleted)
       }),  // ✅ Mention suggestions (@)
     ],
     // Initialize with converted blocks
