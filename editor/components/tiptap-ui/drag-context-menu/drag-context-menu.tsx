@@ -376,9 +376,34 @@ export const DragContextMenu: React.FC<DragContextMenuProps> = ({
   const [node, setNode] = useState<TiptapNode | null>(null)
   const [nodePos, setNodePos] = useState<number>(-1)
 
+
   const handleNodeChange = useCallback((data: NodeChangeData) => {
-    if (data.node) setNode(data.node)
-    setNodePos(data.pos)
+    // Schedule node updates to the next animation frame and force a layout read
+    // This prevents a race where Floating UI measures before the DOM stabilizes
+    const schedule = (fn: () => void) => {
+      if (typeof window === "undefined") {
+        setTimeout(fn, 0)
+        return
+      }
+
+      window.requestAnimationFrame(() => {
+        // Force a layout read to ensure measurements are up-to-date
+        void document.documentElement.getBoundingClientRect()
+        window.requestAnimationFrame(fn)
+      })
+    }
+
+    if (data.node) {
+      schedule(() => {
+        setNode(data.node)
+        setNodePos(data.pos)
+      })
+    } else {
+      schedule(() => {
+        setNode(null)
+        setNodePos(-1)
+      })
+    }
   }, [])
 
   useEffect(() => {
@@ -418,7 +443,7 @@ export const DragContextMenu: React.FC<DragContextMenuProps> = ({
   const onElementDragStart = useCallback(() => {
     if (!editor) return
     editor.commands.setIsDragging(true)
-  }, [editor])
+  }, [editor, nodePos])
 
   const onElementDragEnd = useCallback(() => {
     if (!editor) return
@@ -428,7 +453,7 @@ export const DragContextMenu: React.FC<DragContextMenuProps> = ({
       editor.view.dom.blur()
       editor.view.focus()
     }, 0)
-  }, [editor])
+  }, [editor, nodePos])
 
   if (!editor) return null
 
