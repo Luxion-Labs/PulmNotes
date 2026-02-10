@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import {
   Type,
   Heading1,
@@ -12,7 +12,7 @@ import {
   Quote,
   Code,
   Minus,
-  FileText,
+  Image,
   AtSign,
   Smile,
   Youtube,
@@ -34,163 +34,152 @@ export const MENU_ITEMS: MenuItem[] = [
   { id: 'table', label: 'Table', icon: TableIcon, group: 'Insert' },
   { id: 'emoji', label: 'Emoji', icon: Smile, group: 'Insert' },
   { id: 'mention', label: 'Mention', icon: AtSign, group: 'Insert' },
-  { id: 'image', label: 'Image', icon: FileText, group: 'Upload' },
+  { id: 'image', label: 'Image', icon: Image, group: 'Upload' },
   { id: 'video', label: 'Video', icon: Youtube, group: 'Upload' },
   { id: 'audio', label: 'Audio', icon: Music, group: 'Upload' },
 ];
 
 interface SlashMenuProps {
-  position: Coordinates;
-  onSelect: (type: BlockType) => void;
-  onClose: () => void;
+  position?: Coordinates;
+  onSelect?: (type: BlockType) => void;
+  onClose?: () => void;
   // Optional controlled props used by TipTap Suggestion renderer
   items?: MenuItem[];
   query?: string | null;
 }
 
-export const SlashMenu: React.FC<SlashMenuProps> = ({ position, onSelect, onClose, items, query: controlledQuery }) => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [internalQuery, setInternalQuery] = useState('')
-  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Determine items and query (controlled by Suggestion or local state)
-  const q = (controlledQuery !== undefined && controlledQuery !== null) ? controlledQuery : internalQuery
-  const sourceItems = items ?? MENU_ITEMS
-  const filteredItems = sourceItems.filter((it) => it.label.toLowerCase().includes((q || '').toLowerCase()))
+import { SlashDropdownMenu } from "@/components/tiptap-ui/slash-dropdown-menu"
+import type { SuggestionItem } from "@/components/tiptap-ui-utils/suggestion-menu"
+import { insertImageUpload } from '@/editor/extensions/image-extension'
+import { insertTable } from '@/editor/extensions/table-extension'
+import { openMentionMenu } from '@/editor/extensions/mention-suggestion'
+import type { Editor } from '@tiptap/react'
+import { isNodeInSchema } from '@/lib/tiptap-utils'
 
-  const grouped: Record<string, MenuItem[]> = {};
-  for (const item of filteredItems) {
-    const g = item.group ?? 'Other'
-    if (!grouped[g]) grouped[g] = []
-    grouped[g].push(item)
+export const SlashMenu: React.FC<SlashMenuProps & { editor?: import('@tiptap/react').Editor | null }> = ({ position, onSelect, onClose, items, query: controlledQuery, editor }) => {
+  // Convert our simple MENU_ITEMS into SuggestionItems for the Notion-style menu
+  const toSuggestionItems = (menuItems: MenuItem[]): SuggestionItem[] => {
+    return menuItems.map((mi) => {
+      const id = mi.id
+      const title = mi.label
+      const badge = mi.icon as any
+      const group = mi.group
+
+      const onSelect = ({ editor }: { editor: Editor }) => {
+        // Action executed by selecting item from the Notion-style menu
+        switch (id) {
+          case 'text':
+            editor.chain().focus().setParagraph().run()
+            break
+          case 'h1':
+            editor.chain().focus().toggleHeading({ level: 1 }).run()
+            break
+          case 'h2':
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+            break
+          case 'h3':
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+            break
+          case 'bullet-list':
+            editor.chain().focus().toggleBulletList().run()
+            break
+          case 'numbered-list':
+            editor.chain().focus().toggleOrderedList().run()
+            break
+          case 'todo':
+            editor.chain().focus().toggleTaskList().run()
+            break
+          case 'quote':
+            editor.chain().focus().toggleBlockquote().run()
+            break
+          case 'code':
+            editor.chain().focus().toggleCodeBlock().run()
+            break
+          case 'divider':
+            editor.chain().focus().setHorizontalRule().run()
+            break
+          case 'table':
+            try {
+              insertTable(editor, 3, 3, true)
+            } catch (err) {
+              console.error('[SlashMenu] table insertion failed', err)
+            }
+            break
+          case 'mention':
+            try {
+              openMentionMenu(editor)
+            } catch (err) {
+              editor.chain().focus().insertContent('@').run()
+            }
+            break
+          case 'emoji':
+            editor.chain().focus().insertContent(':').run()
+            setTimeout(() => {
+              try {
+                if (editor && editor.view) {
+                  editor.view.dispatch(editor.state.tr)
+                  editor.view.focus()
+                }
+              } catch (err) {
+                // ignore
+              }
+            }, 0)
+            break
+          case 'image':
+            try {
+              const success = insertImageUpload(editor)
+              if (!success) editor.chain().focus().insertContent('![]()').run()
+            } catch (err) {
+              console.error('[SlashMenu] insert image error', err)
+            }
+            break
+          case 'video':
+            try {
+              if (isNodeInSchema('videoUploadNode', editor)) {
+                editor.chain().focus().insertContent({ type: 'videoUploadNode', attrs: { src: null } }).run()
+              } else if (isNodeInSchema('youtube', editor)) {
+                editor.chain().focus().setYoutubeVideo({ src: '' }).run()
+              } else {
+                // fallback placeholder action
+                editor.chain().focus().insertContent('[Paste YouTube link here]').run()
+              }
+            } catch (err) {
+              console.error('[SlashMenu] insert video error', err)
+            }
+            break
+          case 'audio':
+            try {
+              if (isNodeInSchema('audioUploadNode', editor)) {
+                editor.chain().focus().insertContent({ type: 'audioUploadNode', attrs: { src: null } }).run()
+              } else {
+                editor.chain().focus().insertContent('[Audio placeholder]').run()
+              }
+            } catch (err) {
+              console.error('[SlashMenu] insert audio error', err)
+            }
+            break
+          default:
+            break
+        }
+      }
+
+      const item: SuggestionItem = {
+        title,
+        badge,
+        group,
+        onSelect
+      }
+
+      return item
+    })
   }
 
-  // Auto-focus menu when it appears to intercept keyboard events
-  useEffect(() => {
-    if (menuRef.current) {
-      menuRef.current.focus();
-    }
-  }, []);
+  // Build authoritative items from MENU_ITEMS (or use provided items) and pass them as custom items.
+  const customItems = toSuggestionItems(items ?? MENU_ITEMS)
 
-  useEffect(() => {
-    const menu = menuRef.current;
-    if (menu) {
-      const selectedElement = menu.querySelector('[data-selected="true"]') as HTMLElement | null;
-      if (selectedElement) {
-        selectedElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest'
-        });
-      }
-    }
-  }, [selectedIndex, controlledQuery, internalQuery]);
-
+  // Pass custom items and disable the internal menu to avoid duplicates; the menu itself is authoritative for availability
   return (
-    <div
-      ref={menuRef}
-      tabIndex={-1}
-      className="slash-menu absolute z-50 w-44 bg-white rounded-md shadow-lg overflow-hidden flex flex-col max-h-[320px] outline-none"
-      style={{
-        top: position.y,
-        left: position.x
-      }}
-      onKeyDown={(e) => {
-        // Prevent keyboard events from bubbling to parent
-        e.stopPropagation();
-
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          if (filteredItems.length > 0) {
-            setSelectedIndex((prev) => (prev + 1) % filteredItems.length);
-          }
-          return
-        }
-
-        if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          if (filteredItems.length > 0) {
-            setSelectedIndex((prev) => (prev - 1 + filteredItems.length) % filteredItems.length);
-          }
-          return
-        }
-
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          if (filteredItems.length > 0 && filteredItems[selectedIndex]) {
-            onSelect(filteredItems[selectedIndex].id);
-          }
-          return
-        }
-
-        if (e.key === 'Escape') {
-          e.preventDefault();
-          onClose();
-          return
-        }
-
-        // handle printable characters and Backspace for filtering in uncontrolled mode
-        if (!items) {
-          if (e.key === 'Backspace') {
-            e.preventDefault();
-            setInternalQuery((q) => q.slice(0, -1));
-            setSelectedIndex(0);
-            return
-          }
-
-          if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
-            e.preventDefault();
-            setInternalQuery((q) => (q + e.key).slice(0, 64));
-            setSelectedIndex(0);
-            return
-          }
-        }
-      }}
-    >
-      {/* header placeholder removed to keep UI compact */}
-      
-
-      <div 
-        className="flex flex-col divide-y divide-gray-100 overflow-y-auto" 
-        style={{ 
-          scrollbarWidth: 'none', 
-          msOverflowStyle: 'none'
-        }}
-      >
-        {Object.keys(grouped).map((section) => (
-          <div key={section} className="px-0">
-            <div className="px-3 py-1 text-xs font-semibold text-gray-400 uppercase">{section}</div>
-            <div className="flex flex-col">
-              {grouped[section].map((item, idx) => {
-                const baseIndex = Object.values(grouped).slice(0, Object.keys(grouped).indexOf(section)).reduce((acc, arr) => acc + arr.length, 0)
-                const isSelected = (baseIndex + idx) === selectedIndex
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => onSelect(item.id)}
-                    onMouseEnter={() => setSelectedIndex(baseIndex + idx)}
-                    data-selected={isSelected}
-                    className={`flex items-center gap-2 px-2 py-1 mx-1 rounded text-sm transition-colors duration-150 ${isSelected
-                        ? 'bg-sky-600 text-white'
-                        : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                  >
-                    <div className={`p-0.5 rounded ${isSelected ? 'bg-white/20' : 'bg-transparent'}`}>
-                      <item.icon size={14} className={isSelected ? 'text-white' : 'text-gray-500'} />
-                    </div>
-
-                    <div className="flex flex-col items-start text-left">
-                      <span className="font-medium truncate">{item.label}</span>
-                      {item.description && <span className="text-xs text-gray-400 truncate">{item.description}</span>}
-                    </div>
-
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-
-    </div>
-  );
-};
+    <SlashDropdownMenu editor={editor} config={{ enabledItems: [], customItems }} />
+  )
+}
