@@ -80,12 +80,18 @@ export const AssetNodeView: React.FC<AssetNodeViewProps> = ({
         )}
 
         {type === 'audio' && (
-          <audio
-            src={assetUrl}
-            controls
-            className="w-full rounded-lg shadow-md"
-            style={{ width: '100%' }}
-          />
+          <div className="audio-asset-container">
+            <audio
+              src={assetUrl}
+              controls
+              preload="metadata"
+              className="w-full rounded-lg shadow-md"
+              style={{ width: '100%' }}
+              draggable={false}
+              onDragStart={(e) => e.preventDefault()}
+            />
+            {title && <div className="mt-2 text-xs text-stone-500">{title}</div>}
+          </div>
         )}
 
         {(type === 'pdf' || type === 'docx' || type === 'text' || type === 'markdown' || type === 'link') && (

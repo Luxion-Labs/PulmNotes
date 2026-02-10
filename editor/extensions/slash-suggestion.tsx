@@ -192,6 +192,19 @@ export const SlashSuggestion = Extension.create({
                       console.error('[Slash] insert video upload node error', err)
                     }
                     break
+                  case 'audio':
+                    try {
+                      // Insert audioUploadNode which shows dialog automatically
+                      editor.chain().focus().insertContent({
+                        type: 'audioUploadNode',
+                        attrs: {
+                          src: null,
+                        },
+                      }).run()
+                    } catch (err) {
+                      console.error('[Slash] insert audio upload node error', err)
+                    }
+                    break
                   default:
                     break
                 }
