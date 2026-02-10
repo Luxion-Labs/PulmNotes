@@ -19,6 +19,8 @@ import { TypeIcon } from "@/components/tiptap-icons/type-icon"
 import { AtSignIcon } from "@/components/tiptap-icons/at-sign-icon"
 import { SmilePlusIcon } from "@/components/tiptap-icons/smile-plus-icon"
 import { TableIcon } from "@/components/tiptap-icons/table-icon"
+import { Youtube } from 'lucide-react'
+import { Music } from 'lucide-react'
 import { ListIndentedIcon } from "@/components/tiptap-icons/list-indented-icon"
 
 // --- Lib ---
@@ -178,6 +180,20 @@ const texts = {
       "url",
     ],
     badge: ImageIcon,
+    group: "Upload",
+  },
+  video: {
+    title: "Video",
+    subtext: "Embed a YouTube video or upload a file",
+    keywords: ["video", "youtube", "embed", "upload"],
+    badge: Youtube,
+    group: "Upload",
+  },
+  audio: {
+    title: "Audio",
+    subtext: "Upload or embed audio file",
+    keywords: ["audio", "sound", "mp3", "upload"],
+    badge: Music,
     group: "Upload",
   },
 }
@@ -354,6 +370,32 @@ const getItemImplementations = () => {
             type: "imageUpload",
           })
           .run()
+      },
+    },
+    video: {
+      check: (editor: Editor) => isNodeInSchema("videoUploadNode", editor) || isNodeInSchema("youtube", editor),
+      action: ({ editor }: { editor: Editor }) => {
+        try {
+          // Prefer upload node if available
+          if (isNodeInSchema("videoUploadNode", editor)) {
+            editor.chain().focus().insertContent({ type: 'videoUploadNode', attrs: { src: null } }).run()
+          } else if (isNodeInSchema("youtube", editor)) {
+            // Open the youtube embed dialog by inserting the youtube node with empty src
+            editor.chain().focus().setYoutubeVideo({ src: '' }).run()
+          }
+        } catch (err) {
+          console.error('[Slash] insert video error', err)
+        }
+      },
+    },
+    audio: {
+      check: (editor: Editor) => isNodeInSchema("audioUploadNode", editor),
+      action: ({ editor }: { editor: Editor }) => {
+        try {
+          editor.chain().focus().insertContent({ type: 'audioUploadNode', attrs: { src: null } }).run()
+        } catch (err) {
+          console.error('[Slash] insert audio error', err)
+        }
       },
     },
   }
