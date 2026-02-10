@@ -458,8 +458,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
 
       if (isValidPosition(pos)) {
         const imageNodes = urls.map((url, index) => {
-          const filename =
-            files[index]?.name.replace(/\.[^/.]+$/, "") || "unknown"
+          const filename = files[index]?.name.replace(/\.[^/.]+$/, "") || "unknown"
           return {
             type: extension.options.type,
             attrs: {
@@ -479,6 +478,58 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
           .run()
 
         focusNextNode(props.editor)
+
+        // For each uploaded image, dispatch an app:create-asset-request so the app
+        // can create a persistent Asset and reply with an assetId. When the
+        // response arrives, set the corresponding image node's assetId attribute.
+        urls.forEach((url, index) => {
+          const filename = files[index]?.name.replace(/\.[^/.]+$/, "") || "image"
+          const correlationId = crypto.randomUUID()
+          const detail = {
+            correlationId,
+            name: filename,
+            type: "image",
+            source: { kind: "file", dataUrl: url },
+            src: url,
+          }
+
+          window.dispatchEvent(new CustomEvent("app:create-asset-request", { detail }))
+
+          const onResponse = (ev: Event) => {
+            const ce = ev as CustomEvent<{ correlationId: string; assetId?: string }>
+            if (ce?.detail?.correlationId !== correlationId) return
+            const { assetId } = ce.detail || {}
+            if (assetId) {
+              // Find first image node with matching src and set its assetId
+              const { doc } = props.editor.state
+              let foundPos: number | null = null
+              doc.descendants((node, p) => {
+                if (node.type.name === "image" && node.attrs?.src === url) {
+                  foundPos = p
+                  return false
+                }
+                return true
+              })
+
+              if (foundPos !== null) {
+                try {
+                  const currentNode = props.editor.state.doc.nodeAt(foundPos)
+                  const nextAttrs = { ...(currentNode?.attrs as Record<string, unknown>), assetId }
+                  props.editor.chain().focus().command(({ tr }) => {
+                    tr.setNodeMarkup(foundPos!, undefined, nextAttrs)
+                    return true
+                  }).run()
+                } catch (err) {
+                  console.error('[ImageUploadNode] failed to attach assetId to image node', err)
+                }
+              }
+            }
+
+            window.removeEventListener("app:create-asset-response", onResponse)
+          }
+
+          window.addEventListener("app:create-asset-response", onResponse)
+        })
       }
     }
   }
