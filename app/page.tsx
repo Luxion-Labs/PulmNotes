@@ -126,6 +126,62 @@ export default function Home() {
     }
   }, [assets, isLoaded]);
 
+  // Listen for remote create-asset requests from components embedded in the editor (e.g., upload nodes)
+  useEffect(() => {
+    const handler = async (ev: Event) => {
+      const ce = ev as CustomEvent<{
+        correlationId: string
+        name: string
+        type: AssetType
+        source: { kind: 'file'; dataUrl: string } | { kind: 'link'; url: string }
+        src?: string
+      }>
+
+      const { correlationId, name, type, source, src } = ce.detail
+
+      // Determine category from the currently open note (if any), otherwise fall back to 'Uncategorized'
+      let categoryId = categories.find((c) => c.name === 'Uncategorized')?.id
+      if (currentNoteId) {
+        const note = notes.find((n) => n.id === currentNoteId)
+        if (note && note.categoryId) {
+          categoryId = note.categoryId
+        }
+      }
+
+      if (!categoryId) {
+        const newCategory = {
+          id: `cat-uncategorized-${generateId()}`,
+          name: 'Uncategorized',
+          color: '#a8a29e',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        } as Category
+        setCategories((prev) => [...prev, newCategory])
+        categoryId = newCategory.id
+      }
+
+      const newAsset: Asset = {
+        id: `asset-${generateId()}`,
+        name,
+        type,
+        categoryId: categoryId!,
+        subCategoryId: undefined,
+        source,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+
+      setAssets((prev) => [...prev, newAsset])
+
+      // Respond with assigned id so the caller can attach it to the node
+      window.dispatchEvent(new CustomEvent('app:create-asset-response', { detail: { correlationId, assetId: newAsset.id, src } }))
+    }
+
+    window.addEventListener('app:create-asset-request', handler)
+    return () => window.removeEventListener('app:create-asset-request', handler)
+  }, [isLoaded, currentNoteId, categories.length, notes.length, subCategories.length])
+
+
   const currentNote = notes.find(n => n.id === currentNoteId);
 
   const handleUpdateTitle = (noteId: string, title: string) => {
