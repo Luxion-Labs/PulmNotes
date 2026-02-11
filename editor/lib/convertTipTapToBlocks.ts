@@ -59,27 +59,33 @@ function convertNode(node: JSONContent): Block[] {
     case 'heading': {
       const level = node.attrs?.level || 1;
       const headingType = (`h${level}` as any) as BlockType;
-      const content = nodesToText(node.content);
+      const meta = nodesToTextWithMeta(node.content);
       const mentions = extractMentions(node.content);
 
       blocks.push({
         id: generateId(),
         type: headingType,
-        content,
+        content: meta.text,
         mentions: mentions.length > 0 ? mentions : undefined,
+        marks: meta.marks.length > 0 ? meta.marks : undefined,
+        links: meta.links.length > 0 ? meta.links : undefined,
+        textAlign: node.attrs?.textAlign || node.attrs?.align || undefined,
       });
       break;
     }
 
     case 'paragraph': {
-      const content = nodesToText(node.content);
+      const meta = nodesToTextWithMeta(node.content);
       const mentions = extractMentions(node.content);
 
       blocks.push({
         id: generateId(),
         type: 'text',
-        content,
+        content: meta.text,
         mentions: mentions.length > 0 ? mentions : undefined,
+        marks: meta.marks.length > 0 ? meta.marks : undefined,
+        links: meta.links.length > 0 ? meta.links : undefined,
+        textAlign: node.attrs?.textAlign || node.attrs?.align || undefined,
       });
       break;
     }
@@ -90,14 +96,16 @@ function convertNode(node: JSONContent): Block[] {
           if (listItem.type === 'listItem' && listItem.content) {
             // Extract text from paragraph inside listItem
             const paraNode = listItem.content.find((n) => n.type === 'paragraph');
-            const content = paraNode ? nodesToText(paraNode.content) : '';
+            const meta = paraNode ? nodesToTextWithMeta(paraNode.content) : { text: '', marks: [], links: [] };
             const mentions = paraNode ? extractMentions(paraNode.content) : [];
 
             blocks.push({
               id: generateId(),
               type: 'bullet-list',
-              content,
+              content: meta.text,
               mentions: mentions.length > 0 ? mentions : undefined,
+              marks: meta.marks.length > 0 ? meta.marks : undefined,
+              links: meta.links.length > 0 ? meta.links : undefined,
             });
           }
         }
@@ -110,14 +118,16 @@ function convertNode(node: JSONContent): Block[] {
         for (const listItem of node.content) {
           if (listItem.type === 'listItem' && listItem.content) {
             const paraNode = listItem.content.find((n) => n.type === 'paragraph');
-            const content = paraNode ? nodesToText(paraNode.content) : '';
+            const meta = paraNode ? nodesToTextWithMeta(paraNode.content) : { text: '', marks: [], links: [] };
             const mentions = paraNode ? extractMentions(paraNode.content) : [];
 
             blocks.push({
               id: generateId(),
               type: 'numbered-list',
-              content,
+              content: meta.text,
               mentions: mentions.length > 0 ? mentions : undefined,
+              marks: meta.marks.length > 0 ? meta.marks : undefined,
+              links: meta.links.length > 0 ? meta.links : undefined,
             });
           }
         }
@@ -130,16 +140,18 @@ function convertNode(node: JSONContent): Block[] {
         for (const taskItem of node.content) {
           if (taskItem.type === 'taskItem' && taskItem.content) {
             const paraNode = taskItem.content.find((n) => n.type === 'paragraph');
-            const content = paraNode ? nodesToText(paraNode.content) : '';
+            const meta = paraNode ? nodesToTextWithMeta(paraNode.content) : { text: '', marks: [], links: [] };
             const mentions = paraNode ? extractMentions(paraNode.content) : [];
             const checked = taskItem.attrs?.checked ?? false;
 
             blocks.push({
               id: generateId(),
               type: 'todo',
-              content,
+              content: meta.text,
               checked,
               mentions: mentions.length > 0 ? mentions : undefined,
+              marks: meta.marks.length > 0 ? meta.marks : undefined,
+              links: meta.links.length > 0 ? meta.links : undefined,
             });
           }
         }
@@ -316,24 +328,54 @@ function convertNode(node: JSONContent): Block[] {
 /**
  * Extract plain text from an array of TipTap nodes, handling mentions and other inline elements.
  */
-function nodesToText(nodes: JSONContent[] | undefined): string {
-  if (!nodes) return '';
+function nodesToTextWithMeta(nodes: JSONContent[] | undefined): { text: string; marks: any[]; links: any[] } {
+  if (!nodes) return { text: '', marks: [], links: [] };
 
   let text = '';
+  const marks: any[] = [];
+  const links: any[] = [];
 
-  for (const node of nodes) {
-    if (node.type === 'text') {
-      text += node.text || '';
-    } else if (node.type === 'mention') {
-      // Include mention label in the text
-      text += node.attrs?.label || '@unknown';
-    } else if (node.content) {
-      // Recursively process nested content
-      text += nodesToText(node.content);
+  const walk = (n: JSONContent) => {
+    if (n.type === 'text') {
+      const start = text.length;
+      const t = n.text || '';
+      text += t;
+      const end = text.length;
+
+      if (n.marks && Array.isArray(n.marks)) {
+        for (const m of n.marks) {
+          if (m.type === 'bold' || m.type === 'italic' || m.type === 'underline' || m.type === 'strike' || m.type === 'code' || m.type === 'superscript' || m.type === 'subscript' || m.type === 'highlight' || m.type === 'color') {
+            marks.push({ type: m.type, start, end, attrs: m.attrs });
+          } else if (m.type === 'link') {
+            links.push({ href: m.attrs?.href, start, end, title: m.attrs?.title });
+          }
+        }
+      }
+    } else if (n.type === 'mention') {
+      const start = text.length;
+      const label = n.attrs?.label || '@unknown';
+      text += label;
+      const end = text.length;
+    } else if (n.type === 'emoji') {
+      // TipTap emoji node - prefer unicode attribute or shortcode
+      const start = text.length;
+      const emojiChar = (n.attrs && (n.attrs.unicode || n.attrs.emoji)) || '';
+      const shortcode = n.attrs?.shortcode || '';
+      text += emojiChar || shortcode || '';
+      const end = text.length;
+    } else if (n.content) {
+      for (const child of n.content) walk(child as JSONContent);
     }
-  }
+  };
 
-  return text;
+  for (const n of nodes) walk(n as JSONContent);
+
+  return { text, marks, links };
+}
+
+// Backwards-compatible helper that returns just the text portion
+function nodesToText(nodes: JSONContent[] | undefined): string {
+  return nodesToTextWithMeta(nodes).text;
 }
 
 /**

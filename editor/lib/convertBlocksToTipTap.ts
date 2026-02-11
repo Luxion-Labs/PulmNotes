@@ -45,7 +45,7 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
         const currentBlock = blocks[i];
         if (currentBlock.type !== block.type) break;
 
-        const listItemContent = parseBlockContent(currentBlock.content, currentBlock.mentions);
+        const listItemContent = parseBlockContent(currentBlock.content, currentBlock.mentions, currentBlock.marks, currentBlock.links);
 
         if (block.type === 'todo') {
           listItems.push({
@@ -89,8 +89,8 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
         const level = parseInt(block.type[1]);
         content.push({
           type: 'heading',
-          attrs: { level },
-          content: parseBlockContent(block.content, block.mentions),
+          attrs: { level, textAlign: block.textAlign },
+          content: parseBlockContent(block.content, block.mentions, block.marks, block.links),
         });
         break;
       }
@@ -98,7 +98,8 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
       case 'text': {
         content.push({
           type: 'paragraph',
-          content: parseBlockContent(block.content, block.mentions),
+          attrs: { textAlign: block.textAlign },
+          content: parseBlockContent(block.content, block.mentions, block.marks, block.links),
         });
         break;
       }
@@ -109,7 +110,8 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
           content: [
             {
               type: 'paragraph',
-              content: parseBlockContent(block.content, block.mentions),
+              attrs: { textAlign: block.textAlign },
+              content: parseBlockContent(block.content, block.mentions, block.marks, block.links),
             },
           ],
         });
@@ -117,9 +119,14 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
       }
 
       case 'code': {
+        // Detect fenced code language if present: ```lang\n...\n```
+        let language = 'javascript';
+        const match = typeof block.content === 'string' ? block.content.match(/^```(\w+)/) : null;
+        if (match) language = match[1] || language;
+
         content.push({
           type: 'codeBlock',
-          attrs: { language: 'javascript' }, // Default language; could be enhanced
+          attrs: { language },
           content: [{ type: 'text', text: block.content }],
         });
         break;
@@ -145,7 +152,7 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
           console.warn('[Table Conversion] Failed to parse table JSON, falling back to text', err);
           content.push({
             type: 'paragraph',
-            content: parseBlockContent(block.content, block.mentions),
+            content: parseBlockContent(block.content, block.mentions, block.marks, block.links),
           });
         }
         break;
@@ -214,7 +221,7 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
         // Fallback: any unknown type becomes a paragraph
         content.push({
           type: 'paragraph',
-          content: parseBlockContent(block.content, block.mentions),
+          content: parseBlockContent(block.content, block.mentions, block.marks, block.links),
         });
       }
     }
@@ -232,46 +239,70 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
  * Parse block content string with embedded mentions into TipTap content nodes.
  * Mentions are marked with @title and have indices tracked in the mentions array.
  */
-function parseBlockContent(content: string, mentions?: NoteMention[]): JSONContent[] {
+function parseBlockContent(content: string, mentions?: NoteMention[], marks?: any[] , links?: any[]): JSONContent[] {
   if (!content) return [];
-  if (!mentions || mentions.length === 0) {
-    // No mentions; just return text node
-    return [{ type: 'text', text: content }];
-  }
 
   const contentNodes: JSONContent[] = [];
-  let lastEnd = 0;
 
-  // Sort mentions by start position
-  const sortedMentions = [...mentions].sort((a, b) => a.start - b.start);
+  // Build breakpoints from mentions, marks, and links
+  const breaks = new Set<number>();
+  breaks.add(0);
+  breaks.add(content.length);
 
-  for (const mention of sortedMentions) {
-    // Add text before mention
-    if (mention.start > lastEnd) {
-      contentNodes.push({
-        type: 'text',
-        text: content.slice(lastEnd, mention.start),
-      });
-    }
+  (mentions || []).forEach((m) => { breaks.add(m.start); breaks.add(m.end); });
+  (marks || []).forEach((m) => { breaks.add(m.start); breaks.add(m.end); });
+  (links || []).forEach((l) => { breaks.add(l.start); breaks.add(l.end); });
 
-    // Add mention node
-    contentNodes.push({
-      type: 'mention',
-      attrs: {
-        id: mention.noteId,
-        label: mention.title,
-      },
-    });
+  const points = Array.from(breaks).sort((a, b) => a - b);
 
-    lastEnd = mention.end;
+  // Helper to find a mention covering a range
+  const findMention = (start: number, end: number) => {
+    return (mentions || []).find((m) => m.start <= start && m.end >= end);
+  };
+
+  // Helper to get marks covering a range
+  const getMarksForRange = (start: number, end: number) => {
+    const active = (marks || []).filter((m) => m.start <= start && m.end >= end);
+    return active.map((m) => ({ type: m.type, attrs: m.attrs }));
+  };
+
+  // Helper to get link covering range
+  const getLinkForRange = (start: number, end: number) => {
+    return (links || []).find((l) => l.start <= start && l.end >= end);
   }
 
-  // Add remaining text
-  if (lastEnd < content.length) {
-    contentNodes.push({
-      type: 'text',
-      text: content.slice(lastEnd),
-    });
+  for (let i = 0; i < points.length - 1; i++) {
+    const start = points[i];
+    const end = points[i + 1];
+    if (start === end) continue;
+
+    const mention = findMention(start, end);
+    if (mention) {
+      contentNodes.push({ type: 'mention', attrs: { id: mention.noteId, label: mention.title } });
+      continue;
+    }
+
+    let slice = content.slice(start, end);
+    // Replace emoji shortcodes like :smile: with their unicode equivalent where possible
+    try {
+      const { replaceShortcodesWithEmoji } = require('./emojiMap')
+      slice = replaceShortcodesWithEmoji(slice)
+    } catch (err) {
+      // ignore if module cannot be imported
+    }
+
+    const node: any = { type: 'text', text: slice };
+
+    const activeMarks = getMarksForRange(start, end);
+    const link = getLinkForRange(start, end);
+
+    const appliedMarks: any[] = [];
+    if (link) appliedMarks.push({ type: 'link', attrs: { href: link.href, title: link.title } });
+    for (const m of activeMarks) appliedMarks.push({ type: m.type, attrs: m.attrs || {} });
+
+    if (appliedMarks.length > 0) node.marks = appliedMarks;
+
+    contentNodes.push(node);
   }
 
   return contentNodes.length > 0 ? contentNodes : [];

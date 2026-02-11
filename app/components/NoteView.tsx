@@ -245,6 +245,9 @@ const ReadModeBlock: React.FC<ReadModeBlockProps> = ({ block, assets = [], onOpe
           content={block.content}
           assets={assets}
           onAssetClick={onOpenNote}
+          marks={block.marks}
+          links={block.links}
+          textAlign={block.textAlign}
         />
       );
     }
@@ -265,6 +268,9 @@ const ReadModeBlock: React.FC<ReadModeBlockProps> = ({ block, assets = [], onOpe
             content={textContent}
             assets={assets}
             onAssetClick={onOpenNote}
+            marks={block.marks}
+            links={block.links}
+            textAlign={block.textAlign}
           />
         );
       }
@@ -298,6 +304,9 @@ const ReadModeBlock: React.FC<ReadModeBlockProps> = ({ block, assets = [], onOpe
           content={textContent}
           assets={assets}
           onAssetClick={onOpenNote}
+          marks={block.marks}
+          links={block.links}
+          textAlign={block.textAlign}
         />
       );
     }

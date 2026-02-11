@@ -9,6 +9,9 @@ interface RichContentRendererProps {
   content: string;
   onAssetClick?: (assetId: string) => void;
   assets?: Asset[]; // Pass assets to render inline
+  marks?: Array<any>;
+  links?: Array<any>;
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
 }
 
 /**
@@ -24,7 +27,10 @@ interface RichContentRendererProps {
 export const RichContentRenderer: React.FC<RichContentRendererProps> = ({ 
   content,
   onAssetClick,
-  assets = []
+  assets = [],
+  marks,
+  links,
+  textAlign,
 }) => {
   // Check if content is an asset reference: {{asset:asset-id}}
   const assetRefMatch = content.match(/^\{\{asset:(asset-[a-z0-9]+)\}\}$/);
@@ -34,6 +40,81 @@ export const RichContentRenderer: React.FC<RichContentRendererProps> = ({
     if (asset) {
       return <InlineAssetRenderer asset={asset} onAssetClick={onAssetClick} />;
     }
+  }
+
+  // If marks or links are provided, render using the structured metadata so we
+  // preserve styling and link hrefs exactly as stored in blocks.
+  if (marks || links) {
+    // Build breakpoints
+    const breaks = new Set<number>();
+    breaks.add(0);
+    breaks.add(content.length);
+    (marks || []).forEach((m: any) => { breaks.add(m.start); breaks.add(m.end); });
+    (links || []).forEach((l: any) => { breaks.add(l.start); breaks.add(l.end); });
+    const points = Array.from(breaks).sort((a, b) => a - b);
+
+    const segments: React.ReactNode[] = [];
+    for (let i = 0; i < points.length - 1; i++) {
+      const start = points[i];
+      const end = points[i + 1];
+      if (start === end) continue;
+      const slice = content.slice(start, end);
+
+      // Determine marks that cover this range
+      const activeMarks = (marks || []).filter((m: any) => m.start <= start && m.end >= end);
+      const link = (links || []).find((l: any) => l.start <= start && l.end >= end);
+
+      let node: React.ReactNode = <span>{slice}</span>;
+
+      // Wrap with mark styles
+      if (activeMarks.length > 0) {
+        let inner: React.ReactNode = slice;
+        activeMarks.forEach((m: any) => {
+          switch (m.type) {
+            case 'bold':
+              inner = <strong>{inner}</strong>;
+              break;
+            case 'italic':
+              inner = <em>{inner}</em>;
+              break;
+            case 'underline':
+              inner = <u>{inner}</u>;
+              break;
+            case 'strike':
+              inner = <s>{inner}</s>;
+              break;
+            case 'code':
+              inner = <code className="font-mono bg-stone-50 px-1 rounded">{inner}</code>;
+              break;
+            case 'highlight':
+              inner = <mark className="bg-yellow-200">{inner}</mark>;
+              break;
+            case 'color':
+              inner = <span style={{ color: m.attrs?.color }}>{inner}</span>;
+              break;
+            default:
+              break;
+          }
+        });
+        node = <span>{inner}</span>;
+      }
+
+      if (link) {
+        node = (
+          <a href={link.href} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+            {node}
+          </a>
+        );
+      }
+
+      segments.push(node);
+    }
+
+    const alignClass = textAlign === 'center' ? 'text-center' : textAlign === 'right' ? 'text-right' : textAlign === 'justify' ? 'text-justify' : 'text-left';
+
+    return (
+      <span className={`${alignClass} inline`}>{segments}</span>
+    );
   }
 
   const tokens = parseRichContent(content);

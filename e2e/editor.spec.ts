@@ -143,6 +143,72 @@ test.describe('TipTap Editor - Todo/Checkbox', () => {
     const editor = page.locator('[contenteditable]');
     await expect(editor).toBeFocused();
   });
+
+  test('should insert audio asset via drop from sidebar and render playable audio', async ({ page }: { page: Page }) => {
+    // Prepare an audio asset in localStorage
+    await page.evaluate(() => {
+      const existing = JSON.parse(localStorage.getItem('pulm-assets') || '[]');
+      const asset = {
+        id: 'asset-e2e-audio',
+        name: 'E2E Audio',
+        type: 'audio',
+        categoryId: existing[0]?.categoryId || 'cat-uncategorized',
+        source: { kind: 'file', dataUrl: 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=' },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      localStorage.setItem('pulm-assets', JSON.stringify([asset, ...existing]));
+    });
+
+    // Reload to ensure assets are loaded into the UI
+    await page.reload();
+    await page.waitForSelector('text=Welcome', { timeout: 5000 });
+    await page.click('text=Welcome');
+    await page.waitForSelector('[contenteditable]', { timeout: 5000 });
+
+    // Find the asset in the sidebar
+    await page.waitForSelector('text=E2E Audio');
+    const assetHandle = await page.$('text=E2E Audio');
+    const editorHandle = await page.$('[contenteditable]');
+    if (!assetHandle || !editorHandle) throw new Error('Asset or editor not found');
+
+    // Simulate drop by dispatching a drop event with DataTransfer
+    await page.evaluate(({ assetId }) => {
+      const dt = new DataTransfer();
+      dt.setData('text/plain', assetId);
+      dt.setData('itemType', 'asset');
+      const editor = document.querySelector('[contenteditable]') as HTMLElement;
+      const ev = new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt as any });
+      editor.dispatchEvent(ev);
+    }, { assetId: 'asset-e2e-audio' });
+
+    // Assert an audio element is now present in the editor with controls
+    const audio = await page.waitForSelector('audio[src^="data:"]', { timeout: 2000 });
+    expect(await audio.isVisible()).toBeTruthy();
+    // Check controls attribute exists
+    const hasControls = await audio.evaluate((el) => (el as HTMLAudioElement).hasAttribute('controls'));
+    expect(hasControls).toBeTruthy();
+  });
+
+  test('should upload audio via slash command and insert playable audio', async ({ page }: { page: Page }) => {
+    await page.click('[contenteditable]');
+    await page.keyboard.type('/audio');
+    await page.keyboard.press('Enter');
+
+    // Wait for the audio upload dialog and set a small file
+    const fileInput = await page.waitForSelector('input[type=file][accept="audio/*"]', { timeout: 2000 });
+
+    // Create a small WAV buffer
+    const buffer = Buffer.from('RIFF....WAVEfmt ', 'ascii');
+
+    await fileInput.setInputFiles({ name: 'test-audio.wav', mimeType: 'audio/wav', buffer });
+
+    // Assert audio element was inserted
+    const audio = await page.waitForSelector('audio[src^="data:"]', { timeout: 3000 });
+    expect(await audio.isVisible()).toBeTruthy();
+    const hasControls = await audio.evaluate((el) => (el as HTMLAudioElement).hasAttribute('controls'));
+    expect(hasControls).toBeTruthy();
+  });
 });
 
 test.describe('TipTap Editor - Rich Formatting', () => {

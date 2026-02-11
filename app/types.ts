@@ -56,6 +56,15 @@ export interface Block {
   isOpen?: boolean;
   mentions?: NoteMention[];
   assetMentions?: AssetMention[];
+  // Rich formatting metadata
+  marks?: Array<{
+    type: 'bold' | 'italic' | 'underline' | 'strike' | 'code' | 'superscript' | 'subscript' | 'highlight' | 'color';
+    start: number;
+    end: number;
+    attrs?: { color?: string; backgroundColor?: string };
+  }>;
+  links?: Array<{ href: string; start: number; end: number; title?: string }>;
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
   media?: MediaContent;
   math?: MathContent;
 }

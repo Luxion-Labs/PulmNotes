@@ -41,6 +41,23 @@ export interface NoteMention {
   end: number;
 }
 
+export interface Mark {
+  type: 'bold' | 'italic' | 'underline' | 'strike' | 'code' | 'superscript' | 'subscript' | 'highlight' | 'color';
+  start: number;
+  end: number;
+  attrs?: {
+    color?: string;
+    backgroundColor?: string;
+  };
+}
+
+export interface LinkMark {
+  href: string;
+  start: number;
+  end: number;
+  title?: string;
+}
+
 export interface Block {
   id: string;
   type: BlockType;
@@ -48,6 +65,9 @@ export interface Block {
   checked?: boolean;
   isOpen?: boolean;
   mentions?: NoteMention[];
+  marks?: Mark[];
+  links?: LinkMark[];
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
   media?: MediaContent;
   math?: MathContent;
 }
