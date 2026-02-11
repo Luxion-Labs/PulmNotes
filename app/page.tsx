@@ -82,7 +82,18 @@ export default function Home() {
       setSubCategories(loadedSubCategories);
 
       if (loadedNotes.length > 0) {
-        setNotes(loadedNotes);
+        const defaultPinnedIds = new Set(defaultNotes.map(n => n.id));
+        let didNormalizePins = false;
+        const normalizedNotes = loadedNotes.map((note) => {
+          if (!defaultPinnedIds.has(note.id)) return note;
+          if (note.isPinned !== undefined) return note;
+          didNormalizePins = true;
+          return { ...note, isPinned: true };
+        });
+        setNotes(normalizedNotes);
+        if (didNormalizePins) {
+          await noteStore.saveNotes(normalizedNotes);
+        }
       } else {
         setNotes(defaultNotes);
         await noteStore.saveNotes(defaultNotes);
