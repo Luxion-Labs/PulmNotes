@@ -69,6 +69,23 @@ export interface SuggestionMenuProps<T = DefaultContext>
    */
   floatingOptions?: Partial<UseFloatingOptions>
   /**
+   * Keep the suggestion menu open when clicking inside the editor.
+   * Useful for slash menus that should not disappear on minor cursor moves.
+   * @default false
+   */
+  keepOpenOnEditorClick?: boolean
+  /**
+   * Keep the menu mounted even if the suggestion plugin exits (e.g. cursor moves).
+   * Useful for slash menus that should remain visible until a command is selected.
+   * @default false
+   */
+  persistOnExit?: boolean
+  /**
+   * Whether pressing Escape should close the menu.
+   * @default true
+   */
+  closeOnEscape?: boolean
+  /**
    * Auto-update behavior options passed to `autoUpdate`.
    * Useful to disable `animationFrame` updates to avoid menu flips during rapid keyboard navigation.
    */
