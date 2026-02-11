@@ -355,6 +355,11 @@ function nodesToTextWithMeta(nodes: JSONContent[] | undefined): { text: string; 
     return ':emoji:';
   };
 
+  // Tiptap stores color changes via the `textStyle` mark while our read-mode renderer
+  // currently expects a `color` mark. We normalize `textStyle` -> `color` here so that
+  // the color info survives the round-trip without forcing schema changes.
+  const normalizeMarkType = (mark: string) => (mark === 'textStyle' ? 'color' : mark);
+
   const walk = (n: JSONContent) => {
     if (n.type === 'text') {
       const start = text.length;
@@ -364,8 +369,19 @@ function nodesToTextWithMeta(nodes: JSONContent[] | undefined): { text: string; 
 
       if (n.marks && Array.isArray(n.marks)) {
         for (const m of n.marks) {
-          if (m.type === 'bold' || m.type === 'italic' || m.type === 'underline' || m.type === 'strike' || m.type === 'code' || m.type === 'superscript' || m.type === 'subscript' || m.type === 'highlight' || m.type === 'color') {
-            marks.push({ type: m.type, start, end, attrs: m.attrs });
+          const normalizedType = normalizeMarkType(m.type);
+          if (
+            normalizedType === 'bold' ||
+            normalizedType === 'italic' ||
+            normalizedType === 'underline' ||
+            normalizedType === 'strike' ||
+            normalizedType === 'code' ||
+            normalizedType === 'superscript' ||
+            normalizedType === 'subscript' ||
+            normalizedType === 'highlight' ||
+            normalizedType === 'color'
+          ) {
+            marks.push({ type: normalizedType, start, end, attrs: m.attrs });
           } else if (m.type === 'link') {
             links.push({ href: m.attrs?.href, start, end, title: m.attrs?.title });
           }

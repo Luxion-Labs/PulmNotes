@@ -1,4 +1,4 @@
-import { Block, InlineEmoji, NoteMention } from '@/editor/schema/types';
+import { Block, InlineEmoji, NoteMention, Mark } from '@/editor/schema/types';
 import { JSONContent } from '@tiptap/core';
 
 /**
@@ -239,10 +239,29 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
  * Parse block content string with embedded mentions into TipTap content nodes.
  * Mentions are marked with @title and have indices tracked in the mentions array.
  */
+function mapBlockMarkToTipTapMark(mark: Mark): { type: string; attrs?: Record<string, any> } {
+  const attrs = mark.attrs ? { ...(mark.attrs || {}) } : undefined;
+
+  // We store color marks under the custom `color` type so older blocks don't require schema changes.
+  // When rebuilding TipTap JSON we map both `color` and `textStyle` back into `textStyle` so the editor
+  // receives the mark it expects and colored text survives note switches.
+  if (mark.type === 'color' || mark.type === 'textStyle') {
+    return {
+      type: 'textStyle',
+      attrs,
+    };
+  }
+
+  return {
+    type: mark.type,
+    attrs,
+  };
+}
+
 function parseBlockContent(
   content: string,
   mentions?: NoteMention[],
-  marks?: any[],
+  marks?: Mark[],
   links?: any[],
   emojis?: InlineEmoji[]
 ): JSONContent[] {
@@ -274,8 +293,7 @@ function parseBlockContent(
 
   // Helper to get marks covering a range
   const getMarksForRange = (start: number, end: number) => {
-    const active = (marks || []).filter((m) => m.start <= start && m.end >= end);
-    return active.map((m) => ({ type: m.type, attrs: m.attrs }));
+    return (marks || []).filter((m) => m.start <= start && m.end >= end);
   };
 
   // Helper to get link covering range
@@ -319,7 +337,12 @@ function parseBlockContent(
 
     const appliedMarks: any[] = [];
     if (link) appliedMarks.push({ type: 'link', attrs: { href: link.href, title: link.title } });
-    for (const m of activeMarks) appliedMarks.push({ type: m.type, attrs: m.attrs || {} });
+    for (const m of activeMarks) {
+      const tipTapMark = mapBlockMarkToTipTapMark(m);
+      if (tipTapMark) {
+        appliedMarks.push(tipTapMark);
+      }
+    }
 
     if (appliedMarks.length > 0) node.marks = appliedMarks;
 
