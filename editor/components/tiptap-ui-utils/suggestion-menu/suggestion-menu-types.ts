@@ -1,4 +1,4 @@
-import type { UseFloatingOptions } from "@floating-ui/react"
+import type { UseFloatingOptions, AutoUpdateOptions } from "@floating-ui/react"
 import type { PluginKey } from "@tiptap/pm/state"
 import type { SuggestionOptions } from "@tiptap/suggestion"
 import type { Editor, Range } from "@tiptap/react"
@@ -68,6 +68,11 @@ export interface SuggestionMenuProps<T = DefaultContext>
    * Additional options for the floating UI.
    */
   floatingOptions?: Partial<UseFloatingOptions>
+  /**
+   * Auto-update behavior options passed to `autoUpdate`.
+   * Useful to disable `animationFrame` updates to avoid menu flips during rapid keyboard navigation.
+   */
+  autoUpdateOptions?: Partial<AutoUpdateOptions>
   /**
    * CSS selector attribute for targeting the menu.
    * @default 'tiptap-suggestion-menu'

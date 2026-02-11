@@ -56,6 +56,7 @@ import { insertTable } from '@/editor/extensions/table-extension'
 import { openMentionMenu } from '@/editor/extensions/mention-suggestion'
 import type { Editor } from '@tiptap/react'
 import { isNodeInSchema } from '@/lib/tiptap-utils'
+import { offset, shift, size } from '@floating-ui/react'
 
 export const SlashMenu: React.FC<SlashMenuProps & { editor?: import('@tiptap/react').Editor | null }> = ({ position, onSelect, onClose, items, query: controlledQuery, editor }) => {
   // Convert our simple MENU_ITEMS into SuggestionItems for the Notion-style menu
@@ -179,7 +180,110 @@ export const SlashMenu: React.FC<SlashMenuProps & { editor?: import('@tiptap/rea
   const customItems = toSuggestionItems(items ?? MENU_ITEMS)
 
   // Pass custom items and disable the internal menu to avoid duplicates; the menu itself is authoritative for availability
+  // Also specify floatingOptions and autoUpdateOptions to prevent flip while keyboard navigating to avoid the menu jumping
+  // Additionally, install a DOM handler to focus the floating menu and forward key events to the editor so
+  // keyboard navigation is fully contained within the menu and does not move it.
+  const forwardedKeys = new Set([
+    'ArrowUp',
+    'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
+    'Enter',
+    'Escape',
+    'Tab',
+    'Home',
+    'End',
+  ])
+
+  React.useEffect(() => {
+    if (!editor) return
+
+    let el: HTMLElement | null = null
+    let handler: ((e: KeyboardEvent) => void) | null = null
+
+    const attach = () => {
+      el = document.querySelector('[data-selector="tiptap-slash-dropdown-menu"]') as HTMLElement | null
+      if (!el || !editor || !editor.view) return
+
+      try {
+        el.tabIndex = -1
+        el.focus()
+      } catch (err) {
+        // ignore
+      }
+
+      handler = (e: KeyboardEvent) => {
+        if (!forwardedKeys.has(e.key)) return
+        // Prevent default on the menu element so editor doesn't also react directly
+        e.preventDefault()
+        e.stopPropagation()
+
+        // If the user is trying to move beyond the bounds of the menu, do nothing.
+        // This prevents a redundant update in the editor that can cause the floating
+        // menu to re-measure and shift slightly when at the edges.
+        try {
+          const buttons = Array.from(el?.querySelectorAll('button[data-style="ghost"]') || []) as HTMLElement[]
+          const activeIndex = buttons.findIndex((b) => b.getAttribute('data-active-state') === 'on')
+          if (e.key === 'ArrowDown' && activeIndex === buttons.length - 1) return
+          if (e.key === 'ArrowUp' && activeIndex === 0) return
+        } catch (err) {
+          // ignore and continue to dispatch
+        }
+
+        // Re-dispatch a KeyboardEvent on the editor root so TipTap's Suggestion plugin handles it
+        const target = editor.view.dom as HTMLElement
+        try {
+          const kd = new KeyboardEvent('keydown', {
+            key: e.key,
+            code: e.code,
+            bubbles: true,
+            cancelable: true,
+          })
+          target.dispatchEvent(kd)
+        } catch (err) {
+          // ignore
+        }
+      }
+
+      el.addEventListener('keydown', handler, { capture: true })
+    }
+
+    const observer = new MutationObserver(() => {
+      // Try to (re)attach when DOM changes (menu mount/unmount)
+      if (!el) attach()
+    })
+
+    observer.observe(document.body, { childList: true, subtree: true })
+
+    // Try immediate attach in case the menu is present
+    attach()
+
+    return () => {
+      if (handler && el) el.removeEventListener('keydown', handler as any, { capture: true })
+      observer.disconnect()
+    }
+  }, [editor])
+
   return (
-    <SlashDropdownMenu editor={editor} config={{ enabledItems: [], customItems }} />
+    <SlashDropdownMenu
+      editor={editor}
+      config={{ enabledItems: [], customItems }}
+      floatingOptions={{
+        placement: 'bottom-start',
+        middleware: [
+          offset(6),
+          shift(),
+          size({
+            apply({ availableHeight, elements }) {
+              if (elements.floating) {
+                const maxHeightValue = Math.min(320, availableHeight)
+                elements.floating.style.setProperty('--suggestion-menu-max-height', `${maxHeightValue}px`)
+              }
+            },
+          }),
+        ],
+      }}
+      autoUpdateOptions={{ animationFrame: false }}
+    />
   )
 }
