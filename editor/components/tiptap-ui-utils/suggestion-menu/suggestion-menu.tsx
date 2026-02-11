@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { flip, offset, shift, size } from "@floating-ui/react"
 import { PluginKey } from "@tiptap/pm/state"
 
@@ -35,10 +35,14 @@ import type {
 export const SuggestionMenu = ({
   editor: providedEditor,
   floatingOptions,
+  keepOpenOnEditorClick = false,
+  persistOnExit = false,
+  closeOnEscape = true,
   selector = "tiptap-suggestion-menu",
   children,
   maxHeight = 384,
   pluginKey = SuggestionPluginKey,
+  autoUpdateOptions,
   ...internalSuggestionProps
 }: SuggestionMenuProps) => {
   const { editor } = useTiptapEditor(providedEditor)
@@ -59,9 +63,33 @@ export const SuggestionMenu = ({
   const [internalItems, setInternalItems] = useState<SuggestionItem[]>([])
   const [internalQuery, setInternalQuery] = useState<string>("")
   const [, setInternalRange] = useState<Range | null>(null)
+  const lastKnownClientRect = useRef<DOMRect | null>(null)
 
   // Choose reference: prefer client rect (caret pos) when available, otherwise fallback to decoration node
   const floatingReference = internalClientRect || internalDecorationNode
+
+  const mergedFloatingOptions = useMemo(() => {
+    const base = {
+      ...floatingOptions,
+    } as Partial<{
+      dismissOptions?: {
+        outsidePress?: (event: MouseEvent | TouchEvent) => boolean
+      }
+    }>
+
+    if (keepOpenOnEditorClick) {
+      base.dismissOptions = {
+        ...base.dismissOptions,
+        // Avoid dismissing while the slash menu is active. We keep it visible
+        // regardless of clicks/hover outside so the UI state stays stable.
+        outsidePress: (event) => {
+          return false
+        },
+      }
+    }
+
+    return base
+  }, [floatingOptions, keepOpenOnEditorClick, editor])
 
   const { ref, style, getFloatingProps, isMounted } = useFloatingElement(
     show,
@@ -74,8 +102,9 @@ export const SuggestionMenu = ({
         flip({
           mainAxis: true,
           crossAxis: false,
+          padding: 8,
         }),
-        shift(),
+        shift({ padding: 8 }),
         size({
           apply({ availableHeight, elements }) {
             if (elements.floating) {
@@ -96,8 +125,9 @@ export const SuggestionMenu = ({
           setShow(false)
         }
       },
-      ...floatingOptions,
-    }
+      ...mergedFloatingOptions,
+    },
+    autoUpdateOptions
   )
 
   const internalSuggestionPropsRef = useRef(internalSuggestionProps)
@@ -109,6 +139,46 @@ export const SuggestionMenu = ({
   const closePopup = useCallback(() => {
     setShow(false)
   }, [])
+
+  const hasActiveTrigger = useCallback(
+    (currentEditor: typeof editor) => {
+      const triggerChar = internalSuggestionPropsRef.current.char
+      if (!currentEditor || !triggerChar) return false
+
+      try {
+        const { $from } = currentEditor.state.selection
+        const text = $from.nodeBefore?.isText ? $from.nodeBefore.text || "" : ""
+        if (!text) return false
+
+        const index = text.lastIndexOf(triggerChar)
+        if (index === -1) return false
+
+        // If the cursor is after the trigger in the same text node, consider it active.
+        const cursorOffset = $from.parentOffset
+        return cursorOffset >= index + 1
+      } catch (err) {
+        return false
+      }
+    },
+    []
+  )
+
+  const resolveClientRect = useCallback(
+    (props: SuggestionProps<SuggestionItem>) => {
+      let rect = props.clientRect?.() ?? null
+
+      if (!rect && props.decorationNode instanceof HTMLElement) {
+        rect = props.decorationNode.getBoundingClientRect()
+      }
+
+      if (rect) {
+        lastKnownClientRect.current = rect
+      }
+
+      return rect ?? lastKnownClientRect.current
+    },
+    []
+  )
 
   useEffect(() => {
     if (!editor || editor.isDestroyed) {
@@ -150,6 +220,15 @@ export const SuggestionMenu = ({
           }
         }
 
+        return true
+      },
+
+      shouldShow({ editor }) {
+        // Only show suggestions while the editor is focused. This prevents the menu
+        // from lingering when focus moves outside the editor.
+        if (!editor.view.hasFocus() && !editor.view.composing) {
+          return false
+        }
         return true
       },
 
@@ -212,8 +291,10 @@ export const SuggestionMenu = ({
             setInternalItems(props.items)
             setInternalQuery(props.query)
             setInternalRange(props.range)
-            // If clientRect is available (caret position), prefer it for floating reference
-            setInternalClientRect(props.clientRect?.() ?? null)
+            // If clientRect becomes unavailable during selection updates, keep the last
+            // known rect to avoid the floating UI disappearing.
+            const safeRect = resolveClientRect(props)
+            setInternalClientRect((prev) => safeRect ?? prev)
 
             // Ensure decoration shows our configured content and empty state
             try {
@@ -237,8 +318,12 @@ export const SuggestionMenu = ({
             setInternalItems(props.items)
             setInternalQuery(props.query)
             setInternalRange(props.range)
-            // If clientRect is available (caret position), prefer it for floating reference
-            setInternalClientRect(props.clientRect?.() ?? null)
+            // Keep the floating UI mounted even if a minor cursor move triggers dismiss logic.
+            // The suggestion is still active, so we re-sync visibility here to keep UI + state aligned.
+            setShow(true)
+
+            const safeRect = resolveClientRect(props)
+            setInternalClientRect((prev) => safeRect ?? prev)
 
             // Keep decoration attributes in sync with query
             try {
@@ -255,8 +340,12 @@ export const SuggestionMenu = ({
 
           onKeyDown: (props: SuggestionKeyDownProps) => {
             if (props.event.key === "Escape") {
-              closePopup()
-              return true
+              if (closeOnEscape) {
+                closePopup()
+                return true
+              }
+
+              return false
             }
             return false
           },
@@ -272,13 +361,31 @@ export const SuggestionMenu = ({
               }
             }
 
-            setInternalDecorationNode(null)
-            setInternalCommand(null)
-            setInternalItems([])
-            setInternalQuery("")
-            setInternalRange(null)
-            // setInternalClientRect(null)
-            setShow(false)
+            if (!persistOnExit) {
+              setInternalDecorationNode(null)
+              setInternalCommand(null)
+              setInternalItems([])
+              setInternalQuery("")
+              setInternalRange(null)
+              setInternalClientRect(null)
+              lastKnownClientRect.current = null
+              setShow(false)
+            } else {
+              // Keep the menu visible until an item is selected,
+              // but hide it if the trigger was removed.
+              if (hasActiveTrigger(editor)) {
+                setShow(true)
+              } else {
+                setInternalDecorationNode(null)
+                setInternalCommand(null)
+                setInternalItems([])
+                setInternalQuery("")
+                setInternalRange(null)
+                setInternalClientRect(null)
+                lastKnownClientRect.current = null
+                setShow(false)
+              }
+            }
           },
         }
       },
@@ -292,7 +399,59 @@ export const SuggestionMenu = ({
         editor.unregisterPlugin(pluginKey)
       }
     }
-  }, [editor, pluginKey, closePopup])
+  }, [editor, pluginKey, closePopup, persistOnExit, closeOnEscape, hasActiveTrigger])
+
+  useEffect(() => {
+    if (!editor) return
+
+    if (keepOpenOnEditorClick) {
+      return undefined
+    }
+
+    const handleBlur = () => closePopup()
+
+    editor.on("blur", handleBlur)
+
+    return () => {
+      editor.off("blur", handleBlur)
+    }
+  }, [editor, closePopup, keepOpenOnEditorClick])
+
+  useEffect(() => {
+    if (!editor) return
+
+    const handleSelectionUpdate = () => {
+      if (!show && !persistOnExit) return
+
+      if (persistOnExit && !hasActiveTrigger(editor)) {
+        closePopup()
+        return
+      }
+
+      try {
+        const pos = editor.state.selection.$anchor.pos
+        const coords = editor.view.coordsAtPos(pos)
+        const rect = new DOMRect(
+          coords.left,
+          coords.top,
+          coords.right - coords.left,
+          coords.bottom - coords.top
+        )
+
+        lastKnownClientRect.current = rect
+        setInternalClientRect(rect)
+      } catch (err) {
+        // If coords can't be resolved, keep the last known rect.
+        // This makes cursor movement safe even when ProseMirror can't compute a rect.
+      }
+    }
+
+    editor.on("selectionUpdate", handleSelectionUpdate)
+
+    return () => {
+      editor.off("selectionUpdate", handleSelectionUpdate)
+    }
+  }, [editor, show, persistOnExit])
 
   const onSelect = useCallback(
     (item: SuggestionItem) => {
