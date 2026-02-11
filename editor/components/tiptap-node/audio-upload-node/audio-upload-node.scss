@@ -1,6 +1,43 @@
 .audio-upload-node-wrapper {
   width: 100%;
   position: relative; /* needed so dialog can be absolutely positioned below */
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.audio-upload-node-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border-radius: 0;
+  border: none;
+}
+
+.audio-upload-node-element {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0; /* avoid default audio element margins */
+  background: transparent;
+  border-radius: 0;
+}
+
+.audio-upload-node-delete-area {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.audio-upload-node-container:hover .audio-upload-node-delete-area {
+  opacity: 1;
 }
 
 

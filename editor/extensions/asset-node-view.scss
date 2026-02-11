@@ -1,0 +1,47 @@
+.asset-node-view {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  --tw-ring-shadow: 0 0 transparent;
+  --tw-ring-offset-shadow: 0 0 transparent;
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 transparent), var(--tw-ring-shadow, 0 0 transparent), var(--tw-shadow, 0 0 transparent);
+}
+
+.asset-node-view .audio-asset-container {
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+}
+
+.asset-node-view .audio-asset-container audio {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+}
+
+.asset-node-view .audio-asset-player {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Remove native control enclosure shadow/background for audio only */
+.asset-node-view .audio-asset-player::-webkit-media-controls-enclosure {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.asset-node-view .audio-asset-player::-webkit-media-controls-panel {
+  background: transparent !important;
+  box-shadow: none !important;
+}
