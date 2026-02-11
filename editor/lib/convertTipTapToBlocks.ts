@@ -55,6 +55,35 @@ export function convertTipTapToBlocks(content: JSONContent | undefined): Block[]
 function convertNode(node: JSONContent): Block[] {
   const blocks: Block[] = [];
 
+  const attachRawTipTap = (block: Block, rawNode: JSONContent) => {
+    // Preserve the full TipTap node so custom/unknown block types can round-trip.
+    // This is the core fix for disappearing video/audio: the old converter dropped
+    // custom nodes (videoUploadNode, audioUploadNode, youtube, etc.) entirely.
+    (block as any).tiptap = rawNode;
+  };
+
+  const getTextAlign = (n: JSONContent) => n.attrs?.textAlign || n.attrs?.align || undefined;
+
+  const buildUnknownBlock = (n: JSONContent): Block => {
+    const attrs = n.attrs || {};
+    const textFallback =
+      nodesToText(n.content) ||
+      (typeof attrs.title === 'string' ? attrs.title : '') ||
+      (typeof attrs.alt === 'string' ? attrs.alt : '') ||
+      (typeof attrs.src === 'string' ? attrs.src : '');
+
+    const block = {
+      id: generateId(),
+      // Preserve the original node type for future-proofing.
+      type: (n.type || 'text') as any,
+      content: textFallback || '',
+      textAlign: getTextAlign(n),
+    } as Block;
+
+    attachRawTipTap(block, n);
+    return block;
+  };
+
   switch (node.type) {
     case 'heading': {
       const level = node.attrs?.level || 1;
@@ -70,7 +99,7 @@ function convertNode(node: JSONContent): Block[] {
         marks: meta.marks.length > 0 ? meta.marks : undefined,
         links: meta.links.length > 0 ? meta.links : undefined,
         emojis: meta.emojis.length > 0 ? meta.emojis : undefined,
-        textAlign: node.attrs?.textAlign || node.attrs?.align || undefined,
+        textAlign: getTextAlign(node),
       });
       break;
     }
@@ -87,7 +116,7 @@ function convertNode(node: JSONContent): Block[] {
         marks: meta.marks.length > 0 ? meta.marks : undefined,
         links: meta.links.length > 0 ? meta.links : undefined,
         emojis: meta.emojis.length > 0 ? meta.emojis : undefined,
-        textAlign: node.attrs?.textAlign || node.attrs?.align || undefined,
+        textAlign: getTextAlign(node),
       });
       break;
     }
@@ -216,54 +245,82 @@ function convertNode(node: JSONContent): Block[] {
     }
 
     case 'image': {
-      blocks.push({
+      const contentFallback =
+        node.attrs?.title ||
+        node.attrs?.alt ||
+        node.attrs?.src ||
+        '';
+      const block: Block = {
         id: generateId(),
         type: 'image',
-        content: node.attrs?.alt || '',
+        content: contentFallback,
         media: {
           type: 'image',
           src: node.attrs?.src || '',
           alt: node.attrs?.alt || '',
           caption: node.attrs?.title || '',
+          ...(node.attrs || {}),
         },
-      });
+      };
+      attachRawTipTap(block, node);
+      blocks.push(block);
       break;
     }
 
-    case 'video': {
-      blocks.push({
+    case 'video':
+    case 'videoNode':
+    case 'videoUploadNode':
+    case 'youtube': {
+      const contentFallback =
+        node.attrs?.title ||
+        node.attrs?.alt ||
+        node.attrs?.src ||
+        '';
+      const block: Block = {
         id: generateId(),
         type: 'video',
-        content: node.attrs?.title || '',
+        content: contentFallback,
         media: {
           type: 'video',
           src: node.attrs?.src || '',
           alt: node.attrs?.alt || '',
           caption: node.attrs?.title || '',
+          ...(node.attrs || {}),
         },
-      });
+      };
+      attachRawTipTap(block, node);
+      blocks.push(block);
       break;
     }
 
-    case 'audio': {
-      blocks.push({
+    case 'audio':
+    case 'audioUploadNode': {
+      const contentFallback =
+        node.attrs?.title ||
+        node.attrs?.alt ||
+        node.attrs?.src ||
+        '';
+      const block: Block = {
         id: generateId(),
         type: 'audio',
-        content: node.attrs?.title || '',
+        content: contentFallback,
         media: {
           type: 'audio',
           src: node.attrs?.src || '',
           alt: node.attrs?.alt || '',
           caption: node.attrs?.title || '',
+          ...(node.attrs || {}),
         },
-      });
+      };
+      attachRawTipTap(block, node);
+      blocks.push(block);
       break;
     }
 
     case 'asset': {
       // Convert asset node to asset reference block
       const { assetId, type, alt, title, src } = node.attrs || {};
-      blocks.push({
+      const block: Block = {
         id: generateId(),
         type: 'asset',
         content: `{{asset:${assetId}}}`,
@@ -273,8 +330,11 @@ function convertNode(node: JSONContent): Block[] {
           alt: alt || '',
           caption: title || '',
           assetId,
+          ...(node.attrs || {}),
         },
-      });
+      };
+      attachRawTipTap(block, node);
+      blocks.push(block);
       break;
     }
 
@@ -315,15 +375,10 @@ function convertNode(node: JSONContent): Block[] {
     }
 
     default: {
-      // Unknown node type; try to extract text if present
-      const content = nodesToText(node.content);
-      if (content) {
-        blocks.push({
-          id: generateId(),
-          type: 'text',
-          content,
-        });
-      }
+      // Unknown/custom node type: preserve it generically instead of dropping.
+      // This keeps video/audio uploads and embeds round-tripping even if we
+      // haven't hardcoded their node names yet.
+      blocks.push(buildUnknownBlock(node));
       break;
     }
   }

@@ -32,8 +32,27 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
   const content: JSONContent[] = [];
   let i = 0;
 
+  const getRawTipTapNode = (block: Block): JSONContent | null => {
+    const raw = (block as any).tiptap;
+    if (raw && typeof raw === 'object' && typeof raw.type === 'string') {
+      return raw as JSONContent;
+    }
+    return null;
+  };
+
   while (i < blocks.length) {
     const block = blocks[i];
+
+    // If this block was produced from a custom/unknown TipTap node, restore it
+    // directly. This preserves all attrs/content and fixes disappearing media.
+    // Backward-compat: older blocks without a raw snapshot still use the
+    // block-type switch below, so existing notes keep working.
+    const rawNode = getRawTipTapNode(block);
+    if (rawNode) {
+      content.push(rawNode);
+      i++;
+      continue;
+    }
 
     if (block.type === 'bullet-list' || block.type === 'numbered-list' || block.type === 'todo') {
       // Group consecutive list items of the same type
@@ -163,6 +182,7 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
           content.push({
             type: 'image',
             attrs: {
+              ...block.media,
               src: block.media.src,
               alt: block.media.alt || '',
               title: block.media.caption || '',
@@ -177,6 +197,7 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
           content.push({
             type: 'video',
             attrs: {
+              ...block.media,
               src: block.media.src,
               alt: block.media.alt || '',
               title: block.media.caption || '',
@@ -191,6 +212,7 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
           content.push({
             type: 'audio',
             attrs: {
+              ...block.media,
               src: block.media.src,
               alt: block.media.alt || '',
               title: block.media.caption || '',
@@ -206,6 +228,7 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
           content.push({
             type: 'asset',
             attrs: {
+              ...block.media,
               assetId: block.media.assetId,
               type: block.media.type || 'image',
               src: block.media.src || '',
@@ -218,7 +241,8 @@ export function convertBlocksToTipTap(blocks: Block[]): JSONContent {
       }
 
       default: {
-        // Fallback: any unknown type becomes a paragraph
+        // Fallback: unknown type becomes a paragraph so old blocks don't break.
+        // Custom nodes are handled earlier via the raw TipTap snapshot.
         content.push({
           type: 'paragraph',
           content: parseBlockContent(block.content, block.mentions, block.marks, block.links, block.emojis),
