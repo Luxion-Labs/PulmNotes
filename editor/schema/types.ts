@@ -42,7 +42,7 @@ export interface NoteMention {
 }
 
 export interface Mark {
-  type: 'bold' | 'italic' | 'underline' | 'strike' | 'code' | 'superscript' | 'subscript' | 'highlight' | 'color';
+  type: 'bold' | 'italic' | 'underline' | 'strike' | 'code' | 'superscript' | 'subscript' | 'highlight' | 'color' | 'textStyle';
   start: number;
   end: number;
   attrs?: {
