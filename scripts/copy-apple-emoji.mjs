@@ -34,18 +34,32 @@ const sourceFiles = fs
   .map((entry) => entry.name)
 
 let copied = 0
+let aliased = 0
 for (const fileName of sourceFiles) {
   if (existingFiles.has(fileName)) continue
   fs.copyFileSync(
     path.join(sourceDir, fileName),
     path.join(targetDir, fileName)
   )
+  existingFiles.add(fileName)
   copied++
+}
+
+for (const fileName of sourceFiles) {
+  const aliasName = fileName.replace(/-fe0f/g, "")
+  if (aliasName === fileName) continue
+  if (existingFiles.has(aliasName)) continue
+  fs.copyFileSync(
+    path.join(sourceDir, fileName),
+    path.join(targetDir, aliasName)
+  )
+  existingFiles.add(aliasName)
+  aliased++
 }
 
 console.log(
   `[emoji] Copied ${copied} Apple emoji images into ${path.relative(
     repoRoot,
     targetDir
-  )}`
+  )}. Added ${aliased} alias files`
 )
