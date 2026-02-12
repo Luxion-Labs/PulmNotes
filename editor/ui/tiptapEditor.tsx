@@ -45,6 +45,7 @@ import "@/components/tiptap-node/table-node/styles/prosemirror-table.scss"
 import { convertBlocksToTipTap } from "@/editor/lib/convertBlocksToTipTap"
 import { convertTipTapToBlocks } from "@/editor/lib/convertTipTapToBlocks"
 import { withAppleEmojiFallbacks } from "@/editor/lib/apple-emoji"
+import { getDragData } from "@/app/lib/openExternal"
 
 // --- Custom Nodes & Extensions ---
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension"
@@ -143,13 +144,68 @@ export function TipTapNoteEditor({ note, allNotes = [], assets = [], onUpdateTit
       // Intercept drops inside the editor to handle assets from sidebar/library
       handleDOMEvents: {
         drop: (view: any, event: DragEvent) => {
+          console.log('[Editor] Drop event triggered');
           try {
-            const assetId = event.dataTransfer?.getData('text/plain') || ''
-            const itemType = event.dataTransfer?.getData('itemType') || ''
+            // Try multiple methods to get the asset ID (Tauri may restrict dataTransfer)
+            let assetId = event.dataTransfer?.getData('text/plain') || ''
+            let itemType = event.dataTransfer?.getData('itemType') || ''
+            
+            console.log('[Editor] Initial - assetId:', assetId, 'itemType:', itemType);
+            
+            // Try global drag data store (for Tauri compatibility)
+            if (!assetId || !itemType) {
+              const globalData = getDragData();
+              console.log('[Editor] Global drag data:', globalData);
+              if (globalData.type === 'asset' && globalData.id) {
+                assetId = globalData.id;
+                itemType = 'asset';
+                console.log('[Editor] Using global data - assetId:', assetId);
+              }
+            }
+            
+            // Try JSON format for Tauri compatibility
+            if (!assetId || !itemType) {
+              try {
+                const jsonData = event.dataTransfer?.getData('application/json')
+                if (jsonData) {
+                  const parsed = JSON.parse(jsonData)
+                  if (parsed.type === 'asset' && parsed.id) {
+                    assetId = parsed.id
+                    itemType = 'asset'
+                    console.log('[Editor] Using JSON data - assetId:', assetId);
+                  }
+                }
+              } catch (err) {
+                // Ignore JSON parse errors
+              }
+            }
+            
+            // Fallback: check if we have the data in the types array
+            if (!assetId || !itemType) {
+              const types = Array.from(event.dataTransfer?.types || [])
+              if (types.includes('itemtype') || types.includes('itemType')) {
+                itemType = 'asset'
+                // Try to get the asset ID from any available data
+                for (const type of types) {
+                  const data = event.dataTransfer?.getData(type)
+                  if (data && data.startsWith('asset-')) {
+                    assetId = data
+                    break
+                  }
+                }
+              }
+            }
+            
+            console.log('[Editor] Final - assetId:', assetId, 'itemType:', itemType);
+            
             if (itemType === 'asset' && assetId) {
               // Find the asset from the props (passed from NoteView)
               const asset = assets?.find((a: any) => a.id === assetId)
-              if (!asset || asset.isDeleted) return false
+              console.log('[Editor] Found asset:', asset);
+              if (!asset || asset.isDeleted) {
+                console.warn('[Editor] Asset not found or deleted');
+                return false
+              }
 
               // Map asset types to supported node types; default to 'file' for others
               const type = asset.type === 'video' ? 'video' : asset.type === 'audio' ? 'audio' : asset.type === 'image' ? 'image' : 'file'
@@ -161,9 +217,11 @@ export function TipTapNoteEditor({ note, allNotes = [], assets = [], onUpdateTit
                 // Import and use helper to insert asset node (with optional src)
                 import('@/editor/extensions/asset-node').then(({ insertAssetNode }) => {
                   if (insertAssetNode && editor) {
+                    console.log('[Editor] Inserting asset node');
                     insertAssetNode(editor, assetId, type as any, asset.name, asset.name, src)
                   }
                 }).catch((err) => {
+                  console.error('[Editor] insertAssetNode error:', err);
                   // Fallback raw insertion
                   if (editor) {
                     const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos ?? view.state.selection.to
@@ -177,14 +235,33 @@ export function TipTapNoteEditor({ note, allNotes = [], assets = [], onUpdateTit
                 event.stopPropagation()
                 return true
               } catch (err) {
-                console.error('[Drop] insert asset error', err)
+                console.error('[Editor] insert asset error', err)
                 return false
               }
+            } else {
+              console.warn('[Editor] No valid asset data found');
             }
           } catch (err) {
-            console.error('[Drop] unexpected error', err)
+            console.error('[Editor] unexpected error', err)
           }
 
+          return false
+        },
+        
+        // Add dragover handler to help with Tauri compatibility
+        dragover: (view: any, event: DragEvent) => {
+          try {
+            const types = Array.from(event.dataTransfer?.types || [])
+            // Check global drag data as well
+            const globalData = getDragData();
+            if (types.includes('itemtype') || types.includes('itemType') || types.includes('application/json') || globalData.type === 'asset') {
+              event.preventDefault()
+              event.dataTransfer!.dropEffect = 'copy'
+              return true
+            }
+          } catch (err) {
+            console.error('[Dragover] error', err)
+          }
           return false
         }
       }

@@ -2,6 +2,7 @@
 
 import { useEffect, useContext } from "react"
 import { HyperlinkContext } from "./HyperlinkContext"
+import { openExternal } from "@/app/lib/openExternal"
 
 /**
  * Global event listener component that handles hyperlink hover events
@@ -28,8 +29,8 @@ export function HyperlinkEventHandler() {
       if (target.tagName === "A") {
         const href = (target as HTMLAnchorElement).href
         if (href) {
-          window.open(href, "_blank", "noopener,noreferrer")
           event.preventDefault()
+          openExternal(href)
           return
         }
       }
