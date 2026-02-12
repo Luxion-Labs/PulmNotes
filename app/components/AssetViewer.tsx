@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, ExternalLink, Download } from 'lucide-react';
 import { Asset } from '@/app/types';
+import { openExternal } from '@/app/lib/openExternal';
 
 interface AssetViewerProps {
   asset: Asset | null;
@@ -43,7 +44,7 @@ export const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
 
   const handleOpenExternal = () => {
     if (asset.source.kind === 'link') {
-      window.open(asset.source.url, '_blank', 'noopener,noreferrer');
+      openExternal(asset.source.url);
     }
   };
 
