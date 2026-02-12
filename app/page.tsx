@@ -197,7 +197,7 @@ export default function Home() {
   const activeAssetsCount = assets.filter(a => !a.isDeleted).length;
 
   const handleUpdateTitle = (noteId: string, title: string) => {
-    setNotes(notes.map(n =>
+    setNotes(notes.map((n) =>
       n.id === noteId
         ? { ...n, title, updatedAt: new Date() }
         : n
@@ -205,7 +205,7 @@ export default function Home() {
   };
 
   const handleUpdateBlocks = (noteId: string, blocks: Block[]) => {
-    setNotes(notes.map(n =>
+    setNotes(notes.map((n) =>
       n.id === noteId
         ? { ...n, blocks, updatedAt: new Date() }
         : n
@@ -443,11 +443,12 @@ export default function Home() {
   const handleDeleteNote = (noteId: string) => {
     // Prevent deleting notes in default category
     const note = notes.find(n => n.id === noteId);
-    if (note) {
-      const category = categories.find(c => c.id === note.categoryId);
-      if (category?.isDefault) {
-        return;
-      }
+    if (!note) {
+      return;
+    }
+    const category = categories.find(c => c.id === note.categoryId);
+    if (category?.isDefault) {
+      return;
     }
     
     setNotes(notes.map(n =>
@@ -937,9 +938,11 @@ export default function Home() {
                 <>
                   <TopBar viewMode={viewMode} />
                   <SettingsView
-                    notesCount={activeNotesCount}
-                    categoriesCount={categories.length}
-                    assetsCount={activeAssetsCount}
+                    notes={notes}
+                    categories={categories}
+                    assets={assets}
+                    reflections={reflections}
+                    onOpenFeedback={() => setIsFeedbackPanelOpen(true)}
                   />
                 </>
               )}

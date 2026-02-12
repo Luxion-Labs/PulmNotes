@@ -12,7 +12,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      data-pulm-theme="light"
+      data-pulm-editor-width="comfortable"
+      data-pulm-font-size="default"
+    >
       <head>
         <script src="https://cdn.tailwindcss.com"></script>
         <style>{`
