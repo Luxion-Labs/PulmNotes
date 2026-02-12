@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Asset, Category, DailyReflection, Note } from '@/app/types';
 import { formatBytes, getStorageInfo } from '@/app/lib/storageUtils';
+import JSZip from 'jszip';
 
 type OSKey = 'windows' | 'macos' | 'linux' | 'unknown';
 
@@ -324,7 +325,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
               <p className="flex items-center flex-wrap gap-2">
                 <span className="font-medium text-stone-900">License</span>
-                <span>Open source Â· see repository</span>
+                <span>Open source - see repository</span>
               </p>
               <p className="flex items-center gap-2">
                 <span className="font-medium text-stone-900">Open source link</span>
