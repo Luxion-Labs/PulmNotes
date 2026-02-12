@@ -90,6 +90,7 @@ import { SlashMenu } from "@/editor/ui/SlashMenu"
 
 // --- Lib ---
 import { handleImageUpload, MAX_FILE_SIZE } from "@/editor/lib/tiptap-utils"
+import { withAppleEmojiFallbacks } from "@/editor/lib/apple-emoji"
 
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss"
@@ -252,10 +253,10 @@ export function SimpleEditor() {
       Color,
       Selection,
       Emoji.configure({
-        emojis: gitHubEmojis.filter(
-          (emoji) => !emoji.name.includes("regional")
+        emojis: withAppleEmojiFallbacks(
+          gitHubEmojis.filter((emoji) => !emoji.name.includes("regional"))
         ),
-        forceFallbackImages: false,
+        forceFallbackImages: true,
       }),
       ImageUploadNode.configure({
         accept: "image/*",

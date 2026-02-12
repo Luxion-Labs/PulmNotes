@@ -80,6 +80,7 @@ import { AiProvider, useAi } from "@/editor/contexts/ai-context"
 // --- Lib ---
 import { handleImageUpload, MAX_FILE_SIZE } from "@/editor/lib/tiptap-utils"
 import { TIPTAP_AI_APP_ID } from "@/editor/lib/tiptap-collab-utils"
+import { withAppleEmojiFallbacks } from "@/editor/lib/apple-emoji"
 
 // --- Styles ---
 import "@/components/tiptap-templates/notion-like/notion-like-editor.scss"
@@ -224,10 +225,10 @@ export function EditorProvider(props: EditorProviderProps) {
       }),
       Mention,
       Emoji.configure({
-        emojis: gitHubEmojis.filter(
-          (emoji) => !emoji.name.includes("regional")
+        emojis: withAppleEmojiFallbacks(
+          gitHubEmojis.filter((emoji) => !emoji.name.includes("regional"))
         ),
-        forceFallbackImages: false,
+        forceFallbackImages: true,
       }),
       TableKit.configure({
         table: {
