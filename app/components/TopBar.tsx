@@ -49,6 +49,9 @@ export const TopBar: React.FC<TopBarProps> = ({
       case 'bin':
         parts.push({ text: 'bin' });
         break;
+      case 'settings':
+        parts.push({ text: 'settings' });
+        break;
       case 'library':
         parts.push({ text: 'library' });
         if (categoryName) {
@@ -79,7 +82,7 @@ export const TopBar: React.FC<TopBarProps> = ({
     );
   };
 
-  if (viewMode === 'settings' || viewMode === 'search') {
+  if (viewMode === 'search') {
     return null;
   }
 

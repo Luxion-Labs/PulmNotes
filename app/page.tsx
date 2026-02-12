@@ -7,7 +7,7 @@ import { TopBar } from "@/app/components/TopBar";
 import { AllNotesView } from "@/app/components/AllNotesView";
 import { RecentView } from "@/app/components/RecentView";
 import { PinsView } from "@/app/components/PinsView";
-import { SettingsModal } from "@/app/components/SettingsModal";
+import { SettingsView } from "@/app/components/SettingsView";
 import { FeedbackPanel } from "@/app/components/FeedbackPanel";
 import { BinView } from "@/app/components/BinView";
 import { CommandPalette } from "@/app/components/CommandPalette";
@@ -50,7 +50,6 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<ViewMode>('home');
   const [isReadMode, setIsReadMode] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isFeedbackPanelOpen, setIsFeedbackPanelOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
@@ -194,6 +193,8 @@ export default function Home() {
 
 
   const currentNote = notes.find(n => n.id === currentNoteId);
+  const activeNotesCount = notes.filter(n => !n.isDeleted).length;
+  const activeAssetsCount = assets.filter(a => !a.isDeleted).length;
 
   const handleUpdateTitle = (noteId: string, title: string) => {
     setNotes(notes.map(n =>
@@ -428,15 +429,14 @@ export default function Home() {
   };
 
   const handleChangeView = (mode: ViewMode) => {
-    if (mode === 'settings') {
-      setIsSettingsModalOpen(true);
-    } else if (mode === 'search') {
+    if (mode === 'search') {
       setIsCommandPaletteOpen(true);
-    } else {
-      setViewMode(mode);
-      if (mode !== 'library') {
-        setCurrentNoteId(null);
-      }
+      return;
+    }
+
+    setViewMode(mode);
+    if (mode !== 'library') {
+      setCurrentNoteId(null);
     }
   };
 
@@ -933,6 +933,16 @@ export default function Home() {
                   />
                 </>
               )}
+              {viewMode === 'settings' && (
+                <>
+                  <TopBar viewMode={viewMode} />
+                  <SettingsView
+                    notesCount={activeNotesCount}
+                    categoriesCount={categories.length}
+                    assetsCount={activeAssetsCount}
+                  />
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -945,14 +955,6 @@ export default function Home() {
         onSelectNote={handleSelectNote}
         onUpdateReflection={handleUpdateReflection}
       /> */}
-
-      <SettingsModal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
-        notesCount={notes.filter(n => !n.isDeleted).length}
-        categoriesCount={categories.length}
-        assetsCount={assets.filter(a => !a.isDeleted).length}
-      />
 
       <FeedbackPanel
         isOpen={isFeedbackPanelOpen}
