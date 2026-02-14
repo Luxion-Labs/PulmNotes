@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Note, Block, Asset } from '@/app/types';
 import { TipTapNoteEditor } from '@/editor';
 import { RichContentRenderer } from './RichContentRenderer';
-import { getDragData } from '@/app/lib/openExternal';
 
 interface NoteViewProps {
   note: Note;
@@ -43,16 +42,7 @@ export const NoteView: React.FC<NoteViewProps> = ({
   };
 
   const isAssetDrag = (e: React.DragEvent) => {
-    // Check global drag data first (for Tauri)
-    const globalData = getDragData();
-    console.log('[NoteView] isAssetDrag - globalData:', globalData);
-    if (globalData.type === 'asset') {
-      return true;
-    }
-    
-    // Fallback to dataTransfer types
     const types = Array.from(e.dataTransfer?.types || []);
-    console.log('[NoteView] isAssetDrag - dataTransfer types:', types);
     return types.includes('itemType') || types.includes('itemtype');
   };
 
@@ -76,23 +66,13 @@ export const NoteView: React.FC<NoteViewProps> = ({
   };
 
   const handleDragOver = (e: React.DragEvent) => {
-    console.log('[NoteView] handleDragOver called');
-    if (!isAssetDrag(e)) {
-      console.log('[NoteView] Not an asset drag, ignoring');
-      return;
-    }
-    console.log('[NoteView] Asset drag detected, preventing default');
+    if (!isAssetDrag(e)) return;
     e.preventDefault();
     if (!isDragOver) setIsDragOver(true);
   };
 
   const handleDragEnter = (e: React.DragEvent) => {
-    console.log('[NoteView] handleDragEnter called');
-    if (!isAssetDrag(e)) {
-      console.log('[NoteView] Not an asset drag in dragEnter');
-      return;
-    }
-    console.log('[NoteView] Asset drag enter detected');
+    if (!isAssetDrag(e)) return;
     e.preventDefault();
     // Use a depth counter because dragenter/dragleave fires for child nodes.
     dragDepthRef.current += 1;
