@@ -39,7 +39,8 @@
         "skipTaskbar": false,
         "center": true,
         "hiddenTitle": false,
-        "label": "main"
+        "label": "main",
+        "dragDropEnabled": false
       }
     ],
     "security": {
