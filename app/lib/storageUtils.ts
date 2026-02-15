@@ -1,30 +1,27 @@
-export const getStorageInfo = () => {
+import { invoke } from '@tauri-apps/api/core';
+
+export const getStorageInfo = async () => {
   if (typeof window === 'undefined') {
-    return { used: 0, available: 0, percentage: 0, usedMB: '0', availableMB: '0' };
+    return { used: 0, available: 0, percentage: 0, usedMB: '0', availableMB: 'unlimited', type: 'database' as const };
   }
 
   try {
-    let totalSize = 0;
-    for (const key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
-        totalSize += localStorage[key].length + key.length;
-      }
-    }
-
-    // Typical localStorage limit is 5-10MB, we'll use 5MB as conservative estimate
-    const limit = 5 * 1024 * 1024; // 5MB in bytes
-    const percentage = (totalSize / limit) * 100;
-
+    // Always use database - get database file size from Tauri
+    const dbSize = await invoke<number>('get_database_size');
+    
+    // For SQLite, we don't have a hard limit like localStorage
+    // Show the actual file size without a percentage
     return {
-      used: totalSize,
-      available: limit - totalSize,
-      percentage: Math.min(percentage, 100),
-      usedMB: (totalSize / (1024 * 1024)).toFixed(2),
-      availableMB: ((limit - totalSize) / (1024 * 1024)).toFixed(2)
+      used: dbSize,
+      available: 0, // No fixed limit for SQLite
+      percentage: 0,
+      usedMB: (dbSize / (1024 * 1024)).toFixed(2),
+      availableMB: 'unlimited',
+      type: 'database' as const
     };
   } catch (error) {
     console.error('Error calculating storage:', error);
-    return { used: 0, available: 0, percentage: 0, usedMB: '0', availableMB: '0' };
+    return { used: 0, available: 0, percentage: 0, usedMB: '0', availableMB: 'unlimited', type: 'database' as const };
   }
 };
 
