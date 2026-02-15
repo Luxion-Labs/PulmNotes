@@ -43,7 +43,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' asset: https://asset.localhost file:; img-src 'self' data: asset: https://asset.localhost file:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' ipc: http://ipc.localhost https://ipc.localhost https:; font-src 'self' data:; object-src 'self'; media-src 'self' data: asset: https://asset.localhost file:; frame-src 'self' asset: https://asset.localhost file: https:",
+      "csp": "default-src 'self' asset: https://asset.localhost file:; img-src 'self' data: asset: https://asset.localhost file:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' ipc: http://ipc.localhost https://ipc.localhost https:; font-src 'self' data:; object-src 'self'; media-src 'self' blob: data: asset: https://asset.localhost file:; frame-src 'self' blob: asset: https://asset.localhost file: https:",
       "capabilities": ["default"]
     }
   },
