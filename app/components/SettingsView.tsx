@@ -3,7 +3,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Asset, Category, DailyReflection, Note } from '@/app/types';
 import { formatBytes, getStorageInfo } from '@/app/lib/storageUtils';
+import {
+  createNoteStore,
+  createCategoryStore,
+  createAssetStore,
+  createReflectionStore
+} from '@/app/lib/persistence';
 import JSZip from 'jszip';
+
+const noteStore = createNoteStore();
+const categoryStore = createCategoryStore();
+const assetStore = createAssetStore();
+const reflectionStore = createReflectionStore();
 
 type OSKey = 'windows' | 'macos' | 'linux' | 'unknown';
 
@@ -87,11 +98,24 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   reflections,
   onOpenFeedback
 }) => {
-  const [storageInfo, setStorageInfo] = useState(getStorageInfo());
+  const [storageInfo, setStorageInfo] = useState<{
+    used: number;
+    available: number;
+    percentage: number;
+    usedMB: string;
+    availableMB: string | number;
+    type: 'database';
+  }>({ used: 0, available: 0, percentage: 0, usedMB: '0', availableMB: 'unlimited', type: 'database' });
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    setStorageInfo(getStorageInfo());
+    
+    const loadStorageInfo = async () => {
+      const info = await getStorageInfo();
+      setStorageInfo(info);
+    };
+    
+    loadStorageInfo();
   }, []);
 
   const handleBackupSnapshot = () => {
@@ -148,19 +172,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         throw new Error('Missing notes or categories in the snapshot');
       }
 
-      const persist = (key: string, payload: unknown[]) => {
-        window.localStorage.setItem(key, JSON.stringify(payload));
-      };
-
-      persist('pulm-notes', importedNotes);
-      persist('pulm-categories', importedCategories);
+      // Import directly to database using the stores
+      await categoryStore.saveCategories(importedCategories);
+      await noteStore.saveNotes(importedNotes);
 
       if (Array.isArray(importedAssets)) {
-        persist('pulm-assets', importedAssets);
+        await assetStore.saveAssets(importedAssets);
       }
 
       if (Array.isArray(importedReflections)) {
-        persist('pulm-reflections', importedReflections);
+        await reflectionStore.saveReflections(importedReflections);
       }
 
       window.location.reload();
@@ -175,26 +196,32 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     }
   };
 
-  const handleClearLibrary = () => {
+  const handleClearLibrary = async () => {
     if (typeof window === 'undefined') return;
     const confirmed = window.confirm(
-      'This will remove all notes, categories, assets, reflections, and activity logs from this device. This cannot be undone.'
+      'This will remove all notes, categories, assets, reflections, and activity logs from the database. This cannot be undone.'
     );
     if (!confirmed) {
       return;
     }
-    window.localStorage.removeItem('pulm-notes');
-    window.localStorage.removeItem('pulm-categories');
-    window.localStorage.removeItem('pulm-assets');
-    window.localStorage.removeItem('pulm-reflections');
-    window.localStorage.removeItem('pulm_preferences');
-    window.location.reload();
+    
+    try {
+      // Clear all data by saving empty arrays
+      await noteStore.saveNotes([]);
+      await categoryStore.saveCategories([]);
+      await assetStore.saveAssets([]);
+      await reflectionStore.saveReflections([]);
+      
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to clear library:', error);
+      window.alert('Failed to clear library. Please try again.');
+    }
   };
 
-  const hasTauri = typeof window !== 'undefined' && !!(window as any).__TAURI__;
-  const storageLocationText = hasTauri
-    ? 'Tauri local filesystem (desktop) Â· Browser local storage (web)'
-    : 'Browser local storage';
+  const storageLocationText = 'SQLite database in app data directory';
+  
+  const storageDetailsText = `Database file size: ${formatBytes(storageInfo.used)}`;
 
   const activeNotesCount = useMemo(
     () => notes.filter((note) => !note.isDeleted).length,
@@ -259,7 +286,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 <p className="text-xs uppercase tracking-[0.4em] text-stone-500">Storage usage</p>
                 <p className="text-base text-stone-600 mt-2">{formatBytes(storageInfo.used)} used</p>
                 <p className="text-xs text-stone-400 mt-1">
-                  {Math.round(storageInfo.percentage)}% of a ~5MB browser bucket
+                  {storageDetailsText}
                 </p>
                 <p className="text-xs text-stone-500 mt-1">{storageLocationText}</p>
               </div>
