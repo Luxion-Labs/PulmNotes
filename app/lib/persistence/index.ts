@@ -8,3 +8,10 @@ export type { ReflectionStore } from './ReflectionStore';
 export { LocalStorageReflectionStore } from './LocalStorageReflectionStore';
 export type { AssetStore } from './AssetStore';
 export { LocalStorageAssetStore } from './LocalStorageAssetStore';
+export {
+  createNoteStore,
+  createCategoryStore,
+  createSubCategoryStore,
+  createAssetStore,
+  createReflectionStore
+} from './storeFactory';
