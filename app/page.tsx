@@ -21,19 +21,24 @@ import { defaultCategories } from "@/app/data/defaultCategories";
 import { defaultNotes } from "@/app/data/defaultNotes";
 import { Note, Block, Category, SubCategory, ViewMode, DailyReflection, Asset, AssetType } from "@/app/types";
 import {
-  NoteStore, LocalStorageNoteStore,
-  CategoryStore, LocalStorageCategoryStore,
-  SubCategoryStore, LocalStorageSubCategoryStore,
-  ReflectionStore, LocalStorageReflectionStore,
-  AssetStore, LocalStorageAssetStore
+  NoteStore,
+  CategoryStore,
+  SubCategoryStore,
+  ReflectionStore,
+  AssetStore,
+  createNoteStore,
+  createCategoryStore,
+  createSubCategoryStore,
+  createAssetStore,
+  createReflectionStore
 } from "@/app/lib/persistence";
 import { useState, useEffect } from "react";
 
-const noteStore: NoteStore = new LocalStorageNoteStore();
-const categoryStore: CategoryStore = new LocalStorageCategoryStore();
-const subCategoryStore: SubCategoryStore = new LocalStorageSubCategoryStore();
-const reflectionStore: ReflectionStore = new LocalStorageReflectionStore();
-const assetStore: AssetStore = new LocalStorageAssetStore();
+const noteStore: NoteStore = createNoteStore();
+const categoryStore: CategoryStore = createCategoryStore();
+const subCategoryStore: SubCategoryStore = createSubCategoryStore();
+const reflectionStore: ReflectionStore = createReflectionStore();
+const assetStore: AssetStore = createAssetStore();
 
 const generateId = () => Math.random().toString(36).substring(2, 11);
 

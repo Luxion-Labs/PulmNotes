@@ -17,6 +17,31 @@
   }
 }
 
+/* Scrollbar hiding for all elements */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* Contenteditable focus outline removal */
+[contenteditable]:focus {
+  outline: none;
+}
+
+/* Empty node placeholder */
+.empty-node:empty:before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+  display: block;
+}
+
 :root {
   --pulm-bg: #f4f2f0;
   --pulm-panel: #ffffff;
