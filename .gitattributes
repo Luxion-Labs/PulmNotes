@@ -1,0 +1,99 @@
+# Auto detect text files and normalize line endings to LF
+* text=auto eol=lf
+
+# Source code
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+
+# Rust source files
+*.rs text eol=lf
+Cargo.toml text eol=lf
+Cargo.lock text eol=lf -diff
+
+# Shell scripts
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Windows scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Configuration files
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.editorconfig text eol=lf
+.npmrc text eol=lf
+.hintrc text eol=lf
+
+# Documentation
+*.txt text eol=lf
+LICENSE text eol=lf
+README* text eol=lf
+CHANGELOG* text eol=lf
+CONTRIBUTING* text eol=lf
+SECURITY* text eol=lf
+CODE_OF_CONDUCT* text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.icns binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.mp3 binary
+*.mp4 binary
+*.webm binary
+*.ogg binary
+*.wav binary
+*.pdf binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.bz2 binary
+*.7z binary
+
+# Lock files (generated, should not be manually edited)
+package-lock.json -diff
+yarn.lock -diff
+pnpm-lock.yaml -diff
+bun.lockb -diff binary
+
+# Build outputs (exclude from exports)
+/out/ export-ignore
+/.next/ export-ignore
+/build/ export-ignore
+/dist/ export-ignore
+/target/ export-ignore
+/node_modules/ export-ignore
+*.log export-ignore
+.DS_Store export-ignore
+
+# Git and CI files (exclude from exports)
+.git* export-ignore
+.github/ export-ignore
+.vscode/ export-ignore
+.idea/ export-ignore
+
+# Linguist overrides for accurate language statistics
+*.scss linguist-language=SCSS
+*.module.css linguist-language=CSS
+/editor/components/tiptap-icons/*.tsx linguist-generated=true

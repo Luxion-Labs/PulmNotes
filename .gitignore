@@ -44,4 +44,3 @@ node_modules
 # Authentication tokens
 .npmrc
 
-.github/
