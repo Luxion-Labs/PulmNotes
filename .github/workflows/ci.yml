@@ -27,7 +27,7 @@ jobs:
           bun-version: latest
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.bun/install/cache
@@ -57,7 +57,7 @@ jobs:
           bun-version: latest
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.bun/install/cache
@@ -85,7 +85,7 @@ jobs:
           bun-version: latest
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.bun/install/cache
@@ -150,7 +150,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache Rust dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/bin/
@@ -167,7 +167,7 @@ jobs:
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Cache Bun dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.bun/install/cache
