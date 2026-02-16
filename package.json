@@ -68,7 +68,7 @@
     "lowlight": "^3.3.0",
     "lucide-react": "^0.563.0",
     "next": "^15.0.0",
-    "node-emoji": "^1.11.0",
+    "node-emoji": "^2.2.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-hotkeys-hook": "^5.2.4",
