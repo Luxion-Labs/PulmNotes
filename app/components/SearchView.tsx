@@ -79,7 +79,7 @@ export const SearchView: React.FC<SearchViewProps> = ({
         
         {searchQuery.trim() && filteredNotes.length === 0 && (
           <div className="text-center py-12 text-stone-500">
-            <p>No notes found matching "{searchQuery}"</p>
+            <p>No notes found matching &quot;{searchQuery}&quot;</p>
           </div>
         )}
         
