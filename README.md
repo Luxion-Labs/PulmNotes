@@ -67,3 +67,13 @@ Installers will be created in `src-tauri/target/release/bundle/`
 
 - **Next.js Migration**: See `docs/NEXT_MIGRATION_LOG.md`
 - **Tauri Integration**: See `TAURI_AUDIT_LOG.md` for desktop architecture details
+
+## Manual Release Process
+
+1. Ensure commits follow Conventional Commits.
+2. When ready to release, run:
+```bash
+git tag vX.Y.Z
+git push origin vX.Y.Z
+```
+3. GitHub Actions will run CI, semantic-release, generate `CHANGELOG`, update `package.json` version, create the GitHub Release, attach Tauri artifacts, and generate checksums.
