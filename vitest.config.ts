@@ -7,6 +7,11 @@ export default defineConfig({
     environment: 'node',
     include: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
     exclude: ['node_modules', 'dist', '.next', 'src-tauri'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      reportsDirectory: 'coverage',
+    },
   },
   resolve: {
     alias: {
