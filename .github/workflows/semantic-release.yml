@@ -28,6 +28,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 20
+          registry-url: https://registry.npmjs.org
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -39,6 +40,8 @@ jobs:
             bun.lockb
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
       - run: bun install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.TIPTAP_TOKEN }}
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
