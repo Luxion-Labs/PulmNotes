@@ -40,7 +40,12 @@ export function parseRichContent(content: string): ContentToken[] {
     const urlMatch = remaining.match(/^(https?:\/\/[^\s)]+)/);
     if (urlMatch) {
       const url = urlMatch[1];
-      const host = getHostname(url);
+      let host = '';
+      try {
+        host = new URL(url).hostname;
+      } catch {
+        host = '';
+      }
       // Check if it's an image (including URLs with paths that end in image extensions)
       if (
         /\.(png|jpg|jpeg|webp|gif)($|\?|\/)/i.test(url) ||
@@ -114,16 +119,4 @@ function extractVimeoId(url: string): string | null {
   // vimeo.com/VIDEO_ID
   const match = url.match(/vimeo\.com\/(\d+)/);
   return match ? match[1] : null;
-
-/**
- * Safely extract hostname from a URL string.
- */
-function getHostname(url: string): string | null {
-  try {
-    const parsed = new URL(url);
-    return parsed.hostname;
-  } catch {
-    return null;
-  }
-}
 }
