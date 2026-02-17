@@ -14,7 +14,7 @@ tauri-plugin-shell = "2.1"
 tauri-plugin-fs = "2.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-rusqlite = { version = "0.32", features = ["bundled"] }
+rusqlite = { version = "0.38", features = ["bundled"] }
 
 [features]
 default = ["custom-protocol"]
