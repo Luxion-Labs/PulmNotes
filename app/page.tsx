@@ -17,6 +17,7 @@ import { NoteView } from "@/app/components/NoteView";
 import { NoteTabs } from "@/app/components/NoteTabs";
 import { CategoryModal } from "@/app/components/CategoryModal";
 import { SubCategoryModal } from "@/app/components/SubCategoryModal";
+import PulmEnterPage from "@/app/components/PulmEnterPage";
 import { defaultCategories } from "@/app/data/defaultCategories";
 import { defaultNotes } from "@/app/data/defaultNotes";
 import { Note, Block, Category, SubCategory, ViewMode, DailyReflection, Asset, AssetType } from "@/app/types";
@@ -58,6 +59,7 @@ export default function Home() {
   const [isFeedbackPanelOpen, setIsFeedbackPanelOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
+  const [hasEntered, setHasEntered] = useState(false);
   const [assetModalContext, setAssetModalContext] = useState<{ categoryId: string; subCategoryId?: string } | null>(null);
   const [viewingAsset, setViewingAsset] = useState<Asset | null>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -792,6 +794,10 @@ export default function Home() {
     }));
   };
 
+  if (!hasEntered) {
+    return <PulmEnterPage onEnter={() => setHasEntered(true)} />;
+  }
+
   if (!isLoaded) {
     return null;
   }
@@ -1019,4 +1025,3 @@ export default function Home() {
     </div>
   );
 }
-
