@@ -85,7 +85,7 @@ fn run() -> tauri::Result<()> {
             let db_path = app_data_dir.join("pulm_notes.db");
             
             let db = Database::new(db_path.clone())
-                .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
+                .map_err(|e| std::io::Error::other(e.to_string()))?;
             
             app.manage(AppState {
                 db: Arc::new(db),
