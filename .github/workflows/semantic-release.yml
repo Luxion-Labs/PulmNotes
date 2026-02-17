@@ -39,16 +39,13 @@ jobs:
             bun.lockb
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
       - name: Configure TipTap Pro auth
+        shell: bash
         run: |
-          echo "@tiptap-pro:registry=https://registry.tiptap.dev/" >> $NPM_CONFIG_USERCONFIG
-          echo "//registry.tiptap.dev/:_authToken=${NODE_AUTH_TOKEN}" >> $NPM_CONFIG_USERCONFIG
+          echo "@tiptap-pro:registry=https://registry.tiptap.dev/" > .npmrc
+          echo "//registry.tiptap.dev/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TIPTAP_TOKEN }}
-          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/.npmrc
       - run: bun install --frozen-lockfile
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.TIPTAP_TOKEN }}
-          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/.npmrc
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
