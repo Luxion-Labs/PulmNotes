@@ -28,7 +28,6 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 20
-          registry-url: https://registry.npmjs.org
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -39,6 +38,14 @@ jobs:
             ~/.bun/install/cache
             bun.lockb
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+      - name: Configure TipTap Pro auth
+        run: |
+          echo "@tiptap-pro:registry=https://registry.tiptap.dev/" > ~/.npmrc
+          echo "//registry.tiptap.dev/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.TIPTAP_TOKEN }}
+      - name: Debug npmrc
+        run: cat ~/.npmrc
       - run: bun install --frozen-lockfile
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TIPTAP_TOKEN }}
