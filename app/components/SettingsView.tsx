@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Asset, Category, DailyReflection, Note } from '@/app/types';
 import { formatBytes, getStorageInfo } from '@/app/lib/storageUtils';
 import {
@@ -9,7 +9,25 @@ import {
   createAssetStore,
   createReflectionStore
 } from '@/app/lib/persistence';
-import JSZip from 'jszip';
+import {
+  Shield,
+  Database,
+  Info,
+  Download,
+  Upload,
+  Trash2,
+  HardDrive,
+  BookOpen,
+  Archive,
+  ExternalLink,
+  ChevronRight,
+  AlertTriangle,
+  FolderArchive,
+  Github,
+  Scale,
+  MonitorSmartphone,
+  MessageSquare,
+} from 'lucide-react';
 
 const noteStore = createNoteStore();
 const categoryStore = createCategoryStore();
@@ -17,6 +35,7 @@ const assetStore = createAssetStore();
 const reflectionStore = createReflectionStore();
 
 type OSKey = 'windows' | 'macos' | 'linux' | 'unknown';
+type SettingsTab = 'general' | 'data' | 'about';
 
 const detectPlatform = (): OSKey => {
   if (typeof navigator === 'undefined') {
@@ -74,6 +93,13 @@ const PlatformIcon: React.FC<{ os: OSKey }> = ({ os }) => {
   return <span className="h-5 w-5 rounded-full bg-stone-200" aria-hidden="true" />;
 };
 
+/* ─── Sidebar nav items ─── */
+const NAV_ITEMS: { key: SettingsTab; label: string; icon: React.ReactNode; description: string }[] = [
+  { key: 'general', label: 'General', icon: <Shield size={18} />, description: 'Privacy & philosophy' },
+  { key: 'data', label: 'Storage', icon: <Database size={18} />, description: 'Backup & History' },
+  { key: 'about', label: 'About', icon: <Info size={18} />, description: 'Version & credits' },
+];
+
 interface SettingsViewProps {
   notes: Note[];
   categories: Category[];
@@ -98,6 +124,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   reflections,
   onOpenFeedback
 }) => {
+  const [activeTab, setActiveTab] = useState<SettingsTab>('general');
+  const contentRef = useRef<HTMLDivElement>(null);
   const [storageInfo, setStorageInfo] = useState<{
     used: number;
     available: number;
@@ -132,20 +160,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       type: 'application/json'
     });
     downloadBlob(blob, `pulm-backup-${timestamp}.json`);
-  };
-
-  const handleExportMarkdown = async () => {
-    if (typeof window === 'undefined') return;
-    const zip = new JSZip();
-    notes.forEach((note) => {
-      const name = note.title ? note.title.trim() : 'Untitled';
-      const safeName = name.replace(/[^a-z0-9-_ ]/gi, '').slice(0, 120) || 'note';
-      const markdown = note.blocks.map((block) => block.content).join('\n\n');
-      zip.file(`${safeName || 'note'}.md`, markdown);
-    });
-    const content = await zip.generateAsync({ type: 'blob' });
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    downloadBlob(content, `pulm-markdown-export-${timestamp}.zip`);
   };
 
   const [selectedBackupFile, setSelectedBackupFile] = useState<string | null>(null);
@@ -237,139 +251,434 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
   const platformLabel = platformLabelMap[platformKey];
 
-  return (
-    <div className="flex-1 overflow-y-auto bg-[#f4f2f0] text-stone-900">
-      <div className="max-w-6xl mx-auto px-4 py-10 space-y-6 min-h-full">
-        <div className="flex flex-col gap-1">
-          <p className="text-xs uppercase tracking-[0.4em] text-stone-600 font-bold">
-            Settings
-          </p>
-          <p className="text-sm text-stone-500 max-w-2xl leading-relaxed">
-            Pulm keeps everything rooted on this device. No tracking, no analytics, no cloud; only
-            the quiet reflection you choose to log.
+  /* ─── Tab content renderers ─── */
+
+  const renderGeneral = () => (
+    <div className="space-y-6 animate-[fadeIn_0.25s_ease]">
+      {/* Hero banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 p-8 text-white">
+        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/[0.04] blur-2xl" />
+        <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-white/[0.03] blur-xl" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm">
+              <Shield size={20} className="text-white/90" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight">Privacy-first by design</h2>
+              <p className="text-sm text-white/50">Your notes never leave this device</p>
+            </div>
+          </div>
+          <p className="text-sm text-white/60 leading-relaxed max-w-lg">
+            Pulm keeps everything rooted on this device. No tracking, no analytics, no cloud &mdash;
+            only the quiet reflection you choose to log.
           </p>
         </div>
+      </div>
 
-        <div className="space-y-5">
-          <section className="rounded-3xl border border-stone-200 bg-white/80 p-6 shadow-[0_15px_30px_rgba(15,23,42,0.04)] space-y-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-stone-500 font-semibold">General</p>
-              <h2 className="text-xl font-semibold text-stone-900 mt-2">Description</h2>
+      {/* Philosophy cards */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        {[
+          {
+            icon: <Shield size={18} className="text-emerald-600" />,
+            title: 'Zero telemetry',
+            text: 'No analytics or tracking. Nothing leaves your device unless you export.',
+            accent: 'bg-emerald-50 border-emerald-100',
+          },
+          {
+            icon: <HardDrive size={18} className="text-sky-600" />,
+            title: 'Local storage',
+            text: 'Your data lives in a local SQLite database. You own every byte.',
+            accent: 'bg-sky-50 border-sky-100',
+          },
+          {
+            icon: <BookOpen size={18} className="text-amber-600" />,
+            title: 'Calm workspace',
+            text: 'Designed for reflection. No productivity pressure, no streak counters.',
+            accent: 'bg-amber-50 border-amber-100',
+          },
+          {
+            icon: <Scale size={18} className="text-violet-600" />,
+            title: 'Open source',
+            text: 'Fully open, fully transparent. Inspect every line of code on GitHub.',
+            accent: 'bg-violet-50 border-violet-100',
+          },
+        ].map((card) => (
+          <div
+            key={card.title}
+            className={`group rounded-2xl border p-5 transition-all duration-200 hover:shadow-md ${card.accent}`}
+          >
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
+                {card.icon}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-stone-900">{card.title}</p>
+                <p className="mt-1 text-xs text-stone-500 leading-relaxed">{card.text}</p>
+              </div>
             </div>
-            <p className="text-sm text-stone-600 leading-relaxed">
-              Notes stay in your care. Nothing leaves the device unless you choose to export or backup.
+          </div>
+        ))}
+      </div>
+
+      {/* Feedback CTA */}
+      <button
+        type="button"
+        onClick={onOpenFeedback}
+        className="group flex w-full items-center gap-4 rounded-2xl border border-stone-200 bg-white p-5 text-left transition-all duration-200 hover:border-stone-300 hover:shadow-sm"
+      >
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-stone-100 transition-colors group-hover:bg-stone-200">
+          <MessageSquare size={18} className="text-stone-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-stone-900">Send feedback</p>
+          <p className="text-xs text-stone-500">Share thoughts or report an issue</p>
+        </div>
+        <ChevronRight size={16} className="text-stone-400 transition-transform group-hover:translate-x-0.5" />
+      </button>
+    </div>
+  );
+
+  const renderData = () => (
+    <div className="space-y-6 animate-[fadeIn_0.25s_ease]">
+      {/* Stats row */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        {[
+          {
+            icon: <BookOpen size={18} className="text-stone-600" />,
+            label: 'Active notes',
+            value: activeNotesCount,
+            sub: `${archivedNotesCount} archived`,
+            accent: 'from-stone-50 to-white',
+          },
+          {
+            icon: <FolderArchive size={18} className="text-stone-600" />,
+            label: 'Categories',
+            value: categories.length,
+            sub: `${assets.length} assets`,
+            accent: 'from-stone-50 to-white',
+          },
+          {
+            icon: <HardDrive size={18} className="text-stone-600" />,
+            label: 'Storage',
+            value: formatBytes(storageInfo.used),
+            sub: storageLocationText,
+            accent: 'from-stone-50 to-white',
+          },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className={`relative overflow-hidden rounded-2xl border border-stone-200/80 bg-gradient-to-b ${stat.accent} p-5`}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100">
+                {stat.icon}
+              </div>
+              <span className="text-xs font-medium uppercase tracking-wider text-stone-400">
+                {stat.label}
+              </span>
+            </div>
+            <p className="text-2xl font-bold text-stone-900 tracking-tight">{stat.value}</p>
+            <p className="mt-1 text-xs text-stone-400">{stat.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Storage bar */}
+      {storageInfo.percentage > 0 && (
+        <div className="rounded-2xl border border-stone-200/80 bg-white p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium uppercase tracking-wider text-stone-400">
+              Storage usage
+            </span>
+            <span className="text-xs text-stone-500">{storageDetailsText}</span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-stone-100">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-stone-400 to-stone-600 transition-all duration-700"
+              style={{ width: `${Math.min(storageInfo.percentage, 100)}%` }}
+            />
+          </div>
+          <p className="mt-2 text-xs text-stone-400">
+            {storageInfo.percentage.toFixed(1)}% of available storage
+          </p>
+        </div>
+      )}
+
+      {/* Export / Backup section */}
+      <div className="rounded-2xl border border-stone-200/80 bg-white overflow-hidden">
+        <div className="px-5 pt-5 pb-3">
+          <h3 className="text-sm font-semibold text-stone-900">Export & Backup</h3>
+          <p className="mt-1 text-xs text-stone-400">Download local copies of your data</p>
+        </div>
+
+        <div className="divide-y divide-stone-100">
+          <button
+            type="button"
+            onClick={handleBackupSnapshot}
+            className="group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-stone-50"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-stone-100 transition-colors group-hover:bg-stone-200">
+              <Download size={16} className="text-stone-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-stone-800">Download library snapshot</p>
+              <p className="text-xs text-stone-400">Full JSON backup of notes, categories &amp; assets</p>
+            </div>
+            <ChevronRight size={14} className="text-stone-300 transition-transform group-hover:translate-x-0.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Import section */}
+      <div className="rounded-2xl border border-stone-200/80 bg-white overflow-hidden">
+        <div className="px-5 pt-5 pb-3">
+          <h3 className="text-sm font-semibold text-stone-900">Import</h3>
+          <p className="mt-1 text-xs text-stone-400">Restore from a previous backup snapshot</p>
+        </div>
+
+        <div className="px-5 pb-5">
+          <label className="group flex items-center gap-4 rounded-xl border-2 border-dashed border-stone-200 bg-stone-50/50 px-5 py-5 cursor-pointer transition-colors hover:border-stone-300 hover:bg-stone-50">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm border border-stone-100">
+              <Upload size={16} className="text-stone-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-stone-700">
+                {selectedBackupFile ? selectedBackupFile : 'Choose a backup file'}
+              </p>
+              <p className="text-xs text-stone-400">
+                {selectedBackupFile ? 'File selected — importing...' : 'Drop a .json backup or click to browse'}
+              </p>
+            </div>
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleBackupFileChange}
+              className="hidden"
+            />
+          </label>
+        </div>
+      </div>
+
+      {/* Danger zone */}
+      <div className="rounded-2xl border border-red-200/60 bg-red-50/30 overflow-hidden">
+        <div className="px-5 pt-5 pb-3 flex items-center gap-2">
+          <AlertTriangle size={14} className="text-red-400" />
+          <h3 className="text-sm font-semibold text-red-700">Danger zone</h3>
+        </div>
+        <div className="px-5 pb-5 space-y-3">
+          <p className="text-xs text-red-500/80 leading-relaxed">
+            Clearing the library permanently removes every note, category, asset, reflection, and
+            activity entry from this device. This action cannot be undone.
+          </p>
+          <button
+            type="button"
+            onClick={handleClearLibrary}
+            className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-medium text-red-600 transition-all hover:bg-red-50 hover:border-red-300 hover:shadow-sm active:scale-[0.98]"
+          >
+            <Trash2 size={14} />
+            Clear entire library
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderAbout = () => (
+    <div className="space-y-6 animate-[fadeIn_0.25s_ease]">
+      {/* App identity card */}
+      <div className="relative overflow-hidden rounded-2xl border border-stone-200/80 bg-white p-8">
+        <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-stone-100/60 blur-3xl" />
+        <div className="relative z-10 flex items-start gap-5">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-stone-800 to-stone-900 shadow-lg shadow-stone-900/20">
+            <span className="text-2xl font-bold text-white tracking-tight">P</span>
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-stone-900 tracking-tight">Pulm Notes</h2>
+            <p className="mt-1 text-sm text-stone-400">
+              A calm, private space for reflection that keeps you rooted in local notes.
             </p>
-            <p className="text-sm text-stone-600 leading-relaxed">
-              Pulm places your notes in your device.
-              Nothing leaves the device unless you export or share it. Settings here are about keeping
-              that world calm choose when to surface reflections and how to keep the workspace gentle,
-              not to chase productivity stats.
-            </p>
-          </section>
-
-          <section className="rounded-3xl border border-stone-200 bg-white/80 p-6 shadow-[0_15px_30px_rgba(15,23,42,0.04)] space-y-5">
-            <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-stone-500 font-semibold">Data</p>
-              <h2 className="text-xl font-semibold text-stone-900 mt-2">Library snapshot</h2>
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-stone-100 px-3 py-1">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-xs font-medium text-stone-600">v1.0.0</span>
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl bg-stone-50 p-4 border border-stone-100">
-                <p className="text-xs uppercase tracking-[0.4em] text-stone-500">Notes</p>
-              <p className="text-lg font-semibold text-stone-900 mt-2">
-                {activeNotesCount} active
-              </p>
-              <p className="text-sm text-stone-500 mt-1">
-                {archivedNotesCount} archived
-              </p>
-              </div>
-              <div className="rounded-2xl bg-stone-50 p-4 border border-stone-100">
-                <p className="text-xs uppercase tracking-[0.4em] text-stone-500">Storage usage</p>
-                <p className="text-base text-stone-600 mt-2">{formatBytes(storageInfo.used)} used</p>
-                <p className="text-xs text-stone-400 mt-1">
-                  {storageDetailsText}
-                </p>
-                <p className="text-xs text-stone-500 mt-1">{storageLocationText}</p>
-              </div>
-            </div>
+          </div>
+        </div>
+      </div>
 
-            <div className="space-y-3">
+      {/* System info */}
+      <div className="rounded-2xl border border-stone-200/80 bg-white overflow-hidden">
+        <div className="px-5 pt-5 pb-3">
+          <h3 className="text-sm font-semibold text-stone-900">System</h3>
+        </div>
+        <div className="divide-y divide-stone-100">
+          <div className="flex items-center justify-between px-5 py-3.5">
+            <div className="flex items-center gap-3">
+              <MonitorSmartphone size={16} className="text-stone-400" />
+              <span className="text-sm text-stone-600">Platform</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <PlatformIcon os={platformKey} />
+              <span className="text-sm font-medium text-stone-800">{platformLabel}</span>
+            </div>
+          </div>
+          <div className="flex items-center justify-between px-5 py-3.5">
+            <div className="flex items-center gap-3">
+              <Database size={16} className="text-stone-400" />
+              <span className="text-sm text-stone-600">Storage engine</span>
+            </div>
+            <span className="text-sm font-medium text-stone-800">SQLite</span>
+          </div>
+          <div className="flex items-center justify-between px-5 py-3.5">
+            <div className="flex items-center gap-3">
+              <Archive size={16} className="text-stone-400" />
+              <span className="text-sm text-stone-600">Data size</span>
+            </div>
+            <span className="text-sm font-medium text-stone-800">{formatBytes(storageInfo.used)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Links */}
+      <div className="rounded-2xl border border-stone-200/80 bg-white overflow-hidden">
+        <div className="px-5 pt-5 pb-3">
+          <h3 className="text-sm font-semibold text-stone-900">Links</h3>
+        </div>
+        <div className="divide-y divide-stone-100">
+          <a
+            href="https://github.com/dev-Ninjaa/PulmNotes"
+            target="_blank"
+            rel="noreferrer"
+            className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-stone-50"
+          >
+            <div className="flex items-center gap-3">
+              <Github size={16} className="text-stone-400" />
+              <span className="text-sm text-stone-600">Source code</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-stone-400 transition-colors group-hover:text-stone-600">
+              <span className="text-xs">GitHub</span>
+              <ExternalLink size={12} />
+            </div>
+          </a>
+          <a
+            href="#"
+            className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-stone-50"
+          >
+            <div className="flex items-center gap-3">
+              <ExternalLink size={16} className="text-stone-400" />
+              <span className="text-sm text-stone-600">Pulm</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-stone-400 transition-colors group-hover:text-stone-600">
+              <span className="text-xs">Coming soon</span>
+            </div>
+          </a>
+          <a
+            href="https://luxionlabs.com"
+            target="_blank"
+            rel="noreferrer"
+            className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-stone-50"
+          >
+            <div className="flex items-center gap-3">
+              <ExternalLink size={16} className="text-stone-400" />
+              <span className="text-sm text-stone-600">Labs</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-stone-400 transition-colors group-hover:text-stone-600">
+              <span className="text-xs">luxionlabs.com</span>
+              <ExternalLink size={12} />
+            </div>
+          </a>
+          <div className="flex items-center justify-between px-5 py-3.5">
+            <div className="flex items-center gap-3">
+              <Scale size={16} className="text-stone-400" />
+              <span className="text-sm text-stone-600">License</span>
+            </div>
+            <span className="text-xs font-medium text-stone-500 bg-stone-100 rounded-full px-2.5 py-0.5">
+              Open source
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="text-center pt-2">
+        <p className="text-xs text-stone-300">
+          Made with care for people who value ownership, privacy, and simplicity.
+        </p>
+      </div>
+    </div>
+  );
+
+  const tabContent: Record<SettingsTab, () => React.ReactNode> = {
+    general: renderGeneral,
+    data: renderData,
+    about: renderAbout,
+  };
+
+  return (
+    <div className="flex-1 overflow-hidden bg-[#f7f6f4] text-stone-900">
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
+      <div className="flex h-full">
+        {/* ─── Left sidebar navigation ─── */}
+        <nav className="w-56 shrink-0 border-r border-stone-200/70 bg-[#f0efed] p-4 flex flex-col gap-1 overflow-y-auto">
+          <p className="px-3 pt-1 pb-3 text-[10px] uppercase tracking-[0.25em] font-bold text-stone-400 select-none">
+            Settings
+          </p>
+
+          {NAV_ITEMS.map((item) => {
+            const isActive = activeTab === item.key;
+            return (
               <button
+                key={item.key}
                 type="button"
-                onClick={handleBackupSnapshot}
-                className="w-full text-left rounded-2xl border border-stone-200 bg-stone-50 px-5 py-3 text-sm font-medium text-stone-700 transition hover:border-stone-400"
+                onClick={() => {
+                  setActiveTab(item.key);
+                  contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className={`
+                  group flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150
+                  ${isActive
+                    ? 'bg-white shadow-sm shadow-stone-200/60 text-stone-900'
+                    : 'text-stone-500 hover:bg-white/60 hover:text-stone-700'}
+                `}
               >
-                Library snapshot
-              </button>
-            </div>
-
-            <div className="mt-2 space-y-3 border-t border-stone-100 pt-4">
-              <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.3em] text-stone-400 font-semibold">Backup file</p>
-                <label className="flex items-center gap-3 rounded-2xl border border-stone-200 bg-white/70 px-4 py-3 text-sm text-stone-600 cursor-pointer">
-                  <span className="font-semibold text-stone-900">Choose file</span>
-                  <input
-                    type="file"
-                    accept=".json"
-                    onChange={handleBackupFileChange}
-                    className="hidden"
-                  />
-                </label>
-                {selectedBackupFile && (
-                  <p className="text-xs text-stone-500">Selected: {selectedBackupFile}</p>
-                )}
-              </div>
-              <p className="text-xs uppercase tracking-[0.3em] text-stone-400 font-semibold">Danger zone</p>
-              <p className="text-sm text-stone-500">
-                Clearing the library removes every note, category, asset, reflection, and activity entry
-                from this device.
-              </p>
-              <button
-                type="button"
-                onClick={handleClearLibrary}
-                className="text-sm text-red-600 underline-offset-4 hover:text-red-700"
-              >
-                Clear library
-              </button>
-            </div>
-          </section>
-
-          <section className="rounded-3xl border border-stone-200 bg-white/80 p-6 shadow-[0_15px_30px_rgba(15,23,42,0.04)] space-y-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-stone-500 font-semibold">About</p>
-              <h2 className="text-xl font-semibold text-stone-900 mt-2">Pulm Notes</h2>
-            </div>
-            <div className="text-sm text-stone-600 space-y-2">
-              <p className="flex items-center gap-2">
-                <span className="font-medium text-stone-900">Version</span>
-                <span>1.0.0</span>
-              </p>
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-stone-900">Platform</span>
-                <div className="flex items-center gap-2 text-sm text-stone-600">
-                  <PlatformIcon os={platformKey} />
-                  <span>{platformLabel}</span>
+                <span className={`transition-colors ${isActive ? 'text-stone-800' : 'text-stone-400 group-hover:text-stone-500'}`}>
+                  {item.icon}
+                </span>
+                <div className="min-w-0">
+                  <p className={`text-sm leading-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                    {item.label}
+                  </p>
+                  <p className="text-[11px] text-stone-400 leading-tight mt-0.5 truncate">
+                    {item.description}
+                  </p>
                 </div>
-              </div>
-              <p className="flex items-center flex-wrap gap-2">
-                <span className="font-medium text-stone-900">License</span>
-                <span>Open source - see repository</span>
-              </p>
-              <p className="flex items-center gap-2">
-                <span className="font-medium text-stone-900">Open source link</span>
-                <a
-                  className="text-stone-700 hover:underline"
-                  href="https://github.com/dev-Ninjaa/PulmNotes"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  GitHub
-                </a>
-              </p>
-              <p className="text-sm text-stone-500">
-                A calm, private lucid space for reflection that keeps you rooted in local notes.
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* ─── Main content area ─── */}
+        <div ref={contentRef} className="flex-1 overflow-y-auto scrollbar-none">
+          <div className="max-w-2xl mx-auto px-8 py-10">
+            {/* Section header */}
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold text-stone-900 tracking-tight">
+                {NAV_ITEMS.find((n) => n.key === activeTab)?.label}
+              </h1>
+              <p className="mt-1 text-sm text-stone-400">
+                {NAV_ITEMS.find((n) => n.key === activeTab)?.description}
               </p>
             </div>
-          </section>
+
+            {/* Tab content */}
+            {tabContent[activeTab]()}
+          </div>
         </div>
       </div>
     </div>
