@@ -9,14 +9,12 @@ import {
   createAssetStore,
   createReflectionStore
 } from '@/app/lib/persistence';
-import JSZip from 'jszip';
 import {
   Shield,
   Database,
   Info,
   Download,
   Upload,
-  FileText,
   Trash2,
   HardDrive,
   BookOpen,
@@ -98,7 +96,7 @@ const PlatformIcon: React.FC<{ os: OSKey }> = ({ os }) => {
 /* ─── Sidebar nav items ─── */
 const NAV_ITEMS: { key: SettingsTab; label: string; icon: React.ReactNode; description: string }[] = [
   { key: 'general', label: 'General', icon: <Shield size={18} />, description: 'Privacy & philosophy' },
-  { key: 'data', label: 'Data', icon: <Database size={18} />, description: 'Backup & storage' },
+  { key: 'data', label: 'Storage', icon: <Database size={18} />, description: 'Backup & History' },
   { key: 'about', label: 'About', icon: <Info size={18} />, description: 'Version & credits' },
 ];
 
@@ -162,20 +160,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       type: 'application/json'
     });
     downloadBlob(blob, `pulm-backup-${timestamp}.json`);
-  };
-
-  const handleExportMarkdown = async () => {
-    if (typeof window === 'undefined') return;
-    const zip = new JSZip();
-    notes.forEach((note) => {
-      const name = note.title ? note.title.trim() : 'Untitled';
-      const safeName = name.replace(/[^a-z0-9-_ ]/gi, '').slice(0, 120) || 'note';
-      const markdown = note.blocks.map((block) => block.content).join('\n\n');
-      zip.file(`${safeName || 'note'}.md`, markdown);
-    });
-    const content = await zip.generateAsync({ type: 'blob' });
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    downloadBlob(content, `pulm-markdown-export-${timestamp}.zip`);
   };
 
   const [selectedBackupFile, setSelectedBackupFile] = useState<string | null>(null);
@@ -443,21 +427,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </div>
             <ChevronRight size={14} className="text-stone-300 transition-transform group-hover:translate-x-0.5" />
           </button>
-
-          <button
-            type="button"
-            onClick={handleExportMarkdown}
-            className="group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-stone-50"
-          >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-stone-100 transition-colors group-hover:bg-stone-200">
-              <FileText size={16} className="text-stone-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-stone-800">Export as Markdown</p>
-              <p className="text-xs text-stone-400">Zip archive of all notes in .md format</p>
-            </div>
-            <ChevronRight size={14} className="text-stone-300 transition-transform group-hover:translate-x-0.5" />
-          </button>
         </div>
       </div>
 
@@ -588,6 +557,33 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </div>
             <div className="flex items-center gap-1.5 text-stone-400 transition-colors group-hover:text-stone-600">
               <span className="text-xs">GitHub</span>
+              <ExternalLink size={12} />
+            </div>
+          </a>
+          <a
+            href="#"
+            className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-stone-50"
+          >
+            <div className="flex items-center gap-3">
+              <ExternalLink size={16} className="text-stone-400" />
+              <span className="text-sm text-stone-600">Pulm</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-stone-400 transition-colors group-hover:text-stone-600">
+              <span className="text-xs">Coming soon</span>
+            </div>
+          </a>
+          <a
+            href="https://luxionlabs.com"
+            target="_blank"
+            rel="noreferrer"
+            className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-stone-50"
+          >
+            <div className="flex items-center gap-3">
+              <ExternalLink size={16} className="text-stone-400" />
+              <span className="text-sm text-stone-600">Labs</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-stone-400 transition-colors group-hover:text-stone-600">
+              <span className="text-xs">luxionlabs.com</span>
               <ExternalLink size={12} />
             </div>
           </a>
