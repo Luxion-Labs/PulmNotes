@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from "react"
 import { type Editor } from "@tiptap/react"
 
@@ -229,3 +231,4 @@ export function MoreOptions({
     </>
   )
 }
+

@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { Editor, NodeViewProps } from "@tiptap/react"
 import { NodeViewWrapper, NodeViewContent } from "@tiptap/react"
@@ -357,3 +359,4 @@ export const ResizableImage: React.FC<ResizableImageProps> = ({
     </NodeViewWrapper>
   )
 }
+

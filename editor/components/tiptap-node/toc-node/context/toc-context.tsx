@@ -1,3 +1,5 @@
+'use client';
+
 import {
   createContext,
   useContext,
@@ -167,3 +169,4 @@ export const useToc = () => {
   }
   return ctx
 }
+

@@ -1,3 +1,5 @@
+'use client';
+
 import { NodeViewWrapper } from '@tiptap/react'
 import './video-node-view.scss'
 
@@ -32,3 +34,4 @@ export function VideoNodeView({ node, updateAttributes, deleteNode, selected }: 
     </NodeViewWrapper>
   )
 }
+
