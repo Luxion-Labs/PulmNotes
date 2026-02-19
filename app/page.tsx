@@ -803,7 +803,8 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen bg-[#DFEBF6] text-gray-900 font-sans selection:bg-blue-100 flex-col lg:flex-row">
+    <div className="flex h-full flex-col bg-[#DFEBF6] text-gray-900 font-sans selection:bg-blue-100">
+      <div className="flex flex-1 flex-col lg:flex-row overflow-hidden">
       {/* Sidebar - Hidden on mobile, visible on lg+ */}
       <div className="hidden lg:block">
         <Sidebar
@@ -960,6 +961,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       {/* <ReflectionSidebar

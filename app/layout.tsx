@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Inter } from "next/font/google";
+import { CustomTitleBar } from "@/app/components/CustomTitleBar";
 import "./globals.scss";
 
 const dmSans = DM_Sans({
@@ -32,8 +33,13 @@ export default function RootLayout({
       data-pulm-font-size="default"
       className={`${dmSans.variable} ${inter.variable}`}
     >
-      <body className="min-h-screen bg-white text-gray-900 cursor-text font-sans selection:bg-blue-100 scrollbar-none">
-        {children}
+      <body className="h-screen overflow-hidden bg-white text-gray-900 cursor-text font-sans selection:bg-blue-100 scrollbar-none">
+        <div className="flex h-screen flex-col">
+          <CustomTitleBar />
+          <div className="flex-1 overflow-hidden">
+            {children}
+          </div>
+        </div>
       </body>
     </html>
   );
