@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useRef, useState } from 'react';
 import { FileText } from 'lucide-react';
 import { Coordinates } from '../schema/types';
@@ -219,3 +221,4 @@ export const MentionMenu: React.FC<MentionMenuProps> = ({
     </div>
   );
 };
+

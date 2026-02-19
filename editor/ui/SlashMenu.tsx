@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import {
   Type,
@@ -293,3 +295,4 @@ export const SlashMenu: React.FC<SlashMenuProps & { editor?: import('@tiptap/rea
     />
   )
 }
+
