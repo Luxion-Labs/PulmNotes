@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 
 type PulmEnterPageProps = {
@@ -7,7 +9,7 @@ type PulmEnterPageProps = {
 const PulmEnterPage: React.FC<PulmEnterPageProps> = ({ onEnter }) => {
   return (
     <div
-      className="h-screen w-full flex flex-col items-center relative bg-[#f1f2ef] overflow-hidden font-sans select-none"
+      className="h-full w-full flex flex-col items-center relative bg-[#f1f2ef] overflow-hidden font-sans select-none"
       style={{
         backgroundImage:
           'radial-gradient(1200px 600px at 50% 8%, rgba(246, 249, 252, 0.92), rgba(241, 242, 239, 0.98) 58%, rgba(234, 236, 232, 1) 100%)',

@@ -354,7 +354,7 @@ export const SecondarySidebar: React.FC<SecondarySidebarProps> = ({
   };
 
   return (
-    <div className="w-full md:w-72 h-auto md:h-screen bg-white border-r border-stone-200 flex flex-col overflow-hidden">
+    <div className="w-full md:w-72 h-auto md:h-full bg-white border-r border-stone-200 flex flex-col overflow-hidden">
       {/* Header with Title */}
       <div className="p-3 md:p-4 border-b border-stone-200 flex-shrink-0">
         <h2 className="text-base md:text-lg font-bold text-stone-900">Library</h2>

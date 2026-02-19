@@ -144,7 +144,7 @@ export const ReflectionSidebar: React.FC<ReflectionSidebarProps> = ({
   };
 
   return (
-    <div className="w-72 h-screen bg-stone-50 flex flex-col border-l border-stone-200">
+    <div className="w-72 h-full bg-stone-50 flex flex-col border-l border-stone-200">
       <div className="p-6 pb-4 border-b border-stone-200">
         <h2 className="text-sm font-medium text-stone-500 tracking-wide">
           Daily Reflections
