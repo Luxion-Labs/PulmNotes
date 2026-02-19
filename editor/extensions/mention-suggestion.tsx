@@ -1,3 +1,5 @@
+'use client';
+
 import Mention from '@tiptap/extension-mention'
 import { PluginKey } from '@tiptap/pm/state'
 import { createRoot } from 'react-dom/client'

@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react'
 import { NodeViewWrapper, NodeViewContent, ReactNodeViewProps } from '@tiptap/react'
 
@@ -37,3 +39,4 @@ export const TodoNodeView: React.FC<TodoNodeViewProps> = ({
     </NodeViewWrapper>
   )
 }
+

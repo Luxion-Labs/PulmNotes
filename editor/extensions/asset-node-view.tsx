@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react'
 import { NodeViewWrapper, NodeViewContent, ReactNodeViewProps } from '@tiptap/react'
 import './asset-node-view.scss'
@@ -124,3 +126,4 @@ export const AssetNodeView: React.FC<AssetNodeViewProps> = ({
     </NodeViewWrapper>
   )
 }
+
