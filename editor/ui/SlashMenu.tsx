@@ -22,6 +22,16 @@ import {
 } from 'lucide-react';
 import { MenuItem, BlockType, Coordinates } from '../schema/types';
 
+import { SlashDropdownMenu } from "@/components/tiptap-ui/slash-dropdown-menu";
+import type { SuggestionItem } from "@/components/tiptap-ui-utils/suggestion-menu";
+import { insertImageUpload } from "@/editor/extensions/image-extension";
+import { insertTable } from "@/editor/extensions/table-extension";
+import { openMentionMenu } from "@/editor/extensions/mention-suggestion";
+import type { Editor } from "@tiptap/react";
+import { isNodeInSchema } from "@/lib/tiptap-utils";
+import { offset, shift, size } from "@floating-ui/react";
+
+
 export const MENU_ITEMS: MenuItem[] = [
   { id: 'text', label: 'Text', icon: Type, group: 'Style' },
   { id: 'h1', label: 'Heading 1', icon: Heading1, group: 'Style' },
@@ -50,15 +60,6 @@ interface SlashMenuProps {
   query?: string | null;
 }
 
-
-import { SlashDropdownMenu } from "@/components/tiptap-ui/slash-dropdown-menu"
-import type { SuggestionItem } from "@/components/tiptap-ui-utils/suggestion-menu"
-import { insertImageUpload } from '@/editor/extensions/image-extension'
-import { insertTable } from '@/editor/extensions/table-extension'
-import { openMentionMenu } from '@/editor/extensions/mention-suggestion'
-import type { Editor } from '@tiptap/react'
-import { isNodeInSchema } from '@/lib/tiptap-utils'
-import { offset, shift, size } from '@floating-ui/react'
 
 export const SlashMenu: React.FC<SlashMenuProps & { editor?: import('@tiptap/react').Editor | null }> = ({ position, onSelect, onClose, items, query: controlledQuery, editor }) => {
   // Convert our simple MENU_ITEMS into SuggestionItems for the Notion-style menu
