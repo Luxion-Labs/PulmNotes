@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { Note, Category, Asset } from '@/app/types';
 import { BinContextMenu } from './BinContextMenu';
 import { NoteCard } from './NoteCard';
+import { NoteCardGrid } from './NoteCardGrid';
+import { NOTE_CARD_SIZE_CLASS } from './noteCardLayout';
 import { File, Link as LinkIcon, Image, FileCode, FileVideo, FileAudio, FileArchive, FileText } from 'lucide-react';
 
 interface BinViewProps {
@@ -87,11 +89,11 @@ export const BinView: React.FC<BinViewProps> = ({
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-white">
+    <div className="h-full overflow-y-auto overflow-x-hidden bg-white">
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 md:mb-8">Bin</h1>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+        <NoteCardGrid>
           {deletedNotes.map((note) => {
             const category = getCategoryForNote(note);
             
@@ -111,19 +113,19 @@ export const BinView: React.FC<BinViewProps> = ({
             return (
               <div
                 key={asset.id}
-                className="aspect-[3.8/5] rounded-[12px] sm:rounded-[14px] p-3 sm:p-4 md:p-5 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer bg-stone-100"
+                className={`${NOTE_CARD_SIZE_CLASS} rounded-[14px] p-3.5 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer bg-stone-100 overflow-hidden`}
                 onContextMenu={(e) => handleAssetContextMenu(e, asset.id)}
               >
                 <div>
-                  <div className="flex items-start gap-1.5 sm:gap-2 mb-2 sm:mb-3 text-[10px] sm:text-[11px] font-medium tracking-wide">
+                  <div className="flex items-start gap-2 mb-2 text-[10px] font-medium tracking-wide">
                     <span className="px-1.5 py-0.5 bg-stone-900/5 rounded text-stone-600">
                       {asset.deletedAt?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
-                    <span className="py-0.5 text-stone-500 truncate uppercase">{asset.type}</span>
+                    <span className="py-0.5 text-stone-500 truncate text-[10px] uppercase">{asset.type}</span>
                   </div>
                   
                   <div className="flex items-center gap-2 mb-2">
-                    <AssetIcon size={20} className="text-stone-400 flex-shrink-0" />
+                    <AssetIcon size={18} className="text-stone-400 flex-shrink-0" />
                   </div>
                   
                   <h3 className="text-sm text-stone-700 leading-tight line-clamp-3">
@@ -133,7 +135,7 @@ export const BinView: React.FC<BinViewProps> = ({
               </div>
             );
           })}
-        </div>
+        </NoteCardGrid>
         
         {deletedNotes.length === 0 && deletedAssets.length === 0 && (
           <div className="text-center py-12 text-stone-500">
