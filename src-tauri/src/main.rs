@@ -91,6 +91,14 @@ fn run() -> tauri::Result<()> {
                 db: Arc::new(db),
                 db_path,
             });
+
+            #[cfg(target_os = "macos")]
+            {
+                use tauri::Manager;
+                let window = app.get_webview_window("main").unwrap();
+                window.set_title_bar_style(tauri::TitleBarStyle::Transparent).ok();
+            }
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
