@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Category, SubCategory, Note, ViewMode, Asset } from '@/app/types';
-import { FileText, Plus, FolderPlus, Home, Clock, Pin, Library, Settings, Trash2, Search, Folder, BookOpen, Briefcase, Heart, Star, Lightbulb, Coffee, Music, MessageSquare, File, Link as LinkIcon, Image, FileCode, ChevronLeft, ChevronRight, FileVideo, FileAudio, FileArchive, ChevronDown } from 'lucide-react';
+import { FileText, Plus, FolderPlus, Home, Clock, Pin, Library, Settings, Trash2, Search, Folder, BookOpen, Briefcase, Heart, Star, Lightbulb, Coffee, Music, MessageSquare, File, Link as LinkIcon, Image, FileCode, FileVideo, FileAudio, FileArchive, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { NoteContextMenu } from './NoteContextMenu';
 import { CategoryContextMenu } from './CategoryContextMenu';
 import { SubCategoryContextMenu } from './SubCategoryContextMenu';
@@ -102,6 +102,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     y: number;
     assetId: string;
   } | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const clearSettingsOverlayTimer = () => {
     if (settingsOverlayTimeoutRef.current) {
@@ -409,8 +410,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setDragOverTarget(null);
   };
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
   // Keyboard navigation state - disabled
   // const [keyboardNavIndex, setKeyboardNavIndex] = useState(0);
   // const [keyboardNavItems, setKeyboardNavItems] = useState<Array<{ type: 'category' | 'subcategory' | 'note', id: string }>>([]);
@@ -526,14 +525,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className={`relative h-full bg-[#DFEBF6] flex flex-col transition-all duration-300 ${sidebarOpen ? 'w-60 sm:w-64' : 'w-16 sm:w-20'}`}>
-      {/* Header with toggle button */}
+    <div className={`relative h-full flex-shrink-0 bg-[#DFEBF6] border-r border-white/60 flex flex-col transition-all duration-300 ${sidebarOpen ? 'w-[clamp(180px,22vw,260px)] min-w-[180px] max-w-[260px]' : 'w-16 min-w-16 max-w-16'}`}>
+      {/* Header */}
       <div className="flex items-center justify-between p-4">
         {sidebarOpen && <h2 className="text-lg font-bold text-stone-900">Pulm</h2>}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="p-1.5 hover:bg-stone-100 rounded-lg transition-colors flex-shrink-0"
-          title={sidebarOpen ? "Collapse" : "Expand"}
+          title={sidebarOpen ? 'Collapse' : 'Expand'}
         >
           {sidebarOpen ? (
             <ChevronLeft size={18} className="text-stone-600" />
@@ -579,7 +578,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Library Content */}
-      <div className="flex-1 overflow-y-auto scrollbar-none px-3 pb-16 space-y-0.5">
+      <div className={`flex-1 overflow-y-auto scrollbar-none px-3 space-y-0.5 ${sidebarOpen ? 'pb-20' : 'pb-16'}`}>
         {sidebarOpen && (
           <div className="mb-2 px-1">
             <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">Library</h3>
@@ -594,7 +593,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
 
         {categories.map((category) => {
-          if (!sidebarOpen) return null; // Hide tree when collapsed for now or implement icon-only view potentially
+          if (!sidebarOpen) return null;
 
           const isCategoryExpanded = expandedCategories.has(category.id);
           const categoryNotes = getNotesForCategory(category.id);
@@ -822,7 +821,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Bottom Section with Settings and More */}
-      <div className={`absolute bottom-0 left-0 right-0 p-3 z-20 bg-[#DFEBF6] ${!sidebarOpen && 'flex justify-center'}`}>
+      <div className={`absolute bottom-0 left-0 right-0 p-3 z-20 bg-[#DFEBF6] border-t border-white/60 ${!sidebarOpen && 'flex justify-center'}`}>
         <div
           className={`relative ${sidebarOpen ? 'w-full' : 'w-fit'}`}
           onMouseEnter={() => {
