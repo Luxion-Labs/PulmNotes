@@ -243,8 +243,8 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                     width="48"
                     height="48"
                     viewBox="0 0 24 24"
-                    fill={star <= (hoveredRating || rating) ? '#64748b' : 'none'}
-                    stroke="#64748b"
+                    fill={star <= (hoveredRating || rating) ? '#FFD700' : 'none'}
+                    stroke="#FFD700"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
