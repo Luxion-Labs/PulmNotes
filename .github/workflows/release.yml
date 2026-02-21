@@ -66,6 +66,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
 
+      # Setup Tiptap Pro registry auth
+      - name: Configure Tiptap Pro registry
+        run: echo "//registry.tiptap.dev/:_authToken=${TIPTAP_PRO_TOKEN}" >> .npmrc
+        env:
+          TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
+
       # Install dependencies
       - name: Install dependencies
         run: bun install --frozen-lockfile
