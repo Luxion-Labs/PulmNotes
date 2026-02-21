@@ -74,7 +74,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({
         </h3>
         
         {preview && (
-          <p className="text-[12px] text-stone-500 line-clamp-2">
+          <p className="text-[12px] text-stone-500">
             {preview}
           </p>
         )}
