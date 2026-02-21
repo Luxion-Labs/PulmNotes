@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Category, SubCategory, Note, ViewMode, Asset } from '@/app/types';
-import { FileText, Plus, FolderPlus, Home, Clock, Pin, Library, Settings, Trash2, Search, Folder, BookOpen, Briefcase, Heart, Star, Lightbulb, Coffee, Music, MessageSquare, File, Link as LinkIcon, Image, FileCode, FileVideo, FileAudio, FileArchive, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Plus, Home, Clock, Pin, Library, Settings, Trash2, Search, Folder, BookOpen, Briefcase, Heart, Star, Lightbulb, Coffee, Music, MessageSquare, File, Link as LinkIcon, Image, FileCode, FileVideo, FileAudio, FileArchive, ChevronLeft, ChevronRight } from 'lucide-react';
 import { NoteContextMenu } from './NoteContextMenu';
 import { CategoryContextMenu } from './CategoryContextMenu';
 import { SubCategoryContextMenu } from './SubCategoryContextMenu';
