@@ -61,16 +61,17 @@ jobs:
         with:
           path: |
             ~/.bun/install/cache
-            node_modules
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
+            bun.lockb
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
 
       # Setup Tiptap Pro registry auth
-      - name: Configure Tiptap Pro registry
-        run: echo "//registry.tiptap.dev/:_authToken=${TIPTAP_PRO_TOKEN}" >> .npmrc
+      - name: Configure TipTap Pro auth
+        shell: bash
+        run: |
+          echo "@tiptap-pro:registry=https://registry.tiptap.dev/" > .npmrc
+          echo "//registry.tiptap.dev/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
         env:
-          TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.TIPTAP_TOKEN }}
 
       # Install dependencies
       - name: Install dependencies
