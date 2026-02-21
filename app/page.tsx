@@ -803,10 +803,8 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-[#DFEBF6] text-gray-900 font-sans selection:bg-blue-100">
-      <div className="flex flex-1 flex-col lg:flex-row overflow-hidden">
-      {/* Sidebar - Hidden on mobile, visible on lg+ */}
-      <div className="hidden lg:block">
+    <div className="h-full overflow-hidden bg-[#DFEBF6] text-gray-900 font-sans selection:bg-blue-100">
+      <div className="flex h-full overflow-hidden">
         <Sidebar
           viewMode={viewMode}
           categories={categories}
@@ -837,14 +835,13 @@ export default function Home() {
           onOpenAssetModal={handleOpenAssetModal}
           onOpenCategoryCreateModal={handleOpenCategoryCreateModal}
         />
-      </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden p-2 md:p-3">
-        <div className="bg-white flex-1 flex flex-col overflow-hidden rounded-2xl md:rounded-3xl shadow-sm border border-white/50 relative">
+        <div className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden p-2 md:p-3">
+        <div className="bg-white flex-1 min-h-0 flex flex-col overflow-hidden rounded-2xl md:rounded-3xl shadow-sm border border-white/50 relative">
 
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 min-h-0 overflow-hidden">
 
-            <div className="flex-1 overflow-hidden cursor-text flex flex-col">
+            <div className="flex-1 min-h-0 overflow-hidden cursor-text flex flex-col">
               {viewMode === 'library' && currentNote && (
                 <>
                   {/* Top Bar with breadcrumb and controls */}
@@ -868,7 +865,7 @@ export default function Home() {
                     onSelectNote={handleOpenNote}
                     onCloseTab={handleCloseTab}
                   />
-                  <div className="flex-1 overflow-y-auto">
+                  <div className="flex-1 min-h-0 overflow-y-auto">
                     <NoteView
                       note={currentNote}
                       allNotes={[ 

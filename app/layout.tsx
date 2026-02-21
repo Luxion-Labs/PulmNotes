@@ -30,11 +30,11 @@ export default function RootLayout({
       data-pulm-theme="light"
       data-pulm-editor-width="comfortable"
       data-pulm-font-size="default"
-      className={`${dmSans.variable} ${inter.variable}`}
+      className={`${dmSans.variable} ${inter.variable} h-full overflow-hidden`}
     >
-      <body className="h-screen overflow-hidden bg-white text-gray-900 cursor-text font-sans selection:bg-blue-100 scrollbar-none">
-        <div className="flex h-screen flex-col">
-          <div className="flex-1 overflow-hidden">
+      <body className="h-full overflow-hidden bg-white text-gray-900 cursor-text font-sans selection:bg-blue-100 scrollbar-none">
+        <div className="flex h-screen overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-hidden">
             {children}
           </div>
         </div>
