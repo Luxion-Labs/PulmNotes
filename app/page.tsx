@@ -48,6 +48,21 @@ export default function Home() {
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
+
+  // Startup validation logging
+  useEffect(() => {
+    const logStartupInfo = async () => {
+      try {
+        const { APP_VERSION } = await import('@/app/lib/version');
+        console.log('[Startup] App version:', APP_VERSION);
+        console.log('[Startup] Environment:', process.env.NODE_ENV);
+        console.log('[Startup] Timestamp:', new Date().toISOString());
+      } catch (error) {
+        console.error('[Startup] Failed to log startup info:', error);
+      }
+    };
+    logStartupInfo();
+  }, []);
   const [reflections, setReflections] = useState<DailyReflection[]>([]);
   const [currentNoteId, setCurrentNoteId] = useState<string | null>(null);
   const [openNoteIds, setOpenNoteIds] = useState<string[]>([]);
