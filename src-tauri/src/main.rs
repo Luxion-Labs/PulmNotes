@@ -7,10 +7,13 @@ use db::Database;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::Manager;
+// use uuid::Uuid;
+// use mac_address::get_mac_address;
 
 struct AppState {
     db: Arc<Database>,
     db_path: PathBuf,
+    // device_id: String,
 }
 
 #[tauri::command]
@@ -68,6 +71,28 @@ fn get_database_size(state: tauri::State<AppState>) -> Result<u64, String> {
     state.db.get_database_size(&state.db_path).map_err(|e| e.to_string())
 }
 
+// #[tauri::command]
+// fn get_device_id(state: tauri::State<AppState>) -> String {
+//     state.device_id.clone()
+// }
+
+// fn generate_device_id() -> String {
+//     // Custom namespace UUID for Pulm Notes
+//     let namespace = Uuid::parse_str("6ba7b810-9dad-11d1-80b4-00c04fd430c8").unwrap();
+    
+//     match get_mac_address() {
+//         Ok(Some(mac)) => {
+//             // Use MAC address as the name for UUID v5 generation
+//             let mac_string = mac.to_string();
+//             Uuid::new_v5(&namespace, mac_string.as_bytes()).to_string()
+//         }
+//         _ => {
+//             // Fallback to random UUID if MAC address can't be obtained
+//             Uuid::new_v4().to_string()
+//         }
+//     }
+// }
+
 fn main() {
     if let Err(error) = run() {
         eprintln!("failed to start Pulm Notes: {error}");
@@ -86,12 +111,23 @@ fn run() -> tauri::Result<()> {
             std::fs::create_dir_all(&app_data_dir)?;
             let db_path = app_data_dir.join("pulm_notes.db");
             
+            // let device_id_path = app_data_dir.join("device_id.txt");
+            // let device_id = if device_id_path.exists() {
+            //     std::fs::read_to_string(&device_id_path)
+            //         .unwrap_or_else(|_| generate_device_id())
+            // } else {
+            //     let id = generate_device_id();
+            //     std::fs::write(&device_id_path, &id).ok();
+            //     id
+            // };
+            
             let db = Database::new(db_path.clone())
                 .map_err(|e| std::io::Error::other(e.to_string()))?;
             
             app.manage(AppState {
                 db: Arc::new(db),
                 db_path,
+                // device_id,
             });
 
             #[cfg(target_os = "macos")]
@@ -114,7 +150,8 @@ fn run() -> tauri::Result<()> {
             save_assets,
             load_reflections,
             save_reflections,
-            get_database_size
+            get_database_size,
+            // get_device_id
         ])
         .run(tauri::generate_context!())
 }
