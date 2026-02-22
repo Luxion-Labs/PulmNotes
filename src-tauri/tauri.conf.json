@@ -38,7 +38,8 @@
         "skipTaskbar": false,
         "center": true,
         "label": "main",
-        "dragDropEnabled": false
+        "dragDropEnabled": false,
+        "devtools": false
       }
     ],
     "security": {
