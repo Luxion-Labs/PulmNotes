@@ -31,7 +31,7 @@ function detectPlatform(): 'windows' | 'macos' | 'linux' | 'unknown' {
  * Launch installer and exit app
  * 
  * SAFETY FLOW:
- * 1. Spawn installer process (detached)
+ * 1. Spawn installer process directly (no cmd/shell wrapper)
  * 2. Exit app immediately
  * 3. Installer runs after app closes
  * 4. User data preserved (stored in app_data_dir, not install dir)
@@ -40,27 +40,29 @@ export async function installUpdate(installerPath: string): Promise<void> {
   const platform = detectPlatform();
 
   try {
+    console.log('[InstallUpdate] Launching installer:', installerPath);
+    console.log('[InstallUpdate] Platform:', platform);
+
     // Spawn installer process based on platform
     switch (platform) {
       case 'windows':
-        // Windows: Run .exe or .msi installer
-        // Detached process continues after app exits
-        await Command.create('cmd', ['/c', 'start', '', installerPath]).spawn();
+        // Windows: Launch installer directly using configured shell scope
+        await Command.create('installer', installerPath).spawn();
         break;
 
       case 'macos':
-        // macOS: Open .dmg file
-        await Command.create('open', [installerPath]).spawn();
+        // macOS: Open .dmg file using 'open' command
+        await Command.create('open', installerPath).spawn();
         break;
 
       case 'linux':
         // Linux: Make executable and run
         if (installerPath.endsWith('.AppImage')) {
           await Command.create('chmod', ['+x', installerPath]).execute();
-          await Command.create(installerPath).spawn();
+          await Command.create('installer', installerPath).spawn();
         } else if (installerPath.endsWith('.deb')) {
-          // For .deb, user needs to install manually or use package manager
-          await Command.create('xdg-open', [installerPath]).spawn();
+          // For .deb, open with default handler
+          await Command.create('xdg-open', installerPath).spawn();
         }
         break;
 
@@ -68,13 +70,15 @@ export async function installUpdate(installerPath: string): Promise<void> {
         throw new Error('Unsupported platform');
     }
 
+    console.log('[InstallUpdate] Installer spawned, exiting app...');
+
     // CRITICAL: Exit app immediately after spawning installer
     // This ensures no file locks prevent installation
     // Database is already closed (WAL mode handles this gracefully)
     await new Promise(resolve => setTimeout(resolve, 500)); // Brief delay for process spawn
     await exit(0);
   } catch (error) {
-    console.error('Failed to launch installer:', error);
+    console.error('[InstallUpdate] Failed to launch installer:', error);
     throw error;
   }
 }
