@@ -1,6 +1,6 @@
 {
   "productName": "Pulm Notes",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "identifier": "com.pulm.notes",
   "build": { 
     "beforeDevCommand": "",
