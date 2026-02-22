@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { X, Upload } from 'lucide-react';
-import { invoke } from '@tauri-apps/api/core';
+// import { invoke } from '@tauri-apps/api/core';
 
 interface FeedbackPanelProps {
   isOpen: boolean;
@@ -132,17 +132,17 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
     setError(null);
 
     try {
-      const deviceId = await invoke<string>('get_device_id');
+      // const deviceId = await invoke<string>('get_device_id');
 
       const payload: {
         rating: number;
         message: string;
         imageBase64?: string;
-        userId: string;
+        // userId: string;
       } = {
         rating,
-        message: message.trim(),
-        userId: deviceId
+        message: message.trim()
+        // userId: deviceId
       };
 
       if (imageBase64) {
