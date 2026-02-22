@@ -71,6 +71,47 @@ fn get_database_size(state: tauri::State<AppState>) -> Result<u64, String> {
     state.db.get_database_size(&state.db_path).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn launch_installer(installer_path: String) -> Result<(), String> {
+    use std::process::Command;
+    
+    #[cfg(target_os = "windows")]
+    {
+        Command::new(&installer_path)
+            .spawn()
+            .map_err(|e| format!("Failed to launch installer: {}", e))?;
+    }
+    
+    #[cfg(target_os = "macos")]
+    {
+        Command::new("open")
+            .arg(&installer_path)
+            .spawn()
+            .map_err(|e| format!("Failed to launch installer: {}", e))?;
+    }
+    
+    #[cfg(target_os = "linux")]
+    {
+        if installer_path.ends_with(".AppImage") {
+            Command::new("chmod")
+                .args(["+x", &installer_path])
+                .output()
+                .map_err(|e| format!("Failed to make installer executable: {}", e))?;
+            
+            Command::new(&installer_path)
+                .spawn()
+                .map_err(|e| format!("Failed to launch installer: {}", e))?;
+        } else {
+            Command::new("xdg-open")
+                .arg(&installer_path)
+                .spawn()
+                .map_err(|e| format!("Failed to launch installer: {}", e))?;
+        }
+    }
+    
+    Ok(())
+}
+
 // #[tauri::command]
 // fn get_device_id(state: tauri::State<AppState>) -> String {
 //     state.device_id.clone()
@@ -151,6 +192,7 @@ fn run() -> tauri::Result<()> {
             load_reflections,
             save_reflections,
             get_database_size,
+            launch_installer,
             // get_device_id
         ])
         .run(tauri::generate_context!())
