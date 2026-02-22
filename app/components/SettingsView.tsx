@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Asset, Category, DailyReflection, Note } from '@/app/types';
 import { formatBytes, getStorageInfo } from '@/app/lib/storageUtils';
+import { APP_VERSION } from '@/app/lib/version';
 import {
   createNoteStore,
   createCategoryStore,
@@ -500,7 +501,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </p>
             <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-stone-100 px-3 py-1">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-medium text-stone-600">v1.0.0</span>
+              <span className="text-xs font-medium text-stone-600">v{APP_VERSION}</span>
             </div>
           </div>
         </div>
@@ -546,7 +547,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
         <div className="divide-y divide-stone-100">
           <a
-            href="https://github.com/dev-Ninjaa/PulmNotes"
+            href="https://github.com/Luxion-Labs/PulmNotes.git"
             target="_blank"
             rel="noreferrer"
             className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-stone-50"
@@ -561,15 +562,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </div>
           </a>
           <a
-            href="#"
+            href="https://www.pulm.luxionlabs.com"
+            target="_blank"
+            rel="noreferrer"
             className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-stone-50"
           >
             <div className="flex items-center gap-3">
               <ExternalLink size={16} className="text-stone-400" />
-              <span className="text-sm text-stone-600">Pulm</span>
+              <span className="text-sm text-stone-600">Pulm Website</span>
             </div>
             <div className="flex items-center gap-1.5 text-stone-400 transition-colors group-hover:text-stone-600">
-              <span className="text-xs">Coming soon</span>
+              <span className="text-xs">pulm.luxionlabs.com</span>
+              <ExternalLink size={12} />
             </div>
           </a>
           <a
@@ -580,7 +584,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           >
             <div className="flex items-center gap-3">
               <ExternalLink size={16} className="text-stone-400" />
-              <span className="text-sm text-stone-600">Labs</span>
+              <span className="text-sm text-stone-600">Studio</span>
             </div>
             <div className="flex items-center gap-1.5 text-stone-400 transition-colors group-hover:text-stone-600">
               <span className="text-xs">luxionlabs.com</span>
