@@ -525,7 +525,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className={`relative h-full flex-shrink-0 bg-[#DFEBF6] border-r border-white/60 flex flex-col transition-all duration-300 ${sidebarOpen ? 'w-[clamp(180px,22vw,260px)] min-w-[180px] max-w-[260px]' : 'w-16 min-w-16 max-w-16'}`}>
+    <div className={`relative h-full flex-shrink-0 bg-[#DFEBF6] border-r border/60 flex flex-col transition-all duration-300 ${sidebarOpen ? 'w-[clamp(180px,22vw,260px)] min-w-[180px] max-w-[260px]' : 'w-16 min-w-16 max-w-16'}`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4">
         {sidebarOpen && <h2 className="text-lg font-bold text-stone-900">Pulm</h2>}
@@ -821,7 +821,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Bottom Section with Settings and More */}
-      <div className={`absolute bottom-0 left-0 right-0 p-3 z-20 bg-[#DFEBF6] border-t border-white/60 ${!sidebarOpen && 'flex justify-center'}`}>
+      <div className={`absolute bottom-0 left-0 right-0 p-3 z-20 bg-[#DFEBF6] border-t border/60 ${!sidebarOpen && 'flex justify-center'}`}>
         <div
           className={`relative ${sidebarOpen ? 'w-full' : 'w-fit'}`}
           onMouseEnter={() => {
