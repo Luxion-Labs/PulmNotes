@@ -3,22 +3,25 @@
  * USER-INITIATED ONLY - no background downloads
  */
 
-import { appDataDir } from '@tauri-apps/api/path';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
+import { safeJoinAppData } from '@/app/lib/utils/pathSafe';
 import type { DownloadProgress } from './types';
 
 /**
  * Download installer file to app data directory
  * Returns local path to downloaded installer
+ * 
+ * SAFETY: Uses safeJoinAppData() to ensure proper path construction
+ * and compliance with Tauri filesystem permissions
  */
 export async function downloadInstaller(
   downloadUrl: string,
   onProgress?: (progress: DownloadProgress) => void
 ): Promise<string> {
   try {
-    // Get app data directory
-    const appData = await appDataDir();
-    const tempUpdateDir = `${appData}temp_update`;
+    // Safely construct temp directory path within app data
+    // NEVER use string concatenation for paths
+    const tempUpdateDir = await safeJoinAppData('temp_update');
 
     // Create temp directory if it doesn't exist
     const dirExists = await exists(tempUpdateDir);
@@ -28,7 +31,9 @@ export async function downloadInstaller(
 
     // Extract filename from URL
     const filename = downloadUrl.split('/').pop() || 'installer';
-    const localPath = `${tempUpdateDir}/${filename}`;
+    
+    // Safely construct full file path
+    const localPath = await safeJoinAppData('temp_update', filename);
 
     // Download file using fetch
     const response = await fetch(downloadUrl);
@@ -77,6 +82,13 @@ export async function downloadInstaller(
     // Write to file
     await writeFile(localPath, fileData);
 
+    // Verify file was written successfully
+    const fileExists = await exists(localPath);
+    if (!fileExists) {
+      throw new Error('File write verification failed: file does not exist after write');
+    }
+
+    console.log('[DownloadInstaller] Successfully downloaded to:', localPath);
     return localPath;
   } catch (error) {
     console.error('Installer download failed:', error);
