@@ -1,7 +1,7 @@
 {
   "name": "pulm.notes",
   "description": "A personal note taking app.",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "private": true,
   "scripts": {
     "dev": "next dev",
