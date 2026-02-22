@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Asset, Category, DailyReflection, Note } from '@/app/types';
 import { formatBytes, getStorageInfo } from '@/app/lib/storageUtils';
 import { APP_VERSION } from '@/app/lib/version';
+import { UpdateChecker } from '@/app/components/UpdateChecker';
 import {
   createNoteStore,
   createCategoryStore,
@@ -505,6 +506,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Update Checker */}
+      <div className="rounded-2xl border border-stone-200/80 bg-white p-5">
+        <h3 className="text-sm font-semibold text-stone-900 mb-4">Software Updates</h3>
+        <UpdateChecker currentVersion={APP_VERSION} />
       </div>
 
       {/* System info */}
