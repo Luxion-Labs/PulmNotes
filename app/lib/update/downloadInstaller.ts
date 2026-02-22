@@ -3,6 +3,7 @@
  * USER-INITIATED ONLY - no background downloads
  */
 
+import { fetch } from '@tauri-apps/plugin-http';
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import { safeJoinAppData } from '@/app/lib/utils/pathSafe';
 import type { DownloadProgress } from './types';
@@ -11,8 +12,8 @@ import type { DownloadProgress } from './types';
  * Download installer file to app data directory
  * Returns local path to downloaded installer
  * 
- * SAFETY: Uses safeJoinAppData() to ensure proper path construction
- * and compliance with Tauri filesystem permissions
+ * SAFETY: Uses Tauri HTTP plugin to handle binary downloads and redirects
+ * Browser fetch fails on GitHub CDN redirects in WebView
  */
 export async function downloadInstaller(
   downloadUrl: string,
@@ -20,7 +21,6 @@ export async function downloadInstaller(
 ): Promise<string> {
   try {
     // Safely construct temp directory path within app data
-    // NEVER use string concatenation for paths
     const tempUpdateDir = await safeJoinAppData('temp_update');
 
     // Create temp directory if it doesn't exist
@@ -35,51 +35,33 @@ export async function downloadInstaller(
     // Safely construct full file path
     const localPath = await safeJoinAppData('temp_update', filename);
 
-    // Download file using fetch
-    const response = await fetch(downloadUrl);
-    
+    // Download using Tauri HTTP plugin (handles redirects and binary data)
+    const response = await fetch(downloadUrl, {
+      method: 'GET',
+    });
+
     if (!response.ok) {
-      throw new Error(`Download failed: ${response.statusText}`);
+      throw new Error(`Download failed: HTTP ${response.status} ${response.statusText || ''}`);
     }
 
-    const contentLength = response.headers.get('content-length');
-    const total = contentLength ? parseInt(contentLength, 10) : 0;
-
-    if (!response.body) {
-      throw new Error('Response body is null');
+    // Get binary data as ArrayBuffer
+    const arrayBuffer = await response.arrayBuffer();
+    
+    if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+      throw new Error('Downloaded file is empty');
     }
 
-    const reader = response.body.getReader();
-    const chunks: Uint8Array[] = [];
-    let downloaded = 0;
-
-    while (true) {
-      const { done, value } = await reader.read();
-      
-      if (done) break;
-      
-      chunks.push(value);
-      downloaded += value.length;
-
-      // Report progress
-      if (onProgress && total > 0) {
-        onProgress({
-          downloaded,
-          total,
-          percentage: Math.round((downloaded / total) * 100),
-        });
-      }
+    // Report progress if callback provided
+    if (onProgress) {
+      onProgress({
+        downloaded: arrayBuffer.byteLength,
+        total: arrayBuffer.byteLength,
+        percentage: 100,
+      });
     }
 
-    // Combine chunks into single Uint8Array
-    const fileData = new Uint8Array(downloaded);
-    let offset = 0;
-    for (const chunk of chunks) {
-      fileData.set(chunk, offset);
-      offset += chunk.length;
-    }
-
-    // Write to file
+    // Convert to Uint8Array and write to file
+    const fileData = new Uint8Array(arrayBuffer);
     await writeFile(localPath, fileData);
 
     // Verify file was written successfully
@@ -89,9 +71,25 @@ export async function downloadInstaller(
     }
 
     console.log('[DownloadInstaller] Successfully downloaded to:', localPath);
+    console.log('[DownloadInstaller] File size:', fileData.length, 'bytes');
+    
     return localPath;
   } catch (error) {
-    console.error('Installer download failed:', error);
+    console.error('[DownloadInstaller] Failed:', error);
+    
+    // Provide structured error messages
+    if (error instanceof Error) {
+      if (error.message.includes('403')) {
+        throw new Error('GitHub API rate limit exceeded. Please try again later.');
+      }
+      if (error.message.includes('404')) {
+        throw new Error('Installer file not found. The release may have been removed.');
+      }
+      if (error.message.includes('network')) {
+        throw new Error('Network error. Please check your internet connection.');
+      }
+    }
+    
     throw error;
   }
 }

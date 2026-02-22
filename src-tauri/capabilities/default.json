@@ -28,6 +28,7 @@
     "fs:allow-app-write-recursive",
     "fs:allow-exists",
     "fs:allow-mkdir",
-    "process:allow-exit"
+    "process:allow-exit",
+    "http:default"
   ]
 }
