@@ -69,7 +69,7 @@
     "jszip": "^3.10.1",
     "lodash.throttle": "^4.1.1",
     "lowlight": "^3.3.0",
-    "lucide-react": "^0.564.0",
+    "lucide-react": "^0.575.0",
     "next": "^15.0.0",
     "node-emoji": "^2.2.0",
     "react": "^19.2.3",
