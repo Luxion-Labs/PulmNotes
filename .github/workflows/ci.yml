@@ -137,7 +137,7 @@ jobs:
         run: bun run check:bundle-size
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: web-build
           path: out/
@@ -239,7 +239,7 @@ jobs:
         run: bun run tauri:build
 
       - name: Upload Tauri artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: tauri-${{ matrix.platform }}
           path: |
