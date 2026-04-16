@@ -48,6 +48,28 @@ export const GraphView: React.FC<GraphViewProps> = ({ notes, onSelectNote }) => 
     const links: { source: string, target: string }[] = [];
     const validNodeIds = new Set(nodes.map(n => n.id));
     
+    // Create a map of note titles to note IDs for fast wiki-link lookups
+    // If there are duplicate titles, we only map to the first one to avoid duplicate edges
+    const titleToIdMap = new Map<string, string>();
+    activeNotes.forEach(n => {
+      if (n.title && !titleToIdMap.has(n.title)) {
+        titleToIdMap.set(n.title, n.id);
+      }
+    });
+
+    // Helper to extract wiki-links like [[Title]] using a regex
+    const extractWikiLinks = (text: string, sourceId: string, targetIds: Set<string>) => {
+      const regex = /\[\[(.*?)\]\]/g;
+      let match;
+      while ((match = regex.exec(text)) !== null) {
+        const title = match[1];
+        const targetId = titleToIdMap.get(title);
+        if (targetId && targetId !== sourceId) {
+          targetIds.add(targetId);
+        }
+      }
+    };
+    
     // Extract edges based on mentions and wiki-links
     activeNotes.forEach(note => {
       const targetIds = new Set<string>();
@@ -60,14 +82,7 @@ export const GraphView: React.FC<GraphViewProps> = ({ notes, onSelectNote }) => 
         
         // Fallback: check raw text for wiki-link pattern [[Title]]
         if (block.content) {
-          activeNotes.forEach(potentialTarget => {
-            if (
-              potentialTarget.id !== note.id && 
-              block.content!.includes(`[[${potentialTarget.title}]]`)
-            ) {
-              targetIds.add(potentialTarget.id);
-            }
-          });
+          extractWikiLinks(block.content, note.id, targetIds);
         }
 
         // Check list items
@@ -77,14 +92,7 @@ export const GraphView: React.FC<GraphViewProps> = ({ notes, onSelectNote }) => 
               item.mentions.forEach(m => targetIds.add(m.noteId));
             }
             if (item.content) {
-              activeNotes.forEach(potentialTarget => {
-                if (
-                  potentialTarget.id !== note.id && 
-                  item.content!.includes(`[[${potentialTarget.title}]]`)
-                ) {
-                  targetIds.add(potentialTarget.id);
-                }
-              });
+              extractWikiLinks(item.content, note.id, targetIds);
             }
           });
         }
