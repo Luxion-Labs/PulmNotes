@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Category, SubCategory, Note, ViewMode, Asset } from '@/app/types';
-import { FileText, Plus, Home, Clock, Pin, Library, Settings, Trash2, Search, Folder, BookOpen, Briefcase, Heart, Star, Lightbulb, Coffee, Music, MessageSquare, File, Link as LinkIcon, Image, FileCode, FileVideo, FileAudio, FileArchive, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Plus, Home, Clock, Pin, Library, Settings, Trash2, Search, Folder, BookOpen, Briefcase, Heart, Star, Lightbulb, Coffee, Music, MessageSquare, File, Link as LinkIcon, Image, FileCode, FileVideo, FileAudio, FileArchive, ChevronLeft, ChevronRight, Inbox } from 'lucide-react';
 import { NoteContextMenu } from './NoteContextMenu';
 import { CategoryContextMenu } from './CategoryContextMenu';
 import { SubCategoryContextMenu } from './SubCategoryContextMenu';
@@ -19,6 +19,7 @@ interface SidebarProps {
   currentNoteId: string | null;
   selectedCategoryId: string | null;
   selectedSubCategoryId: string | null;
+  inboxCount: number;
   onSelectNote: (noteId: string) => void;
   onSelectCategory: (categoryId: string) => void;
   onSelectSubCategory: (subCategoryId: string) => void;
@@ -546,8 +547,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Main Navigation */}
       <div className={`p-3 space-y-1 ${!sidebarOpen && 'flex flex-col items-center'}`}>
-        {(['home', 'recent', 'pins', 'graph'] as ViewMode[]).map((mode) => {
-          const Icon = mode === 'graph' ? require('lucide-react').Network : getViewModeIcon(mode);
+        {(['home', 'inbox', 'recent', 'pins', 'graph'] as ViewMode[]).map((mode) => {
+          const Icon = mode === 'graph' ? require('lucide-react').Network : mode === 'inbox' ? Inbox : getViewModeIcon(mode);
           return (
             <div key={mode} className="group relative">
               <button
@@ -556,22 +557,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-stone-600 hover:bg-stone-100'
                   } ${!sidebarOpen && 'w-fit p-3 justify-center'}`}
-                title={sidebarOpen ? undefined : mode === 'graph' ? 'Graph View' : getViewModeLabel(mode)}
+                title={sidebarOpen ? undefined : mode === 'graph' ? 'Graph View' : mode === 'inbox' ? 'Inbox' : getViewModeLabel(mode)}
               >
-                <Icon size={18} className={`flex-shrink-0 ${mode === 'home' ? 'text-blue-500' :
-                  mode === 'recent' ? 'text-orange-500' :
-                    mode === 'pins' ? 'text-red-500' :
-                      mode === 'library' ? 'text-green-500' :
-                        mode === 'settings' ? 'text-gray-500' :
-                          mode === 'bin' ? 'text-stone-500' :
-                            mode === 'search' ? 'text-purple-500' :
-                              mode === 'graph' ? 'text-indigo-500' : ''
-                  }`} />
-                {sidebarOpen && <span>{mode === 'graph' ? 'Graph View' : getViewModeLabel(mode)}</span>}
+                <div className="relative">
+                  <Icon size={18} className={`flex-shrink-0 ${mode === 'home' ? 'text-blue-500' :
+                    mode === 'recent' ? 'text-orange-500' :
+                      mode === 'pins' ? 'text-red-500' :
+                        mode === 'library' ? 'text-green-500' :
+                          mode === 'settings' ? 'text-gray-500' :
+                            mode === 'bin' ? 'text-stone-500' :
+                              mode === 'search' ? 'text-purple-500' :
+                                mode === 'graph' ? 'text-indigo-500' :
+                                  mode === 'inbox' ? 'text-indigo-400' : ''
+                    }`} />
+                  {mode === 'inbox' && inboxCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 text-[9px] font-bold 
+                                   bg-indigo-500 text-white rounded-full w-3.5 h-3.5 
+                                   flex items-center justify-center">
+                      {inboxCount > 9 ? '9+' : inboxCount}
+                    </span>
+                  )}
+                </div>
+                {sidebarOpen && <span>{mode === 'graph' ? 'Graph View' : mode === 'inbox' ? 'Inbox' : getViewModeLabel(mode)}</span>}
               </button>
               {!sidebarOpen && (
                 <div className="absolute left-20 top-1/2 -translate-y-1/2 bg-stone-900 text-white text-xs font-medium px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-                  {mode === 'graph' ? 'Graph View' : getViewModeLabel(mode)}
+                  {mode === 'graph' ? 'Graph View' : mode === 'inbox' ? 'Inbox' : getViewModeLabel(mode)}
                 </div>
               )}
             </div>

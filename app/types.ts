@@ -141,7 +141,7 @@ export interface Asset {
   deletedAt?: Date;
 }
 
-export type ViewMode = 'home' | 'library' | 'recent' | 'pins' | 'settings' | 'bin' | 'search' | 'graph';
+export type ViewMode = 'home' | 'library' | 'recent' | 'pins' | 'settings' | 'bin' | 'search' | 'graph' | 'inbox';
 
 export interface DailyReflection {
   date: string; // YYYY-MM-DD

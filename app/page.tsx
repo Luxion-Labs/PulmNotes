@@ -37,6 +37,7 @@ import { useState, useEffect } from "react";
 import { listen } from '@tauri-apps/api/event';
 
 import { GraphView } from './components/GraphView';
+import { InboxView } from './components/InboxView';
 import { BacklinksSidebar } from './components/BacklinksSidebar';
 
 const noteStore: NoteStore = createNoteStore();
@@ -248,6 +249,25 @@ export default function Home() {
   const currentNote = notes.find(n => n.id === currentNoteId);
   const activeNotesCount = notes.filter(n => !n.isDeleted).length;
   const activeAssetsCount = assets.filter(a => !a.isDeleted).length;
+  
+  const uncategorizedCategory = categories.find(c => c.name === 'Uncategorized');
+  const inboxCount = notes.filter(n => n.categoryId === (uncategorizedCategory?.id || 'Uncategorized') && !n.isDeleted).length;
+
+  const handlePromote = (noteId: string, categoryId: string) => {
+    setNotes(notes.map((n) =>
+      n.id === noteId
+        ? { ...n, categoryId, updatedAt: new Date() }
+        : n
+    ));
+  };
+
+  const handleSnooze = (noteId: string) => {
+    setNotes(notes.map((n) =>
+      n.id === noteId
+        ? { ...n, isPinned: true, updatedAt: new Date() }
+        : n
+    ));
+  };
 
   const handleUpdateTitle = (noteId: string, title: string) => {
     setNotes(notes.map((n) =>
@@ -860,6 +880,7 @@ export default function Home() {
           currentNoteId={currentNoteId}
           selectedCategoryId={selectedCategoryId}
           selectedSubCategoryId={selectedSubCategoryId}
+          inboxCount={inboxCount}
           onSelectNote={handleSelectNote}
           onSelectCategory={handleSelectCategory}
           onSelectSubCategory={handleSelectSubCategory}
@@ -1006,6 +1027,16 @@ export default function Home() {
                 <GraphView 
                   notes={notes}
                   onSelectNote={handleSelectNote}
+                />
+              )}
+
+              {viewMode === 'inbox' && (
+                <InboxView
+                  notes={notes}
+                  categories={categories}
+                  onPromote={handlePromote}
+                  onDiscard={handleDeleteNote}
+                  onSnooze={handleSnooze}
                 />
               )}
             </div>
