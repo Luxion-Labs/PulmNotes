@@ -254,13 +254,6 @@ export default function Home() {
   const uncategorizedCategory = categories.find(c => c.name === 'Uncategorized');
   const inboxCount = notes.filter(n => n.categoryId === (uncategorizedCategory?.id || 'Uncategorized') && !n.isDeleted).length;
 
-  const allUniqueTags = Array.from(new Set(notes.flatMap(n => n.tags || []))).sort();
-  const filteredNotes = notes.filter(n => {
-    if (selectedTags.length === 0) return true;
-    const noteTags = n.tags || [];
-    return selectedTags.every(tag => noteTags.includes(tag));
-  });
-
   const handlePromote = (noteId: string, categoryId: string) => {
     setNotes(notes.map((n) =>
       n.id === noteId

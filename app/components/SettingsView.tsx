@@ -25,7 +25,7 @@ import {
   ChevronRight,
   AlertTriangle,
   FolderArchive,
-  Github,
+  Globe,
   Scale,
   MonitorSmartphone,
   MessageSquare,
@@ -560,7 +560,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-stone-50"
           >
             <div className="flex items-center gap-3">
-              <Github size={16} className="text-stone-400" />
+              <Globe size={16} className="text-stone-400" />
               <span className="text-sm text-stone-600">Source code</span>
             </div>
             <div className="flex items-center gap-1.5 text-stone-400 transition-colors group-hover:text-stone-600">

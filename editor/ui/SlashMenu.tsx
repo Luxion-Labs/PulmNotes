@@ -17,7 +17,7 @@ import {
   Image,
   AtSign,
   Smile,
-  Youtube,
+  Video,
   Music
 } from 'lucide-react';
 import { MenuItem, BlockType, Coordinates } from '../schema/types';
@@ -47,7 +47,7 @@ export const MENU_ITEMS: MenuItem[] = [
   { id: 'emoji', label: 'Emoji', icon: Smile, group: 'Insert' },
   { id: 'mention', label: 'Mention', icon: AtSign, group: 'Insert' },
   { id: 'image', label: 'Image', icon: Image, group: 'Upload' },
-  { id: 'video', label: 'Video', icon: Youtube, group: 'Upload' },
+  { id: 'video', label: 'Video', icon: Video, group: 'Upload' },
   { id: 'audio', label: 'Audio', icon: Music, group: 'Upload' },
 ];
 

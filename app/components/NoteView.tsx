@@ -12,6 +12,7 @@ interface NoteViewProps {
   isReadMode?: boolean;
   onUpdateTitle: (noteId: string, title: string) => void;
   onUpdateBlocks: (noteId: string, blocks: Block[]) => void;
+  onUpdateTags?: (noteId: string, tags: string[]) => void;
   onOpenNote?: (noteId: string) => void;
 }
 
@@ -28,9 +29,11 @@ export const NoteView: React.FC<NoteViewProps> = ({
   isReadMode = false,
   onUpdateTitle,
   onUpdateBlocks,
+  onUpdateTags,
   onOpenNote
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [tagInput, setTagInput] = useState('');
   const dragDepthRef = useRef(0);
 
   const resetDragState = () => {
@@ -103,13 +106,52 @@ export const NoteView: React.FC<NoteViewProps> = ({
         className={`relative w-full ${isDragOver ? 'ring-2 ring-stone-400 ring-inset' : ''}`}
       >
         {/* Title Input */}
-        <div className="mb-8 group px-4 sm:px-6 md:px-8 lg:px-12 py-4 md:py-6">
+        <div className="mb-2 group px-4 sm:px-6 md:px-8 lg:px-12 pt-4 md:pt-6">
           <input
             type="text"
             placeholder="Untitled"
             value={note.title}
             onChange={(e) => onUpdateTitle(note.id, e.target.value)}
             className="w-full text-5xl font-bold text-gray-800 placeholder-gray-300 outline-none bg-transparent text-center"
+          />
+        </div>
+
+        {/* Tags Input */}
+        <div className="mb-8 px-4 sm:px-6 md:px-8 lg:px-12 flex flex-wrap items-center justify-center gap-2">
+          {(note.tags || []).map(tag => (
+            <span key={tag} className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-stone-100 text-stone-600 text-sm font-medium border border-stone-200">
+              #{tag}
+              <button 
+                onClick={() => onUpdateTags?.(note.id, (note.tags || []).filter(t => t !== tag))}
+                className="text-stone-400 hover:text-stone-600 focus:outline-none"
+              >
+                &times;
+              </button>
+            </span>
+          ))}
+          <input
+            type="text"
+            placeholder={(!note.tags || note.tags.length === 0) ? "Add tags..." : ""}
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                const normalized = tagInput.trim().replace(/^#/, '').toLowerCase();
+                const currentTags = note.tags || [];
+                if (normalized && !currentTags.includes(normalized)) {
+                  onUpdateTags?.(note.id, [...currentTags, normalized]);
+                }
+                setTagInput('');
+              } else if (e.key === 'Backspace' && tagInput === '') {
+                e.preventDefault();
+                const currentTags = note.tags || [];
+                if (currentTags.length > 0) {
+                  onUpdateTags?.(note.id, currentTags.slice(0, -1));
+                }
+              }
+            }}
+            className="bg-transparent outline-none text-sm text-stone-600 placeholder-stone-300 min-w-[80px] text-center"
           />
         </div>
 
@@ -138,11 +180,22 @@ export const NoteView: React.FC<NoteViewProps> = ({
   return (
     <>
       <div className="max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-8 md:py-12 lg:py-16 pb-32 md:pb-48">
-        <div className="mb-6 md:mb-8">
+        <div className="mb-2">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 break-words">
             {note.title}
           </h1>
         </div>
+
+        {/* Read-only Tags */}
+        {(note.tags && note.tags.length > 0) && (
+          <div className="mb-8 flex flex-wrap gap-2">
+            {note.tags.map(tag => (
+              <span key={tag} className="px-2.5 py-1 rounded-md bg-stone-100 text-stone-600 text-sm font-medium border border-stone-200">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="flex flex-col gap-1">
           {note.blocks.map((block) => (

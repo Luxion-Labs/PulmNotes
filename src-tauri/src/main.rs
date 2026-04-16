@@ -7,6 +7,7 @@ use db::Database;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::Manager;
+use tauri_plugin_global_shortcut::{Code, Modifiers, ShortcutState};
 // use uuid::Uuid;
 // use mac_address::get_mac_address;
 
@@ -134,6 +135,14 @@ fn launch_installer(installer_path: String) -> Result<(), String> {
 //     }
 // }
 
+#[tauri::command]
+fn save_quick_note(_content: String, app_handle: tauri::AppHandle) -> Result<(), String> {
+    // The frontend already saved the note using the standard save_notes command.
+    // We just need to emit an event so the main window can refresh its note list.
+    app_handle.emit("note-saved", ()).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 fn main() {
     if let Err(error) = run() {
         eprintln!("failed to start Pulm Notes: {error}");
@@ -147,6 +156,28 @@ fn run() -> tauri::Result<()> {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_http::init())
+        .plugin(
+            tauri_plugin_global_shortcut::Builder::new()
+                .with_shortcut("CommandOrControl+Shift+Space", |app, _shortcut, event| {
+                    if event.state == ShortcutState::Pressed {
+                        if let Some(window) = app.get_webview_window("quick-capture") {
+                            if window.is_visible().unwrap_or(false) {
+                                if let Err(e) = window.hide() {
+                                    eprintln!("failed to hide quick-capture window: {e}");
+                                }
+                            } else {
+                                if let Err(e) = window.show() {
+                                    eprintln!("failed to show quick-capture window: {e}");
+                                }
+                                if let Err(e) = window.set_focus() {
+                                    eprintln!("failed to focus quick-capture window: {e}");
+                                }
+                            }
+                        }
+                    }
+                })
+                .build(),
+        )
         .setup(|app| {
             let app_data_dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&app_data_dir)?;
@@ -193,6 +224,7 @@ fn run() -> tauri::Result<()> {
             save_reflections,
             get_database_size,
             launch_installer,
+            save_quick_note
             // get_device_id
         ])
         .run(tauri::generate_context!())

@@ -115,6 +115,7 @@ export interface Note {
   categoryId: string;
   subCategoryId?: string;
   isPinned?: boolean;
+  tags?: string[];
   isDefault?: boolean;
   lastOpenedAt?: Date;
   createdAt: Date;
@@ -141,7 +142,7 @@ export interface Asset {
   deletedAt?: Date;
 }
 
-export type ViewMode = 'home' | 'library' | 'recent' | 'pins' | 'settings' | 'bin' | 'search';
+export type ViewMode = 'home' | 'library' | 'recent' | 'pins' | 'settings' | 'bin' | 'search' | 'graph' | 'inbox';
 
 export interface DailyReflection {
   date: string; // YYYY-MM-DD

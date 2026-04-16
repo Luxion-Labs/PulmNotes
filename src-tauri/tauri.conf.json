@@ -1,6 +1,6 @@
 {
   "productName": "Pulm Notes",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "identifier": "com.pulm.notes",
   "build": { 
     "beforeDevCommand": "",
@@ -24,6 +24,7 @@
     }
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "title": "Pulm Notes",
@@ -40,6 +41,20 @@
         "label": "main",
         "dragDropEnabled": false,
         "devtools": false
+      },
+      {
+        "label": "quick-capture",
+        "title": "",
+        "width": 600,
+        "height": 120,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "visible": false,
+        "center": true,
+        "resizable": false,
+        "skipTaskbar": true,
+        "focus": true,
+        "url": "/quick-capture.html"
       }
     ],
     "security": {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Note, Category } from '@/app/types';
 import { Search, FileText } from 'lucide-react';
+import * as Ariakit from '@ariakit/react';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -20,52 +21,57 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   onSelectNote
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
-
   const activeNotes = notes.filter(n => !n.isDeleted);
 
   const filteredNotes = searchQuery.trim()
-    ? activeNotes.filter(note => 
-        note.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    ? activeNotes.filter(note => {
+        const query = searchQuery.toLowerCase();
+        
+        // Search by title
+        if (note.title.toLowerCase().includes(query)) {
+          return true;
+        }
+        
+        // Search by block content
+        return note.blocks.some(block => {
+          // Check block content if it exists
+          if (block.content && block.content.toLowerCase().includes(query)) {
+            return true;
+          }
+          
+          // Check list items if it's a list block
+          if (block.items) {
+            return block.items.some(item => 
+              item.content && item.content.toLowerCase().includes(query)
+            );
+          }
+          
+          return false;
+        });
+      })
     : [];
+
+  const combobox = Ariakit.useComboboxStore({
+    open: isOpen,
+    setOpen: (open) => {
+      if (!open) onClose();
+    },
+    setValue: setSearchQuery,
+    value: searchQuery,
+  });
+
+  // Make sure to sync isOpen prop with Ariakit store
+  useEffect(() => {
+    if (isOpen !== combobox.getState().open) {
+      combobox.setOpen(isOpen);
+    }
+  }, [isOpen, combobox]);
 
   useEffect(() => {
     if (isOpen) {
       setSearchQuery('');
-      setSelectedIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen]);
-
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [searchQuery]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-
-      if (e.key === 'Escape') {
-        onClose();
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setSelectedIndex(prev => 
-          prev < filteredNotes.length - 1 ? prev + 1 : prev
-        );
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setSelectedIndex(prev => prev > 0 ? prev - 1 : 0);
-      } else if (e.key === 'Enter' && filteredNotes.length > 0) {
-        e.preventDefault();
-        handleSelectNote(filteredNotes[selectedIndex].id);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, filteredNotes, selectedIndex]);
 
   const handleSelectNote = (noteId: string) => {
     onSelectNote(noteId);
@@ -79,76 +85,76 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-32">
-      <div 
-        className="absolute inset-0 bg-stone-900/20 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-[520px] mx-4 overflow-hidden">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-          <input
-            ref={inputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+    <Ariakit.Dialog
+      store={combobox}
+      open={isOpen}
+      onClose={onClose}
+      backdrop={<div className="fixed inset-0 z-50 bg-stone-900/20 backdrop-blur-sm" />}
+      className="fixed inset-0 z-50 flex items-start justify-center pt-32 pointer-events-none"
+    >
+      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-[520px] mx-4 overflow-hidden pointer-events-auto flex flex-col max-h-[60vh]">
+        <div className="relative flex-shrink-0">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" size={18} />
+          <Ariakit.Combobox
+            store={combobox}
+            autoSelect
             placeholder="Search notes..."
             className="w-full pl-11 pr-4 py-3.5 text-sm border-b border-stone-200 outline-none"
           />
         </div>
 
-        {searchQuery.trim() && (
-          <div className="max-h-[400px] overflow-y-auto">
-            {filteredNotes.length > 0 ? (
-              <div className="py-2">
-                {filteredNotes.map((note, index) => {
+        <Ariakit.ComboboxPopover
+          store={combobox}
+          portal={false}
+          gutter={0}
+          sameWidth
+          className="overflow-y-auto flex-1 overscroll-contain"
+        >
+          {searchQuery.trim() && (
+            <div className="py-2">
+              {filteredNotes.length > 0 ? (
+                filteredNotes.map((note) => {
                   const category = getCategoryForNote(note);
-                  const isSelected = index === selectedIndex;
-                  
                   return (
-                    <div
+                    <Ariakit.ComboboxItem
                       key={note.id}
+                      value={note.title}
                       onClick={() => handleSelectNote(note.id)}
-                      className={`px-4 py-2.5 cursor-pointer transition-colors ${
-                        isSelected ? 'bg-stone-100' : 'hover:bg-stone-50'
-                      }`}
+                      className="px-4 py-2.5 cursor-pointer transition-colors flex items-center gap-3 aria-selected:bg-stone-100 hover:bg-stone-50 outline-none"
                     >
-                      <div className="flex items-center gap-3">
-                        <FileText size={16} className="text-stone-400 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-stone-900 truncate">
-                            {note.title}
-                          </div>
-                          {category && (
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <div 
-                                className="w-1.5 h-1.5 rounded-full" 
-                                style={{ backgroundColor: category.color }}
-                              />
-                              <span className="text-xs text-stone-500">{category.name}</span>
-                            </div>
-                          )}
+                      <FileText size={16} className="text-stone-400 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-stone-900 truncate">
+                          {note.title}
                         </div>
+                        {category && (
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <div 
+                              className="w-1.5 h-1.5 rounded-full" 
+                              style={{ backgroundColor: category.color }}
+                            />
+                            <span className="text-xs text-stone-500">{category.name}</span>
+                          </div>
+                        )}
                       </div>
-                    </div>
+                    </Ariakit.ComboboxItem>
                   );
-                })}
-              </div>
-            ) : (
-              <div className="px-4 py-8 text-center text-sm text-stone-500">
-                No notes found
-              </div>
-            )}
-          </div>
-        )}
+                })
+              ) : (
+                <div className="px-4 py-8 text-center text-sm text-stone-500">
+                  No notes found
+                </div>
+              )}
+            </div>
+          )}
 
-        {!searchQuery.trim() && (
-          <div className="px-4 py-8 text-center text-sm text-stone-400">
-            Type to search notes
-          </div>
-        )}
+          {!searchQuery.trim() && (
+            <div className="px-4 py-8 text-center text-sm text-stone-400">
+              Type to search notes
+            </div>
+          )}
+        </Ariakit.ComboboxPopover>
       </div>
-    </div>
+    </Ariakit.Dialog>
   );
 };

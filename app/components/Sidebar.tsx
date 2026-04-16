@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Category, SubCategory, Note, ViewMode, Asset } from '@/app/types';
-import { FileText, Plus, Home, Clock, Pin, Library, Settings, Trash2, Search, Folder, BookOpen, Briefcase, Heart, Star, Lightbulb, Coffee, Music, MessageSquare, File, Link as LinkIcon, Image, FileCode, FileVideo, FileAudio, FileArchive, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Plus, Home, Clock, Pin, Library, Settings, Trash2, Search, Folder, BookOpen, Briefcase, Heart, Star, Lightbulb, Coffee, Music, MessageSquare, File, Link as LinkIcon, Image, FileCode, FileVideo, FileAudio, FileArchive, ChevronLeft, ChevronRight, Inbox } from 'lucide-react';
 import { NoteContextMenu } from './NoteContextMenu';
 import { CategoryContextMenu } from './CategoryContextMenu';
 import { SubCategoryContextMenu } from './SubCategoryContextMenu';
@@ -19,6 +19,11 @@ interface SidebarProps {
   currentNoteId: string | null;
   selectedCategoryId: string | null;
   selectedSubCategoryId: string | null;
+  inboxCount: number;
+  allUniqueTags: string[];
+  selectedTags: string[];
+  onToggleTag: (tag: string) => void;
+  onClearTags: () => void;
   onSelectNote: (noteId: string) => void;
   onSelectCategory: (categoryId: string) => void;
   onSelectSubCategory: (subCategoryId: string) => void;
@@ -50,6 +55,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentNoteId,
   selectedCategoryId,
   selectedSubCategoryId,
+  inboxCount,
+  allUniqueTags,
+  selectedTags,
+  onToggleTag,
+  onClearTags,
   onSelectNote,
   onSelectCategory,
   onSelectSubCategory,
@@ -525,7 +535,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className={`relative h-full flex-shrink-0 bg-[#DFEBF6] border-r border/60 flex flex-col transition-all duration-300 ${sidebarOpen ? 'w-[clamp(180px,22vw,260px)] min-w-[180px] max-w-[260px]' : 'w-16 min-w-16 max-w-16'}`}>
+    <div
+      className={`relative h-full flex-shrink-0 bg-[#DFEBF6] border-r border/60 flex flex-col transition-all duration-300 ${sidebarOpen ? 'w-[clamp(180px,22vw,260px)] min-w-[180px] max-w-[260px]' : 'w-16 min-w-16 max-w-16'}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-4">
         {sidebarOpen && <h2 className="text-lg font-bold text-stone-900">Pulm</h2>}
@@ -544,8 +556,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Main Navigation */}
       <div className={`p-3 space-y-1 ${!sidebarOpen && 'flex flex-col items-center'}`}>
-        {(['home', 'recent', 'pins'] as ViewMode[]).map((mode) => {
-          const Icon = getViewModeIcon(mode);
+        {(['home', 'inbox', 'recent', 'pins', 'graph'] as ViewMode[]).map((mode) => {
+          const Icon = mode === 'graph' ? require('lucide-react').Network : mode === 'inbox' ? Inbox : getViewModeIcon(mode);
           return (
             <div key={mode} className="group relative">
               <button
@@ -554,27 +566,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-stone-600 hover:bg-stone-100'
                   } ${!sidebarOpen && 'w-fit p-3 justify-center'}`}
-                title={sidebarOpen ? undefined : getViewModeLabel(mode)}
+                title={sidebarOpen ? undefined : mode === 'graph' ? 'Graph View' : mode === 'inbox' ? 'Inbox' : getViewModeLabel(mode)}
               >
-                <Icon size={18} className={`flex-shrink-0 ${mode === 'home' ? 'text-blue-500' :
-                  mode === 'recent' ? 'text-orange-500' :
-                    mode === 'pins' ? 'text-red-500' :
-                      mode === 'library' ? 'text-green-500' :
-                        mode === 'settings' ? 'text-gray-500' :
-                          mode === 'bin' ? 'text-stone-500' :
-                            mode === 'search' ? 'text-purple-500' : ''
-                  }`} />
-                {sidebarOpen && <span>{getViewModeLabel(mode)}</span>}
+                <div className="relative">
+                  <Icon size={18} className={`flex-shrink-0 ${mode === 'home' ? 'text-blue-500' :
+                    mode === 'recent' ? 'text-orange-500' :
+                      mode === 'pins' ? 'text-red-500' :
+                        mode === 'library' ? 'text-green-500' :
+                          mode === 'settings' ? 'text-gray-500' :
+                            mode === 'bin' ? 'text-stone-500' :
+                              mode === 'search' ? 'text-purple-500' :
+                                mode === 'graph' ? 'text-indigo-500' :
+                                  mode === 'inbox' ? 'text-indigo-400' : ''
+                    }`} />
+                  {mode === 'inbox' && inboxCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 text-[9px] font-bold 
+                                   bg-indigo-500 text-white rounded-full w-3.5 h-3.5 
+                                   flex items-center justify-center">
+                      {inboxCount > 9 ? '9+' : inboxCount}
+                    </span>
+                  )}
+                </div>
+                {sidebarOpen && <span>{mode === 'graph' ? 'Graph View' : mode === 'inbox' ? 'Inbox' : getViewModeLabel(mode)}</span>}
               </button>
               {!sidebarOpen && (
                 <div className="absolute left-20 top-1/2 -translate-y-1/2 bg-stone-900 text-white text-xs font-medium px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-                  {getViewModeLabel(mode)}
+                  {mode === 'graph' ? 'Graph View' : mode === 'inbox' ? 'Inbox' : getViewModeLabel(mode)}
                 </div>
               )}
             </div>
           );
         })}
-
       </div>
 
       {/* Library Content */}
@@ -819,6 +841,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
           );
         })}
       </div>
+
+      {/* Tags Section */}
+      {sidebarOpen && allUniqueTags.length > 0 && (
+        <div className="px-4 pb-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">Tags</span>
+            {selectedTags.length > 0 && (
+              <button 
+                onClick={onClearTags}
+                className="text-[10px] text-stone-500 hover:text-stone-700"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {allUniqueTags.map(tag => {
+              const isSelected = selectedTags.includes(tag);
+              return (
+                <button
+                  key={tag}
+                  onClick={() => onToggleTag(tag)}
+                  className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors border ${
+                    isSelected 
+                      ? 'bg-indigo-100 text-indigo-700 border-indigo-200 shadow-sm' 
+                      : 'bg-white/60 text-stone-500 border-stone-200/50 hover:bg-white hover:text-stone-700 hover:border-stone-300'
+                  }`}
+                >
+                  #{tag}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Bottom Section with Settings and More */}
       <div className={`absolute bottom-0 left-0 right-0 p-3 z-20 bg-[#DFEBF6] border-t border/60 ${!sidebarOpen && 'flex justify-center'}`}>
