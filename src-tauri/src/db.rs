@@ -45,15 +45,26 @@ impl Database {
             // Run migrations sequentially
             let tx = conn.transaction()?;
             
+            // Track if any migrations actually ran
+            let mut migration_run = false;
+            
             // Example migration block:
             // if current_version < 2 {
             //     tx.execute("ALTER TABLE notes ADD COLUMN new_field TEXT", [])?;
+            //     migration_run = true;
             // }
             
-            // Update version after successful migration
-            tx.pragma_update(None, "user_version", SCHEMA_VERSION)?;
+            // Only update version if we actually ran a migration for this version
+            // (or if we explicitly want to mark it as up-to-date despite no changes)
+            if migration_run {
+                tx.pragma_update(None, "user_version", SCHEMA_VERSION)?;
+                eprintln!("Migrations completed successfully.");
+            } else {
+                eprintln!("No migration steps defined between version {} and {}", current_version, SCHEMA_VERSION);
+                // We don't bump the version here so that if a future update adds the missing
+                // migration steps, they will run correctly.
+            }
             tx.commit()?;
-            eprintln!("Migrations completed successfully.");
         } else if current_version > SCHEMA_VERSION {
             eprintln!(
                 "Warning: Database schema version {} is newer than app version {}. Some features might not work correctly.",
