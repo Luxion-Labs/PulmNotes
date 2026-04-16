@@ -34,6 +34,7 @@ import {
   createReflectionStore
 } from "@/app/lib/persistence";
 import { useState, useEffect } from "react";
+import { listen } from '@tauri-apps/api/event';
 
 const noteStore: NoteStore = createNoteStore();
 const categoryStore: CategoryStore = createCategoryStore();
@@ -157,6 +158,26 @@ export default function Home() {
       assetStore.saveAssets(assets);
     }
   }, [assets, isLoaded]);
+
+  useEffect(() => {
+    const unlistenPromise = listen('note-saved', async () => {
+      const loadedNotes = await noteStore.loadNotes();
+      setNotes(loadedNotes);
+    });
+
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(true);
+      }
+    };
+    document.addEventListener('keydown', handleGlobalKeyDown);
+
+    return () => {
+      unlistenPromise.then(unlisten => unlisten());
+      document.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, []);
 
   // Listen for remote create-asset requests from components embedded in the editor (e.g., upload nodes)
   useEffect(() => {
