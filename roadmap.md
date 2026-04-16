@@ -23,7 +23,12 @@
 * **Implementation:** Use `@ariakit/react` to build a keyboard-first command palette (`Cmd/Ctrl + K`) for instantly switching between or searching within notes.
 * **Why:** Retrieval must be as frictionless as capture.
 
-## Backlog (Post-Core)
+## Decision Log
+
+- **D-1:** Built with Tauri + React instead of Electron for smaller bundle size and lower memory usage.
+- **D-2:** SQLite used as the primary local data store instead of plain JSON files to support full-text search.
+- **D-3:** No AI features (summarization, auto-tagging) in v0.1 or v0.2. Focus exclusively on the local-first core loop.
+- **D-8:** Shipped v0.1 as a purely local, single-blob SQLite implementation. Deferred the CR-SQLite normalization and React Native mobile companion to v0.2 to avoid delaying the core product launch.
 ### 1. Inbox triage flow
 * **Goal:** Quick captures land but have no path to becoming real notes. Users need a way to promote inbox items — assign a title, move to notes, or discard. Without this the inbox fills up and becomes noise.
 
