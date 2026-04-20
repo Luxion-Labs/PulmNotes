@@ -76,7 +76,7 @@
     "react-dom": "^19.2.3",
     "react-hotkeys-hook": "^5.2.4",
     "react-textarea-autosize": "^8.5.9",
-    "uuid": "^13.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
