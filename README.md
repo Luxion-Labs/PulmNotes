@@ -1,79 +1,34 @@
 # Pulm Notes
 
-A local-first, offline-capable personal note-taking app.
+> Local-first, privacy-focused research and personal note-taking desktop and web app.
 
-Available as both a **web app** and a **native desktop app** (via Tauri).
-
-## Prerequisites
-
-- Node.js 18+ (or bun 1.0+)
-- bun package manager
-- **For desktop app:** Rust toolchain (see [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/))
-
-## Installation & Setup
-
-1. Install dependencies using bun:
-   ```bash
-   bun install
-   ```
-
-2. **Web App:** Start the development server:
-   ```bash
-   bun run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) in your browser
-
-3. **Desktop App:** Run the Tauri development build:
-   ```bash
-   bun run tauri:dev
-   ```
-
-## Build for Production
-
-**Web App:**
 ```bash
-bun run build
-bun start
+git clone https://github.com/Luxion-Labs/PulmNotes.git && cd PulmNotes && npm install && npm run dev
 ```
 
-**Desktop App:**
-```bash
-bun run tauri:build
-```
-Installers will be created in `src-tauri/target/release/bundle/`
+![Pulm Notes Banner](assets/images/banner.svg)
 
-## Technology
+[![Live Demo](https://img.shields.io/badge/Demo-Live_Preview-00F2FE?style=flat-square)](https://pulm.luxionlabs.com) [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE) [![SLA](https://img.shields.io/badge/Response_SLA-24_Hours-4FACFE?style=flat-square)](CONTRIBUTING.md)
 
-- **Framework**: Next.js 15 (App Router)
-- **Desktop Shell**: Tauri 2.0 (Rust)
-- **UI Library**: React 19
-- **Styling**: Tailwind CSS
-- **Icons**: lucide-react
-- **Package Manager**: bun
+## Overview
+Local-first, privacy-focused research and personal note-taking desktop and web app. Built by Luxion Labs as part of our high-velocity open-source engineering ecosystem.
 
 ## Features
+- Local-first architecture with instant offline availability.
+- Markdown-powered canvas and organized tag indexing.
+- Cross-platform web and native desktop support.
+- Zero cloud dependencies or surveillance telemetry.
 
-- **Local-first**: All data stays on your device
-- **Offline-capable**: Works without internet
-- **Private**: No cloud, no tracking, no accounts
-- Minimalist text editor interface
-- Slash command menu (type `/` to open)
-- Support for multiple block types (headings, lists, code, quotes, etc.)
-- Keyboard shortcuts for navigation and editing
-- Clean, responsive design
-- **Desktop app**: Native performance with Tauri
+## Architecture and Stack
+React 19, TypeScript, Vite, Tailwind CSS, Lucide icons, and Tauri desktop packaging.
 
-## Migration Notes
-
-- **Next.js Migration**: See `docs/NEXT_MIGRATION_LOG.md`
-- **Tauri Integration**: See `TAURI_AUDIT_LOG.md` for desktop architecture details
-
-## Manual Release Process
-
-1. Ensure commits follow Conventional Commits.
-2. When ready to release, run:
+## Quickstart
 ```bash
-git tag vX.Y.Z
-git push origin vX.Y.Z
+git clone https://github.com/Luxion-Labs/PulmNotes.git && cd PulmNotes && npm install && npm run dev
 ```
-3. GitHub Actions will run CI, semantic-release, generate `CHANGELOG`, update `package.json` version, create the GitHub Release, attach Tauri artifacts, and generate checksums.
+
+## Maintainer Response SLA
+Luxion Labs enforces a strict 24-hour response SLA on all community issues, feature proposals, and pull requests. See [CONTRIBUTING.md](CONTRIBUTING.md) for full development guidelines.
+
+## License
+Distributed under the MIT License. See [LICENSE](LICENSE) for more details.
