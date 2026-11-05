@@ -1,66 +1,97 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="100%" height="100%">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#080B11" />
-      <stop offset="50%" stop-color="#0F1420" />
-      <stop offset="100%" stop-color="#07090E" />
+    <linearGradient id="pulm-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070A10" />
+      <stop offset="50%" stop-color="#101827" />
+      <stop offset="100%" stop-color="#05070C" />
     </linearGradient>
-    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#00F2FE" />
-      <stop offset="50%" stop-color="#4FACFE" />
-      <stop offset="100%" stop-color="#00C6FF" />
+    <linearGradient id="amber-teal" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="50%" stop-color="#14B8A6" />
+      <stop offset="100%" stop-color="#38BDF8" />
     </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="40%" r="55%">
-      <stop offset="0%" stop-color="#00F2FE" stop-opacity="0.16" />
-      <stop offset="60%" stop-color="#4FACFE" stop-opacity="0.04" />
-      <stop offset="100%" stop-color="#080B11" stop-opacity="0" />
+    <radialGradient id="note-glow" cx="75%" cy="50%" r="45%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.3" />
+      <stop offset="50%" stop-color="#14B8A6" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#070A10" stop-opacity="0" />
     </radialGradient>
-    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#FFFFFF" stroke-width="0.5" stroke-opacity="0.04" />
+    <pattern id="dot-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="15" cy="15" r="1" fill="#F59E0B" fill-opacity="0.1" />
     </pattern>
   </defs>
 
-  <!-- Background -->
-  <rect width="1200" height="400" fill="url(#bg)" />
-  <rect width="1200" height="400" fill="url(#glow)" />
-  <rect width="1200" height="400" fill="url(#grid)" />
+  <rect width="1200" height="420" fill="url(#pulm-bg)" />
+  <rect width="1200" height="420" fill="url(#note-glow)" />
+  <rect width="1200" height="420" fill="url(#dot-grid)" />
 
-  <!-- Outer frame border -->
-  <rect x="20" y="20" width="1160" height="360" rx="16" fill="none" stroke="#FFFFFF" stroke-width="1" stroke-opacity="0.08" />
-  
-  <!-- Pill Tag -->
-  <g transform="translate(60, 60)">
-    <rect width="236" height="28" rx="14" fill="#00F2FE" fill-opacity="0.1" stroke="#00F2FE" stroke-width="1" stroke-opacity="0.4" />
-    <circle cx="16" cy="14" r="4" fill="#00F2FE" />
-    <text x="28" y="18" fill="#00F2FE" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="1.5">LOCAL-FIRST RESEARCH</text>
+  <rect x="20" y="20" width="1160" height="380" rx="14" fill="none" stroke="#F59E0B" stroke-width="1" stroke-opacity="0.2" />
+
+  <!-- Local-First Notebook / Tauri Desktop Art (Right Side) -->
+  <g transform="translate(850, 210)">
+    <!-- Desktop Application Frame Outline -->
+    <rect x="-140" y="-95" width="280" height="190" rx="10" fill="#0C1322" stroke="#14B8A6" stroke-width="2" />
+    <!-- Window Title Bar -->
+    <rect x="-140" y="-95" width="280" height="28" rx="10" fill="#141E33" />
+    <circle cx="-120" cy="-81" r="4" fill="#EF4444" />
+    <circle cx="-108" cy="-81" r="4" fill="#F59E0B" />
+    <circle cx="-96" cy="-81" r="4" fill="#10B981" />
+    <text x="0" y="-77" fill="#64748B" font-family="'SF Mono', monospace" font-size="10" text-anchor="middle">pulm-notes :: workspace</text>
+
+    <!-- Sidebar Division -->
+    <line x1="-60" y1="-67" x2="-60" y2="95" stroke="#1E293B" stroke-width="1.5" />
+    <rect x="-130" y="-55" width="55" height="6" rx="3" fill="#F59E0B" fill-opacity="0.7" />
+    <rect x="-130" y="-40" width="45" height="5" rx="2.5" fill="#64748B" fill-opacity="0.5" />
+    <rect x="-130" y="-28" width="50" height="5" rx="2.5" fill="#64748B" fill-opacity="0.5" />
+
+    <!-- Note Document Editor Body -->
+    <rect x="-45" y="-55" width="90" height="8" rx="4" fill="#E2E8F0" />
+    <rect x="-45" y="-38" width="160" height="4" rx="2" fill="#64748B" />
+    <rect x="-45" y="-28" width="140" height="4" rx="2" fill="#64748B" />
+    <rect x="-45" y="-18" width="150" height="4" rx="2" fill="#64748B" />
+    
+    <!-- Code Block in Note -->
+    <rect x="-45" y="-5" width="165" height="40" rx="6" fill="#060A12" stroke="#1E293B" stroke-width="1" />
+    <rect x="-35" y="6" width="70" height="4" rx="2" fill="#14B8A6" />
+    <rect x="-35" y="16" width="110" height="4" rx="2" fill="#F59E0B" />
+
+    <!-- Local-First Shield Badge -->
+    <g transform="translate(115, 65)">
+      <circle cx="0" cy="0" r="18" fill="#14B8A6" />
+      <path d="M -6 -2 L -2 3 L 6 -5" stroke="#040810" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    </g>
+
+    <text x="0" y="125" fill="#94A3B8" font-family="'SF Mono', monospace" font-size="11" letter-spacing="1" text-anchor="middle">OFFLINE-FIRST: 100% PRIVATE DATA</text>
   </g>
 
-  <!-- Title -->
-  <text x="60" y="165" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="-1.5">
-    Pulm Notes
-  </text>
-  
-  <!-- Accent Line Under Title -->
-  <rect x="60" y="185" width="80" height="4" rx="2" fill="url(#accent)" />
+  <!-- Content (Left Side) -->
+  <g transform="translate(70, 75)">
+    <rect width="260" height="30" rx="15" fill="#F59E0B" fill-opacity="0.12" stroke="#F59E0B" stroke-width="1" stroke-opacity="0.4" />
+    <circle cx="16" cy="15" r="4" fill="#F59E0B" />
+    <text x="28" y="19" fill="#F59E0B" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" letter-spacing="1.2">LOCAL-FIRST RESEARCH NOTEBOOK</text>
 
-  <!-- Subtitle -->
-  <text x="60" y="235" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="20" font-weight="400" letter-spacing="-0.2">
-    Local-first, privacy-focused research and personal note-taking desktop and web app.
-  </text>
+    <text x="0" y="85" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="52" font-weight="800" letter-spacing="-1.5">
+      Pulm Notes
+    </text>
 
-  <!-- Footer Meta -->
-  <g transform="translate(60, 310)">
-    <rect width="160" height="32" rx="6" fill="#FFFFFF" fill-opacity="0.03" stroke="#FFFFFF" stroke-width="1" stroke-opacity="0.08" />
-    <text x="14" y="21" fill="#64748B" font-family="'SF Mono', Menlo, Consolas, Monaco, monospace" font-size="12">ORG: LUXION-LABS</text>
-  </g>
+    <rect x="0" y="105" width="90" height="4" rx="2" fill="url(#amber-teal)" />
 
-  <g transform="translate(235, 310)">
-    <rect width="170" height="32" rx="6" fill="#FFFFFF" fill-opacity="0.03" stroke="#FFFFFF" stroke-width="1" stroke-opacity="0.08" />
-    <text x="14" y="21" fill="#64748B" font-family="'SF Mono', Menlo, Consolas, Monaco, monospace" font-size="12">STATUS: PRODUCTION</text>
-  </g>
+    <text x="0" y="150" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="400" letter-spacing="-0.2">
+      Local-first, privacy-focused research and personal note-taking desktop and web app.
+    </text>
 
-  <g transform="translate(420, 310)">
-    <rect width="150" height="32" rx="6" fill="#FFFFFF" fill-opacity="0.03" stroke="#FFFFFF" stroke-width="1" stroke-opacity="0.08" />
-    <text x="14" y="21" fill="#64748B" font-family="'SF Mono', Menlo, Consolas, Monaco, monospace" font-size="12">LICENSE: MIT</text>
+    <text x="0" y="180" fill="#64748B" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="400">
+      Engineered for maximum speed and zero cloud surveillance with native Tauri 2.0 Rust shell.
+    </text>
+
+    <g transform="translate(0, 240)">
+      <rect width="170" height="34" rx="8" fill="#FFFFFF" fill-opacity="0.03" stroke="#FFFFFF" stroke-width="1" stroke-opacity="0.08" />
+      <text x="14" y="22" fill="#94A3B8" font-family="'SF Mono', monospace" font-size="11">SHELL: TAURI 2.0 (RUST)</text>
+
+      <rect x="185" y="0" width="180" height="34" rx="8" fill="#FFFFFF" fill-opacity="0.03" stroke="#FFFFFF" stroke-width="1" stroke-opacity="0.08" />
+      <text x="199" y="22" fill="#94A3B8" font-family="'SF Mono', monospace" font-size="11">FRONTEND: NEXT.JS 15</text>
+
+      <rect x="380" y="0" width="160" height="34" rx="8" fill="#FFFFFF" fill-opacity="0.03" stroke="#FFFFFF" stroke-width="1" stroke-opacity="0.08" />
+      <text x="394" y="22" fill="#94A3B8" font-family="'SF Mono', monospace" font-size="11">SLA: 24H RESPONSE</text>
+    </g>
   </g>
 </svg>
